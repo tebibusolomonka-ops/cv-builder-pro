@@ -9,12 +9,15 @@ import { TEMPLATES, LAYOUT_LABELS } from '@/lib/constants'
 import { TemplateThumbnail } from '@/components/editor/TemplateThumbnail'
 import { useResumeStore } from '@/store/useResumeStore'
 
+// The five on the homepage. Picked from the new reference set for range --
+// light professional, bold two-tone, dark with skill rings, rounded panel,
+// monospace -- and every one measured with its two columns ending level.
 const FLAGSHIP_IDS = [
-  'vertex-gold',
-  'meridian-navy',
-  'crest-burgundy',
-  'obsidian-coral',
-  'solstice-cobalt',
+  'bureau-slate',
+  'placard-burgundy',
+  'gauge-coral',
+  'pillar-navy',
+  'terminal-indigo',
 ]
 
 const SLIDE_W = 400

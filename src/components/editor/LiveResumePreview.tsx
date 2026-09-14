@@ -2917,7 +2917,7 @@ function PlacardResume({ model }: { model: PreviewModel }) {
         <div className="mt-6 space-y-5 px-6">
           <div>
             <PlacardBar title="Contact" accent={accent} />
-            <div className="space-y-1.5 text-[10px] text-gray-700">
+            <div className="space-y-1.5 text-[10.5px] text-gray-700">
               {model.phone ? <p>{model.phone}</p> : null}
               {model.email ? <p className="break-all">{model.email}</p> : null}
               {model.location ? <p>{model.location}</p> : null}
@@ -2941,7 +2941,7 @@ function PlacardResume({ model }: { model: PreviewModel }) {
           </div>
           <div>
             <PlacardBar title="Skills" accent={accent} />
-            <ul className="space-y-1.5 text-[10px] text-gray-700">
+            <ul className="space-y-2 text-[10.5px] text-gray-700">
               {model.skills.map((sk) => (
                 <li key={sk.id} className="flex gap-2">
                   <span className="mt-[6px] h-[3px] w-[3px] shrink-0 rounded-full" style={{ backgroundColor: accent }} />
@@ -2962,6 +2962,19 @@ function PlacardResume({ model }: { model: PreviewModel }) {
               </div>
             </div>
           ) : null}
+          {model.references.length > 0 ? (
+            <div>
+              <PlacardBar title="References" accent={accent} />
+              <div className="space-y-2 text-[10.5px] leading-relaxed">
+                {model.references.map((r) => (
+                  <div key={r.id}>
+                    <p className="font-bold">{r.name}</p>
+                    <p className="text-gray-600">{[r.title, r.company].filter(Boolean).join(', ')}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
         </div>
       </div>
 
@@ -2970,20 +2983,6 @@ function PlacardResume({ model }: { model: PreviewModel }) {
           <Portrait model={model} className="h-[186px] w-full rounded-sm" />
         </div>
         <div className="space-y-5">
-          <div>
-            <PlacardHead title="Education" icon={GraduationCap} accent={accent} />
-            <div className="space-y-2.5">
-              {model.education.map((e) => (
-                <div key={e.id} className="flex gap-2.5 text-[9.5px]">
-                  <span className="mt-[5px] h-[5px] w-[5px] shrink-0 rounded-full" style={{ backgroundColor: accent }} />
-                  <div>
-                    <p className="font-bold text-white">{[e.degree, e.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</p>
-                    <p className="text-white/55">{[e.school, [e.startDate, e.endDate].filter(Boolean).join(' - ')].filter(Boolean).join(' | ')}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
           <div>
             <PlacardHead title="Experience" icon={Briefcase} accent={accent} />
             <div className="space-y-3.5">
@@ -3141,11 +3140,11 @@ function SignatureResume({ model }: { model: PreviewModel }) {
         </div>
         <div>
           <SignatureHeading title="About Me" accent={accent} />
-          <p className="text-[9.5px] leading-[1.75] text-gray-600">{model.summary}</p>
+          <p className="text-[10.5px] leading-[1.75] text-gray-600">{model.summary}</p>
         </div>
         <div>
           <SignatureHeading title="Contact" accent={accent} />
-          <div className="space-y-1.5 text-[9.5px] text-gray-700">
+          <div className="space-y-2 text-[10.5px] text-gray-700">
             {model.phone ? <p>{model.phone}</p> : null}
             {model.email ? <p className="break-all">{model.email}</p> : null}
             {model.website ? <p className="break-all">{model.website}</p> : null}
@@ -3154,7 +3153,7 @@ function SignatureResume({ model }: { model: PreviewModel }) {
         </div>
         <div>
           <SignatureHeading title="Skills" accent={accent} />
-          <ul className="space-y-1.5 text-[9.5px] text-gray-700">
+          <ul className="space-y-2 text-[10.5px] text-gray-700">
             {model.skills.map((sk) => (
               <li key={sk.id} className="flex gap-2">
                 <span className="mt-[6px] h-[3px] w-[3px] shrink-0 rounded-full" style={{ backgroundColor: accent }} />
@@ -3162,6 +3161,18 @@ function SignatureResume({ model }: { model: PreviewModel }) {
               </li>
             ))}
           </ul>
+        </div>
+        <div>
+          <SignatureHeading title="Education" accent={accent} />
+          <div className="space-y-2.5 text-[10.5px] leading-relaxed">
+            {model.education.map((e) => (
+              <div key={e.id}>
+                <p className="font-bold">{e.school || 'University'}</p>
+                <p className="text-gray-600">{[e.degree, e.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</p>
+                <p className="text-gray-400">{[e.startDate, e.endDate].filter(Boolean).join(' - ')}</p>
+              </div>
+            ))}
+          </div>
         </div>
         {model.languages.length > 0 ? (
           <div>
@@ -3199,22 +3210,25 @@ function SignatureResume({ model }: { model: PreviewModel }) {
               ))}
             </div>
           </div>
-          <div>
-            <SignatureBand title="Education" accent={accent} />
-            <div className="space-y-2.5">
-              {model.education.map((e) => (
-                <div key={e.id} className="text-[10px] leading-relaxed">
-                  <p className="font-bold uppercase tracking-wide">{[e.degree, e.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</p>
-                  <p className="text-gray-600">{e.school}</p>
-                  <p className="text-gray-400">{[e.startDate, e.endDate].filter(Boolean).join(' - ')}</p>
-                </div>
-              ))}
-            </div>
-          </div>
           {model.certifications.length > 0 ? (
             <div>
               <SignatureBand title="Certifications" accent={accent} />
               <CertList items={model.certifications} />
+            </div>
+          ) : null}
+          {model.references.length > 0 ? (
+            <div>
+              <SignatureBand title="References" accent={accent} />
+              <div className="grid grid-cols-2 gap-5">
+                {model.references.map((r) => (
+                  <div key={r.id} className="text-[10px] leading-relaxed">
+                    <p className="font-bold">{r.name}</p>
+                    <p className="text-gray-600">{[r.title, r.company].filter(Boolean).join(', ')}</p>
+                    {r.phone ? <p className="text-gray-500">{r.phone}</p> : null}
+                    {r.email ? <p className="break-all text-gray-500">{r.email}</p> : null}
+                  </div>
+                ))}
+              </div>
             </div>
           ) : null}
         </div>
@@ -3542,7 +3556,7 @@ function PillarResume({ model }: { model: PreviewModel }) {
         </div>
         <div>
           <PillarPanelHeading title="Contact" accent={accent} />
-          <div className="space-y-2 text-[10px] leading-relaxed text-white/75">
+          <div className="space-y-2.5 text-[11px] leading-relaxed text-white/75">
             {model.phone ? <p className="flex gap-2"><Phone size={10} className="mt-[2px] shrink-0" style={{ color: accent }} />{model.phone}</p> : null}
             {model.email ? <p className="flex gap-2"><Mail size={10} className="mt-[2px] shrink-0" style={{ color: accent }} /><span className="break-all">{model.email}</span></p> : null}
             {model.location ? <p className="flex gap-2"><MapPin size={10} className="mt-[2px] shrink-0" style={{ color: accent }} />{model.location}</p> : null}
@@ -3551,7 +3565,7 @@ function PillarResume({ model }: { model: PreviewModel }) {
         </div>
         <div>
           <PillarPanelHeading title="Education" accent={accent} />
-          <div className="space-y-2.5 text-[10px] leading-relaxed">
+          <div className="space-y-3 text-[11px] leading-relaxed">
             {model.education.map((e) => (
               <div key={e.id}>
                 <p className="font-semibold" style={{ color: accent }}>{[e.startDate, e.endDate].filter(Boolean).join(' - ')}</p>
@@ -3563,12 +3577,25 @@ function PillarResume({ model }: { model: PreviewModel }) {
         </div>
         <div>
           <PillarPanelHeading title="Skills" accent={accent} />
-          <ul className="space-y-1.5 text-[10px] text-white/75">
+          <ul className="space-y-2 text-[11px] text-white/75">
             {model.skills.map((sk) => (
               <li key={sk.id} className="flex gap-2"><span style={{ color: accent }}>&bull;</span>{sk.name}</li>
             ))}
           </ul>
         </div>
+        {model.certifications.length > 0 ? (
+          <div>
+            <PillarPanelHeading title="Certificates" accent={accent} />
+            <div className="space-y-2.5 text-[11px] leading-relaxed">
+              {model.certifications.map((c) => (
+                <div key={c.id}>
+                  <p className="font-semibold">{c.name}</p>
+                  <p className="text-white/55">{[c.issuer, c.date].filter(Boolean).join(' - ')}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
         {model.languages.length > 0 ? (
           <div>
             <PillarPanelHeading title="Languages" accent={accent} />
@@ -3726,7 +3753,7 @@ function QuillResume({ model }: { model: PreviewModel }) {
         </div>
         <div>
           <QuillHeading title="Contact" />
-          <div className="space-y-2 text-[10px] leading-relaxed text-gray-700">
+          <div className="space-y-2.5 text-[11px] leading-relaxed text-gray-700">
             {model.email ? <p className="flex gap-2"><Mail size={10} className="mt-[2px] shrink-0" style={{ color: accent }} /><span className="break-all">{model.email}</span></p> : null}
             {model.phone ? <p className="flex gap-2"><Phone size={10} className="mt-[2px] shrink-0" style={{ color: accent }} />{model.phone}</p> : null}
             {model.location ? <p className="flex gap-2"><MapPin size={10} className="mt-[2px] shrink-0" style={{ color: accent }} />{model.location}</p> : null}
@@ -3735,7 +3762,7 @@ function QuillResume({ model }: { model: PreviewModel }) {
         </div>
         <div>
           <QuillHeading title="Expertise" />
-          <ul className="space-y-1.5 text-[10px] text-gray-700">
+          <ul className="space-y-2 text-[11px] text-gray-700">
             {model.skills.map((sk) => (
               <li key={sk.id} className="flex gap-2">
                 <span className="mt-[6px] h-[3px] w-[3px] shrink-0 rounded-full" style={{ backgroundColor: accent }} />
@@ -3743,6 +3770,18 @@ function QuillResume({ model }: { model: PreviewModel }) {
               </li>
             ))}
           </ul>
+        </div>
+        <div>
+          <QuillHeading title="Education" />
+          <div className="space-y-2.5 text-[11px] leading-relaxed">
+            {model.education.map((e) => (
+              <div key={e.id}>
+                <p className="font-bold">{e.school || 'University'}</p>
+                <p className="text-gray-600">{[e.degree, e.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</p>
+                <p className="text-gray-400">{[e.startDate, e.endDate].filter(Boolean).join(' - ')}</p>
+              </div>
+            ))}
+          </div>
         </div>
         {model.languages.length > 0 ? (
           <div>
@@ -3791,17 +3830,6 @@ function QuillResume({ model }: { model: PreviewModel }) {
                 </div>
                 <p className="text-[9.5px] italic text-gray-500">{exp.company}</p>
                 <BulletLines text={exp.description} accent={accent} />
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="mt-6">
-          <QuillRule title="Education" accent={accent} />
-          <div className="space-y-2.5">
-            {model.education.map((e) => (
-              <div key={e.id} className="text-[10px] leading-relaxed">
-                <p className="font-extrabold uppercase">{e.school || 'University'}</p>
-                <p className="text-gray-600">{[[e.degree, e.fieldOfStudy].filter(Boolean).join(' in '), [e.startDate, e.endDate].filter(Boolean).join(' - ')].filter(Boolean).join(' | ')}</p>
               </div>
             ))}
           </div>
@@ -3962,6 +3990,17 @@ function BloomResume({ model }: { model: PreviewModel }) {
             ))}
           </div>
         </div>
+        <div className="rounded-2xl px-5 py-4 text-white" style={{ backgroundColor: secondary }}>
+          <BloomHeading title="Education" accent={accent} />
+          <div className="space-y-2 text-[9.5px] leading-relaxed">
+            {model.education.map((e) => (
+              <div key={e.id}>
+                <p className="font-bold">{e.school || 'University'}</p>
+                <p className="text-white/60">{[e.degree, [e.startDate, e.endDate].filter(Boolean).join(' - ')].filter(Boolean).join(' | ')}</p>
+              </div>
+            ))}
+          </div>
+        </div>
         <div className="flex-1 rounded-2xl px-5 py-4 text-white" style={{ backgroundColor: secondary }}>
           <BloomHeading title="Personal Skill" accent={accent} />
           <ul className="space-y-1.5 text-[9.5px] text-white/80">
@@ -3969,6 +4008,16 @@ function BloomResume({ model }: { model: PreviewModel }) {
               <li key={sk.id} className="flex gap-2"><span style={{ color: accent }}>&bull;</span>{sk.name}</li>
             ))}
           </ul>
+          {model.languages.length > 0 ? (
+            <>
+              <BloomHeading title="Language" accent={accent} className="mt-3" />
+              <ul className="space-y-1.5 text-[9.5px] text-white/80">
+                {model.languages.map((l) => (
+                  <li key={l.id} className="flex gap-2"><span style={{ color: accent }}>&bull;</span>{l.name}</li>
+                ))}
+              </ul>
+            </>
+          ) : null}
         </div>
       </div>
 
@@ -4025,9 +4074,9 @@ function BloomPill({ text, secondary }: { text: string; secondary: string }) {
   )
 }
 
-function BloomHeading({ title, accent }: { title: string; accent: string }) {
+function BloomHeading({ title, accent, className }: { title: string; accent: string; className?: string }) {
   return (
-    <h2 className="mb-2 text-[11px] font-bold" style={{ color: accent, fontFamily: SERIF }}>
+    <h2 className={cn('mb-2 text-[11px] font-bold', className)} style={{ color: accent, fontFamily: SERIF }}>
       {title}
     </h2>
   )
@@ -4053,7 +4102,7 @@ function ColumnResume({ model }: { model: PreviewModel }) {
         </div>
         <div>
           <ColumnHeading title="Contact" accent={accent} />
-          <div className="space-y-2 text-[10px] leading-relaxed text-white/75">
+          <div className="space-y-2.5 text-[10.5px] leading-relaxed text-white/75">
             {model.phone ? <p>{model.phone}</p> : null}
             {model.email ? <p className="break-all">{model.email}</p> : null}
             {model.website ? <p className="break-all">{model.website}</p> : null}
@@ -4062,7 +4111,7 @@ function ColumnResume({ model }: { model: PreviewModel }) {
         </div>
         <div>
           <ColumnHeading title="Education" accent={accent} />
-          <div className="space-y-2.5 text-[10px] leading-relaxed">
+          <div className="space-y-3 text-[10.5px] leading-relaxed">
             {model.education.map((e) => (
               <div key={e.id}>
                 <p className="font-bold">{[e.degree, e.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</p>
@@ -4074,7 +4123,7 @@ function ColumnResume({ model }: { model: PreviewModel }) {
         </div>
         <div>
           <ColumnHeading title="Skills" accent={accent} />
-          <ul className="space-y-1.5 text-[10px] text-white/75">
+          <ul className="space-y-2 text-[10.5px] text-white/75">
             {model.skills.map((sk) => <li key={sk.id}>{sk.name}</li>)}
           </ul>
         </div>
@@ -4084,6 +4133,19 @@ function ColumnResume({ model }: { model: PreviewModel }) {
             <ul className="space-y-1.5 text-[10px] text-white/75">
               {model.languages.map((l) => <li key={l.id}>{l.name}</li>)}
             </ul>
+          </div>
+        ) : null}
+        {model.references.length > 0 ? (
+          <div>
+            <ColumnHeading title="References" accent={accent} />
+            <div className="space-y-2.5 text-[10.5px] leading-relaxed text-white/75">
+              {model.references.map((r) => (
+                <div key={r.id}>
+                  <p className="font-bold text-white">{r.name}</p>
+                  <p>{[r.title, r.company].filter(Boolean).join(', ')}</p>
+                </div>
+              ))}
+            </div>
           </div>
         ) : null}
         {model.certifications.length > 0 ? (
@@ -4173,7 +4235,7 @@ function AlcoveResume({ model }: { model: PreviewModel }) {
         </div>
         <div>
           <AlcoveHeading title="Education" />
-          <div className="space-y-2.5 text-[10px] leading-relaxed">
+          <div className="space-y-3 text-[10.5px] leading-relaxed">
             {model.education.map((e) => (
               <div key={e.id}>
                 <p className="font-semibold">{e.school || 'University'}</p>
@@ -4185,7 +4247,7 @@ function AlcoveResume({ model }: { model: PreviewModel }) {
         </div>
         <div>
           <AlcoveHeading title="Skills" />
-          <ul className="space-y-1.5 text-[10px] text-gray-700">
+          <ul className="space-y-2 text-[10.5px] text-gray-700">
             {model.skills.map((sk) => (
               <li key={sk.id} className="flex gap-2">
                 <span className="mt-[6px] h-[3px] w-[3px] shrink-0 rounded-full" style={{ backgroundColor: accent }} />
@@ -4194,6 +4256,19 @@ function AlcoveResume({ model }: { model: PreviewModel }) {
             ))}
           </ul>
         </div>
+        {model.certifications.length > 0 ? (
+          <div>
+            <AlcoveHeading title="Certificates" />
+            <div className="space-y-2.5 text-[10.5px] leading-relaxed">
+              {model.certifications.map((c) => (
+                <div key={c.id}>
+                  <p className="font-semibold">{c.name}</p>
+                  <p className="text-gray-500">{[c.issuer, c.date].filter(Boolean).join(' - ')}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
         {model.languages.length > 0 ? (
           <div>
             <AlcoveHeading title="Language" />
@@ -4382,7 +4457,7 @@ function GutterResume({ model }: { model: PreviewModel }) {
         </div>
         <div>
           <GutterRailHeading title="Contact" />
-          <div className="space-y-2 text-[10px] leading-relaxed text-white/75">
+          <div className="space-y-2.5 text-[11px] leading-relaxed text-white/75">
             {model.phone ? <p className="flex gap-2"><Phone size={10} className="mt-[2px] shrink-0" style={{ color: accent }} />{model.phone}</p> : null}
             {model.email ? <p className="flex gap-2"><Mail size={10} className="mt-[2px] shrink-0" style={{ color: accent }} /><span className="break-all">{model.email}</span></p> : null}
             {model.location ? <p className="flex gap-2"><MapPin size={10} className="mt-[2px] shrink-0" style={{ color: accent }} />{model.location}</p> : null}
@@ -4390,7 +4465,7 @@ function GutterResume({ model }: { model: PreviewModel }) {
         </div>
         <div>
           <GutterRailHeading title="Education" />
-          <div className="space-y-2.5 text-[10px] leading-relaxed">
+          <div className="space-y-3 text-[11px] leading-relaxed">
             {model.education.map((e) => (
               <div key={e.id}>
                 <p className="font-bold">{e.school || 'University'}</p>
@@ -4402,12 +4477,25 @@ function GutterResume({ model }: { model: PreviewModel }) {
         </div>
         <div>
           <GutterRailHeading title="Skills" />
-          <ul className="space-y-1.5 text-[10px] text-white/75">
+          <ul className="space-y-2 text-[11px] text-white/75">
             {model.skills.map((sk) => (
               <li key={sk.id} className="flex gap-2"><span style={{ color: accent }}>&bull;</span>{sk.name}</li>
             ))}
           </ul>
         </div>
+        {model.certifications.length > 0 ? (
+          <div>
+            <GutterRailHeading title="Certifications" />
+            <div className="space-y-2.5 text-[10.5px] leading-relaxed">
+              {model.certifications.map((c) => (
+                <div key={c.id}>
+                  <p className="font-semibold">{c.name}</p>
+                  <p className="text-white/55">{[c.issuer, c.date].filter(Boolean).join(' - ')}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
         {model.languages.length > 0 ? (
           <div>
             <GutterRailHeading title="Languages" />
@@ -4547,6 +4635,19 @@ function BillboardResume({ model }: { model: PreviewModel }) {
             ))}
           </div>
         </div>
+        {model.certifications.length > 0 ? (
+          <div className="mt-5">
+            <BillboardHeading title="Certifications" />
+            <div className="space-y-1.5 text-[10px] leading-relaxed">
+              {model.certifications.map((c) => (
+                <div key={c.id}>
+                  <p className="font-bold">{c.name}</p>
+                  <p className="text-gray-500">{[c.issuer, c.date].filter(Boolean).join(' - ')}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
         <div className="mt-5">
           <BillboardHeading title="Skills" />
           <ul className="grid grid-cols-2 gap-x-5 gap-y-1 text-[10px] text-gray-700">
