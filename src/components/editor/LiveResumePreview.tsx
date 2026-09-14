@@ -754,11 +754,22 @@ function ModernResume({ model }: { model: PreviewModel }) {
       <aside className="w-[275px] shrink-0 p-8 text-white" style={{ backgroundColor: secondary }}>
         <div className="mb-7 flex justify-center"><Avatar model={model} size={128} ring={accent} /></div>
         <SideSection title="Contact" accent={accent} dark><ContactChips model={model} chipBg={accent} chipColor="#ffffff" textClass="text-white/85" /></SideSection>
+        <SideSection title="Education" accent={accent} dark>
+          <div className="space-y-3">
+            {model.education.map((e) => (
+              <div key={e.id} className="text-[10.5px] leading-relaxed">
+                <p className="font-bold">{[e.degree, e.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</p>
+                <p className="text-white/70">{e.school || 'University Name'}</p>
+                <p className="text-white/50">{[e.startDate, e.endDate].filter(Boolean).join(' - ')}</p>
+              </div>
+            ))}
+          </div>
+        </SideSection>
         <SideSection title="Skills" accent={accent} dark><SkillBars skills={model.skills} accent={accent} /></SideSection>
         {model.languages.length > 0 && <SideSection title="Languages" accent={accent} dark><LanguageStars items={model.languages} accent={accent} dark /></SideSection>}
         {model.certifications.length > 0 && (
           <SideSection title="Certifications" accent={accent} dark>
-            <div className="space-y-2 text-[10px] text-white/80">
+            <div className="space-y-2.5 text-[11px] leading-relaxed text-white/80">
               {model.certifications.map((c) => <p key={c.id}><strong className="text-white/95">{c.name}</strong>{c.date ? ` · ${c.date}` : ''}</p>)}
             </div>
           </SideSection>
@@ -771,7 +782,6 @@ function ModernResume({ model }: { model: PreviewModel }) {
         </header>
         <MainSection title="Profile" accent={accent}><Paragraph>{model.summary}</Paragraph></MainSection>
         <MainSection title="Experience" accent={accent}><ExperienceList items={model.experience} accent={secondary} datePill /></MainSection>
-        <MainSection title="Education" accent={accent}><EducationList items={model.education} /></MainSection>
         {model.projects.length > 0 && <MainSection title="Projects" accent={accent}><ProjectList items={model.projects} accent={secondary} /></MainSection>}
         {model.references.length > 0 && <MainSection title="References" accent={accent}><div className="grid grid-cols-2 gap-4"><RefList items={[model.references[0]]} />{model.references[1] && <RefList items={[model.references[1]]} />}</div></MainSection>}
       </main>
@@ -1727,10 +1737,34 @@ function VertexResume({ model }: { model: PreviewModel }) {
       <div className="flex w-[290px] shrink-0 flex-col px-6 py-8" style={{ background: `linear-gradient(160deg, ${accent}, #0d0d0f 78%)` }}>
         <Portrait model={model} className="h-[300px] w-full shrink-0 rounded-md" />
         <div className="mt-3 flex flex-1 flex-col gap-5">
-          <div><PanelHeading title="About Me" color="#fff" /><p className="text-[9.5px] leading-relaxed text-white/75">{model.summary}</p></div>
+          <div><PanelHeading title="About Me" color="#fff" /><p className="text-[10.5px] leading-relaxed text-white/75">{model.summary}</p></div>
           <div><PanelHeading title="Language" color="#fff" /><SkillBars skills={model.languages.map((l, i) => ({ id: String(i), name: l.name, level: 'expert' as const }))} accent="#fff" track="rgba(255,255,255,.25)" /></div>
+          {model.certifications.length > 0 && (
+            <div><PanelHeading title="Certifications" color="#fff" />
+              <div className="space-y-2.5">
+                {model.certifications.map((c) => (
+                  <div key={c.id} className="text-[10.5px] leading-relaxed">
+                    <p className="font-semibold text-white/90">{c.name}</p>
+                    <p className="text-white/55">{[c.issuer, c.date].filter(Boolean).join(' · ')}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          {model.references.length > 0 && (
+            <div><PanelHeading title="References" color="#fff" />
+              <div className="space-y-2.5">
+                {model.references.map((r) => (
+                  <div key={r.id} className="text-[10.5px] leading-relaxed">
+                    <p className="font-semibold text-white/90">{r.name}</p>
+                    <p className="text-white/55">{[r.title, r.company].filter(Boolean).join(', ')}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           <div><PanelHeading title="Contact" color="#fff" />
-            <div className="space-y-1 text-[9.5px] text-white/80">
+            <div className="space-y-1.5 text-[10.5px] text-white/80">
               {model.phone && <p>{model.phone}</p>}{model.email && <p className="break-all">{model.email}</p>}{model.location && <p>{model.location}</p>}
             </div>
           </div>
@@ -1749,7 +1783,7 @@ function MeridianResume({ model }: { model: PreviewModel }) {
         <div className="flex justify-center"><Portrait model={model} className="h-[124px] w-[124px] rounded-full ring-4" style={{ boxShadow: `0 0 0 4px ${accent}` }} /></div>
         <div className="mt-7 flex flex-1 flex-col gap-6">
           <div><PanelHeading title="Contact" color={accent} />
-            <div className="space-y-1.5 text-[9.5px] leading-relaxed text-white/80">
+            <div className="space-y-2 text-[10.5px] leading-relaxed text-white/80">
               {model.phone && <p>{model.phone}</p>}{model.email && <p className="break-all">{model.email}</p>}
               {model.location && <p>{model.location}</p>}{model.website && <p className="break-all">{model.website}</p>}
             </div>
@@ -1757,12 +1791,24 @@ function MeridianResume({ model }: { model: PreviewModel }) {
           <div><PanelHeading title="Education" color={accent} />
             <div className="space-y-3">
               {model.education.map((e) => (
-                <div key={e.id}><p className="text-[10px] font-bold leading-snug">{e.degree || 'Degree'}</p><p className="text-[9px] text-white/60">{e.school}</p><p className="text-[8.5px] text-white/45">{[e.startDate, e.endDate].filter(Boolean).join(' – ')}</p></div>
+                <div key={e.id}><p className="text-[11px] font-bold leading-snug">{e.degree || 'Degree'}</p><p className="text-[10px] text-white/60">{e.school}</p><p className="text-[9.5px] text-white/45">{[e.startDate, e.endDate].filter(Boolean).join(' – ')}</p></div>
               ))}
             </div>
           </div>
-          <div><PanelHeading title="Skills" color={accent} /><SkillBars skills={model.skills.slice(0, 6)} accent={accent} /></div>
+          <div><PanelHeading title="Skills" color={accent} /><SkillBars skills={model.skills} accent={accent} /></div>
           {model.languages.length > 0 && <div><PanelHeading title="Languages" color={accent} /><LanguageStars items={model.languages} accent={accent} dark /></div>}
+          {model.certifications.length > 0 && (
+            <div><PanelHeading title="Certifications" color={accent} />
+              <div className="space-y-2.5">
+                {model.certifications.map((c) => (
+                  <div key={c.id} className="text-[10.5px] leading-relaxed">
+                    <p className="font-semibold">{c.name}</p>
+                    <p className="text-white/55">{[c.issuer, c.date].filter(Boolean).join(' · ')}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </aside>
       <div className="flex flex-1 flex-col px-10 py-12">
@@ -1770,7 +1816,6 @@ function MeridianResume({ model }: { model: PreviewModel }) {
         <p className="mt-3.5 text-[12px] font-semibold uppercase tracking-[0.32em]" style={{ color: accent }}>{model.title}</p>
         <div className="mt-9"><PanelHeading title="About Me" color={secondary} /><Paragraph>{model.summary}</Paragraph></div>
         <div className="mt-10 flex-1"><PanelHeading title="Experience" color={secondary} /><TimelineRail items={model.experience} accent={accent} secondary={secondary} /></div>
-        {model.certifications.length > 0 && <div className="mt-10"><PanelHeading title="Certifications" color={secondary} /><CertList items={model.certifications} /></div>}
         {model.references.length > 0 && <div className="mt-10"><PanelHeading title="References" color={secondary} /><RefList items={model.references} /></div>}
       </div>
     </Page>
@@ -1817,16 +1862,28 @@ function ObsidianResume({ model }: { model: PreviewModel }) {
       <aside className="flex w-[248px] shrink-0 flex-col bg-[#111113] px-7 py-8 text-white">
         <Portrait model={model} className="h-[150px] w-full rounded-sm" />
         <div className="mt-7 flex flex-1 flex-col gap-6">
-          <div><PanelHeading title="About Me" color={accent} /><p className="text-[9.5px] leading-relaxed text-white/70">{model.summary}</p></div>
+          <div><PanelHeading title="About Me" color={accent} /><p className="text-[10.5px] leading-relaxed text-white/70">{model.summary}</p></div>
           <div><PanelHeading title="Education" color={accent} />
             <div className="space-y-2.5">
               {model.education.map((e) => (
-                <div key={e.id}><p className="text-[10px] font-bold leading-snug">{e.degree || 'Degree'}</p><p className="text-[9px] text-white/55">{e.school}</p></div>
+                <div key={e.id}><p className="text-[11px] font-bold leading-snug">{e.degree || 'Degree'}</p><p className="text-[10px] text-white/55">{e.school}</p></div>
               ))}
             </div>
           </div>
-          <div><PanelHeading title="Skills" color={accent} /><SkillBars skills={model.skills.slice(0, 6)} accent="#ffffff" track="rgba(255,255,255,.22)" /></div>
-          {model.languages.length > 0 && <div><PanelHeading title="Languages" color={accent} /><ul className="space-y-1 text-[9.5px] text-white/75">{model.languages.map((l, i) => <li key={i}>• {l.name}</li>)}</ul></div>}
+          <div><PanelHeading title="Skills" color={accent} /><SkillBars skills={model.skills} accent="#ffffff" track="rgba(255,255,255,.22)" /></div>
+          {model.languages.length > 0 && <div><PanelHeading title="Languages" color={accent} /><ul className="space-y-1.5 text-[10.5px] text-white/75">{model.languages.map((l, i) => <li key={i}>• {l.name}</li>)}</ul></div>}
+          {model.certifications.length > 0 && (
+            <div><PanelHeading title="Certifications" color={accent} />
+              <div className="space-y-2.5">
+                {model.certifications.map((c) => (
+                  <div key={c.id} className="text-[10.5px] leading-relaxed">
+                    <p className="font-semibold">{c.name}</p>
+                    <p className="text-white/55">{[c.issuer, c.date].filter(Boolean).join(' · ')}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </aside>
       <div className="flex-1 px-9 py-9">
@@ -1836,7 +1893,6 @@ function ObsidianResume({ model }: { model: PreviewModel }) {
           {model.phone && <span>{model.phone}</span>}{model.email && <span>{model.email}</span>}{model.location && <span>{model.location}</span>}
         </div>
         <div className="mt-7"><PanelHeading title="Experience" color="#111113" /><TimelineRail items={model.experience} accent={accent} secondary="#111113" /></div>
-        {model.certifications.length > 0 && <div className="mt-7"><PanelHeading title="Certifications" color="#111113" /><CertList items={model.certifications} /></div>}
         {model.references.length > 0 && <div className="mt-7"><PanelHeading title="References" color="#111113" /><RefList items={model.references} /></div>}
       </div>
     </Page>
