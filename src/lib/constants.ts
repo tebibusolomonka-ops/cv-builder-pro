@@ -1,4 +1,4 @@
-export const APP_NAME = 'CV Builder Pro'
+export const APP_NAME = 'Netsa CV'
 export const APP_DESCRIPTION = 'Build professional resumes that get you hired. Create stunning CVs with our modern, easy-to-use builder.'
 export const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 export const STARRED_RESUME_KEY = 'cvb-starred-doc-1'

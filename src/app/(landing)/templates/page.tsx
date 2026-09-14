@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { TemplateShowcase } from '@/components/landing/TemplateShowcase'
 
 export const metadata: Metadata = {
-  title: 'Resume Templates — CV Builder Pro',
+  title: 'Resume Templates — Netsa CV',
   description:
     'Browse every resume layout in the collection. Each one is a distinct design, rendered live, free to use and fully editable.',
 }

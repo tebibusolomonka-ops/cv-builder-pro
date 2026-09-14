@@ -29,7 +29,7 @@ function parseBackup(raw: string): Backup {
 
   const b = parsed as Partial<Backup>
   if (b?.app !== 'cv-builder-pro') {
-    throw new Error('That file was not created by CV Builder Pro.')
+    throw new Error('That file was not created by Netsa CV.')
   }
   if (typeof b.version !== 'number' || b.version > BACKUP_VERSION) {
     throw new Error('That backup was made by a newer version of the app.')

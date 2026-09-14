@@ -2,9 +2,9 @@ import type { Metadata } from 'next'
 import { LegalPage, Section } from '@/components/legal/LegalPage'
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy — CV Builder Pro',
+  title: 'Privacy Policy — Netsa CV',
   description:
-    'What CV Builder Pro does and does not collect. Your resume stays in your own browser; there are no accounts and no analytics.',
+    'What Netsa CV does and does not collect. Your resume stays in your own browser; there are no accounts and no analytics.',
 }
 
 export default function PrivacyPage() {

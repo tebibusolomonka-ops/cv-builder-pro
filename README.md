@@ -1,4 +1,4 @@
-# CV Builder Pro
+# Netsa CV
 
 A local-first resume builder with live A4 previews, multiple layouts, JSON backup and PDF export. No account is required. Resume and application data stays in the browser unless the user exports a file.
 

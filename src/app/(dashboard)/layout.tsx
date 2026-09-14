@@ -44,7 +44,7 @@ export default function DashboardLayout({
               <FileText className="h-5 w-5 text-white" />
             </div>
             <span className="hidden font-heading text-lg font-bold text-dark-100 sm:block">
-              CV Builder <span className="text-primary-400">Pro</span>
+              Netsa <span className="text-primary-400">CV</span>
             </span>
           </Link>
 

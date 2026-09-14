@@ -42,7 +42,7 @@ function parseBackup(content: string): ImportEntry[] {
   }
 
   if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-    throw new Error('That file is not a CV Builder backup.')
+    throw new Error('That file is not a Netsa CV backup.')
   }
 
   const backup = parsed as Record<string, unknown>

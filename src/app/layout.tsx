@@ -3,7 +3,7 @@ import { Toaster } from 'react-hot-toast'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'CV Builder Pro — Free Resume Builder',
+  title: 'Netsa CV — Free Resume Builder',
   description:
     'Create an ATS-friendly resume, choose a professional layout, and export a free PDF without creating an account.',
   keywords: [
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     'ATS resume',
   ],
   openGraph: {
-    title: 'CV Builder Pro — Free Resume Builder',
+    title: 'Netsa CV — Free Resume Builder',
     description: 'Build an ATS-friendly resume and export it as a free PDF. No account required.',
     type: 'website',
   },

@@ -2,9 +2,9 @@ import type { Metadata } from 'next'
 import { LegalPage, Section } from '@/components/legal/LegalPage'
 
 export const metadata: Metadata = {
-  title: 'Terms of Use — CV Builder Pro',
+  title: 'Terms of Use — Netsa CV',
   description:
-    'The terms for using CV Builder Pro: free to use, provided as-is, and your CV content remains yours.',
+    'The terms for using Netsa CV: free to use, provided as-is, and your CV content remains yours.',
 }
 
 export default function TermsPage() {
@@ -20,7 +20,7 @@ export default function TermsPage() {
 
       <Section title="Using the site">
         <p>
-          You may use CV Builder Pro to create resumes for yourself or for other people, including
+          You may use Netsa CV to create resumes for yourself or for other people, including
           as part of paid work. There is no charge, no subscription, and no watermark on what you
           export.
         </p>

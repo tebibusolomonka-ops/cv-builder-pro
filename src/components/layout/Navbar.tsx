@@ -52,10 +52,10 @@ export function Navbar() {
               </div>
               <div>
                 <span className="text-lg font-bold text-white font-heading">
-                  CV Builder
+                  Netsa
                 </span>
                 <span className="text-lg font-bold gradient-text font-heading">
-                  {' '}Pro
+                  {' '}CV
                 </span>
               </div>
             </Link>
