@@ -296,6 +296,18 @@ export function LiveResumePreview({ templateId, forceSample = false }: { templat
 
 const SERIF = "'Playfair Display', Georgia, 'Times New Roman', serif"
 
+/**
+ * Dark text for layouts whose palette family is 'panel'.
+ *
+ * For those, `secondary` is a PALE background tint (#e9f1fe and friends), not
+ * an ink. Solstice painted its page text, all seven section headings and every
+ * job title with it, so they rendered near-white on white — 1.1:1, invisible.
+ * The page then read as blocks of text floating in empty space, because the
+ * headings between them were gone. If a panel-family layout needs dark text,
+ * it uses this.
+ */
+const INK = '#2c3440'
+
 // A4 at 96dpi. Apply zoom to Page because some templates require its direct children.
 const PAGE_W = 794
 const PAGE_H = 1123
@@ -847,12 +859,12 @@ function MinimalResume({ model }: { model: PreviewModel }) {
         <ContactStrip model={model} className="mt-4" />
       </header>
       <div className="grid flex-1 grid-cols-[1fr_235px] gap-10">
-        <main className="flex flex-col justify-between [&>section:last-child]:mb-0">
+        <main className="flex flex-col [&>section:last-child]:mb-0">
           <SimpleSection title="Profile" accent={accent}><Paragraph>{model.summary}</Paragraph></SimpleSection>
           <SimpleSection title="Experience" accent={accent}><ExperienceList items={model.experience} accent={accent} /></SimpleSection>
           {model.projects.length > 0 && <SimpleSection title="Projects" accent={accent}><ProjectList items={model.projects} accent={accent} /></SimpleSection>}
         </main>
-        <aside className="flex flex-col justify-between [&>section:last-child]:mb-0">
+        <aside className="flex flex-col [&>section:last-child]:mb-0">
           <SimpleSection title="Education" accent={accent}><EducationList items={model.education} /></SimpleSection>
           <SimpleSection title="Expertise" accent={accent}><SkillList skills={model.skills} accent={accent} /></SimpleSection>
           {model.languages.length > 0 && <SimpleSection title="Languages" accent={accent}><LanguageStars items={model.languages} accent={accent} /></SimpleSection>}
@@ -988,7 +1000,7 @@ function TimelineResume({ model }: { model: PreviewModel }) {
             </div>
           </div>
         </main>
-        <aside className="flex h-full flex-col justify-between gap-7 [&>section]:mb-0">
+        <aside className="flex flex-col gap-7 [&>section]:mb-0">
           <SimpleSection title="Education" accent={accent}><EducationList items={model.education} /></SimpleSection>
           <SimpleSection title="Skills" accent={accent}><SkillChips skills={model.skills} accent={accent} filled /></SimpleSection>
           {model.languages.length > 0 && <SimpleSection title="Languages" accent={accent}><LanguageStars items={model.languages} accent={accent} /></SimpleSection>}
@@ -1159,12 +1171,12 @@ function SplitResume({ model }: { model: PreviewModel }) {
         </div>
       </header>
       <div className="grid flex-1 grid-cols-[1fr_230px] gap-9 px-10 py-9">
-        <main className="flex flex-col justify-between [&>section:last-child]:mb-0">
+        <main className="flex flex-col [&>section:last-child]:mb-0">
           <SplitSection title="About" accent={accent}><Paragraph>{model.summary}</Paragraph></SplitSection>
           <SplitSection title="Experience" accent={accent}><ExperienceList items={model.experience} accent={secondary} /></SplitSection>
           {model.projects.length > 0 && <SplitSection title="Projects" accent={accent}><ProjectList items={model.projects} accent={secondary} /></SplitSection>}
         </main>
-        <aside className="flex flex-col justify-between [&>section:last-child]:mb-0">
+        <aside className="flex flex-col [&>section:last-child]:mb-0">
           <SplitSection title="Education" accent={accent}><EducationList items={model.education} /></SplitSection>
           <SplitSection title="Skills" accent={accent}><SkillBars skills={model.skills} accent={accent} track="rgba(0,0,0,0.08)" labelClass="text-gray-700" /></SplitSection>
           {model.languages.length > 0 && <SplitSection title="Languages" accent={accent}><LanguageStars items={model.languages} accent={accent} /></SplitSection>}
@@ -1671,7 +1683,7 @@ function VertexResume({ model }: { model: PreviewModel }) {
   const { accent } = model.template
   return (
     <Page className="flex bg-[#0d0d0f] text-white">
-      <div className="flex flex-1 flex-col justify-between gap-7 px-10 py-11">
+      <div className="flex flex-1 flex-col gap-7 px-10 py-11">
         <div>
         <h1 className="text-[46px] font-extrabold uppercase leading-[0.92] tracking-tight">
           {model.name.split(' ')[0]}<br />{model.name.split(' ').slice(1).join(' ')}
@@ -1714,7 +1726,7 @@ function VertexResume({ model }: { model: PreviewModel }) {
       </div>
       <div className="flex w-[290px] shrink-0 flex-col px-6 py-8" style={{ background: `linear-gradient(160deg, ${accent}, #0d0d0f 78%)` }}>
         <Portrait model={model} className="h-[300px] w-full shrink-0 rounded-md" />
-        <div className="mt-3 flex flex-1 flex-col justify-between gap-5">
+        <div className="mt-3 flex flex-1 flex-col gap-5">
           <div><PanelHeading title="About Me" color="#fff" /><p className="text-[9.5px] leading-relaxed text-white/75">{model.summary}</p></div>
           <div><PanelHeading title="Language" color="#fff" /><SkillBars skills={model.languages.map((l, i) => ({ id: String(i), name: l.name, level: 'expert' as const }))} accent="#fff" track="rgba(255,255,255,.25)" /></div>
           <div><PanelHeading title="Contact" color="#fff" />
@@ -1735,7 +1747,7 @@ function MeridianResume({ model }: { model: PreviewModel }) {
     <Page className="flex" style={{ color: secondary }}>
       <aside className="flex w-[252px] shrink-0 flex-col px-7 py-9 text-white" style={{ backgroundColor: secondary }}>
         <div className="flex justify-center"><Portrait model={model} className="h-[124px] w-[124px] rounded-full ring-4" style={{ boxShadow: `0 0 0 4px ${accent}` }} /></div>
-        <div className="mt-7 flex flex-1 flex-col justify-between gap-6">
+        <div className="mt-7 flex flex-1 flex-col gap-6">
           <div><PanelHeading title="Contact" color={accent} />
             <div className="space-y-1.5 text-[9.5px] leading-relaxed text-white/80">
               {model.phone && <p>{model.phone}</p>}{model.email && <p className="break-all">{model.email}</p>}
@@ -1782,12 +1794,12 @@ function CrestResume({ model }: { model: PreviewModel }) {
         {model.location && <span>{model.location}</span>}{model.website && <span>{model.website}</span>}
       </div>
       <div className="grid flex-1 grid-cols-[210px_1fr] gap-8 px-11 py-8">
-        <aside className="flex flex-col justify-between gap-6">
+        <aside className="flex flex-col gap-6">
           <div><PanelHeading title="Education" color={accent} /><EducationList items={model.education} /></div>
           <div><PanelHeading title="Skills" color={accent} /><SkillBars skills={model.skills.slice(0, 7)} accent={accent} track="#e5e7eb" labelClass="text-gray-700" /></div>
           {model.languages.length > 0 && <div><PanelHeading title="Languages" color={accent} /><LanguageStars items={model.languages} accent={accent} /></div>}
         </aside>
-        <main className="flex flex-col justify-between gap-6">
+        <main className="flex flex-col gap-6">
           <div><PanelHeading title="Profile" color={accent} /><Paragraph>{model.summary}</Paragraph></div>
           <div><PanelHeading title="Experience" color={accent} /><TimelineRail items={model.experience} accent={accent} secondary={secondary} /></div>
           {model.references.length > 0 && <div><PanelHeading title="References" color={accent} /><RefList items={model.references} /></div>}
@@ -1804,7 +1816,7 @@ function ObsidianResume({ model }: { model: PreviewModel }) {
     <Page className="flex">
       <aside className="flex w-[248px] shrink-0 flex-col bg-[#111113] px-7 py-8 text-white">
         <Portrait model={model} className="h-[150px] w-full rounded-sm" />
-        <div className="mt-7 flex flex-1 flex-col justify-between gap-6">
+        <div className="mt-7 flex flex-1 flex-col gap-6">
           <div><PanelHeading title="About Me" color={accent} /><p className="text-[9.5px] leading-relaxed text-white/70">{model.summary}</p></div>
           <div><PanelHeading title="Education" color={accent} />
             <div className="space-y-2.5">
@@ -1833,9 +1845,11 @@ function ObsidianResume({ model }: { model: PreviewModel }) {
 
 // Solstice
 function SolsticeResume({ model }: { model: PreviewModel }) {
-  const { accent, secondary } = model.template
+  // No `secondary` here on purpose: this layout is panel-family, so secondary
+  // is a pale background tint and there is no panel in this design to use it on.
+  const { accent } = model.template
   return (
-    <Page className="flex flex-col" style={{ color: secondary }}>
+    <Page className="flex flex-col" style={{ color: INK }}>
       <div className="flex flex-wrap items-center gap-x-6 gap-y-1 px-10 py-2.5 text-[9.5px] text-white" style={{ backgroundColor: accent }}>
         {model.phone && <span>{model.phone}</span>}{model.email && <span>{model.email}</span>}{model.location && <span>{model.location}</span>}
       </div>
@@ -1846,17 +1860,17 @@ function SolsticeResume({ model }: { model: PreviewModel }) {
             <h1 className="text-[27px] font-extrabold uppercase leading-[0.95] text-white">{model.name}</h1>
             <p className="mt-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-white/85">{model.title}</p>
           </div>
-          <div className="mt-6 flex flex-1 flex-col justify-between gap-5">
-            <div><PanelHeading title="Education" color={secondary} /><EducationList items={model.education} /></div>
-            <div><PanelHeading title="Skills" color={secondary} /><SkillBars skills={model.skills.slice(0, 6)} accent={accent} track="#e5e7eb" labelClass="text-gray-700" /></div>
-            {model.languages.length > 0 && <div><PanelHeading title="Languages" color={secondary} /><LanguageStars items={model.languages} accent={accent} /></div>}
+          <div className="mt-6 flex flex-1 flex-col gap-5">
+            <div><PanelHeading title="Education" color={INK} /><EducationList items={model.education} /></div>
+            <div><PanelHeading title="Skills" color={INK} /><SkillBars skills={model.skills.slice(0, 6)} accent={accent} track="#e5e7eb" labelClass="text-gray-700" /></div>
+            {model.languages.length > 0 && <div><PanelHeading title="Languages" color={INK} /><LanguageStars items={model.languages} accent={accent} /></div>}
           </div>
         </div>
-        <div className="flex flex-col justify-between gap-6 px-9 py-8">
-          <div><PanelHeading title="About Me" color={secondary} /><Paragraph>{model.summary}</Paragraph></div>
-          <div><PanelHeading title="Experience" color={secondary} /><TimelineRail items={model.experience} accent={accent} secondary={secondary} /></div>
-          {model.certifications.length > 0 && <div><PanelHeading title="Certifications" color={secondary} /><CertList items={model.certifications} /></div>}
-          {model.references.length > 0 && <div><PanelHeading title="References" color={secondary} /><RefList items={model.references} /></div>}
+        <div className="flex flex-col gap-6 px-9 py-8">
+          <div><PanelHeading title="About Me" color={INK} /><Paragraph>{model.summary}</Paragraph></div>
+          <div><PanelHeading title="Experience" color={INK} /><TimelineRail items={model.experience} accent={accent} secondary={INK} /></div>
+          {model.certifications.length > 0 && <div><PanelHeading title="Certifications" color={INK} /><CertList items={model.certifications} /></div>}
+          {model.references.length > 0 && <div><PanelHeading title="References" color={INK} /><RefList items={model.references} /></div>}
         </div>
       </div>
     </Page>
@@ -2279,7 +2293,7 @@ function PillLabel({ title, accent }: { title: string; accent: string }) {
 function BureauResume({ model }: { model: PreviewModel }) {
   const { accent, secondary } = model.template
   return (
-    <Page className="flex" style={{ color: '#2c3440' }}>
+    <Page className="flex" style={{ color: INK }}>
       <aside className="w-[250px] shrink-0 px-7 py-9" style={{ backgroundColor: secondary }}>
         <div className="flex justify-center">
           <div className="rounded-full p-[3px]" style={{ backgroundColor: accent }}>
