@@ -10,8 +10,18 @@ import type { ResumeData } from '@/types/resume'
 
 const BACKUP_VERSION = 1
 
+/**
+ * Marker written into every backup file so a stray JSON cannot overwrite a
+ * resume. It changed with the rename to Netsa CV, so files written before the
+ * rename carry the old id — keep accepting them forever. A backup is the one
+ * copy of a user's CV that survives clearing browser data; refusing to read an
+ * older one would destroy exactly the data the feature exists to protect.
+ */
+const BACKUP_APP_ID = 'netsa-cv'
+const ACCEPTED_APP_IDS: readonly string[] = [BACKUP_APP_ID, 'cv-builder-pro']
+
 interface Backup {
-  app: 'cv-builder-pro'
+  app: string
   version: number
   exportedAt: string
   title: string
@@ -28,7 +38,7 @@ function parseBackup(raw: string): Backup {
   }
 
   const b = parsed as Partial<Backup>
-  if (b?.app !== 'cv-builder-pro') {
+  if (typeof b?.app !== 'string' || !ACCEPTED_APP_IDS.includes(b.app)) {
     throw new Error('That file was not created by Netsa CV.')
   }
   if (typeof b.version !== 'number' || b.version > BACKUP_VERSION) {
@@ -46,7 +56,7 @@ export function BackupControls() {
 
   const handleDownload = () => {
     const backup: Backup = {
-      app: 'cv-builder-pro',
+      app: BACKUP_APP_ID,
       version: BACKUP_VERSION,
       exportedAt: new Date().toISOString(),
       title,
