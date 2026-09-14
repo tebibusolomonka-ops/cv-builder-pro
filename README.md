@@ -1,36 +1,44 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CV Builder Pro
 
-## Getting Started
+A local-first resume builder with live A4 previews, multiple layouts, JSON backup and PDF export. No account is required. Resume and application data stays in the browser unless the user exports a file.
 
-First, run the development server:
+## Stack
+
+- TypeScript and TSX
+- React 19
+- Next.js 16 App Router
+- Tailwind CSS 4
+- Zustand for browser-local state
+- Puppeteer Core for downloadable PDF rendering
+
+There is no separate Python, PHP or database backend. The PDF endpoint is a Next.js server route written in TypeScript.
+
+## Run locally
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+For a production build:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm run start
+```
 
-## Learn More
+## Data and exports
 
-To learn more about Next.js, take a look at the following resources:
+Resume data is stored under `cv-builder-resume` in `localStorage`. Applications use `cv-builder-applications`. The editor and settings pages can export and restore portable JSON backups.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+PDF export uses an installed Chrome or Edge browser when available. If server-side rendering is unavailable, the editor falls back to the browser print dialog.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Checks
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run lint
+npx tsc --noEmit --incremental false
+npm run build
+```
