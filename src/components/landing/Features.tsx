@@ -8,22 +8,22 @@ const BENEFITS = [
   {
     icon: HardDrive,
     title: 'Nothing leaves your device',
-    body: 'Your resume is stored in this browser, not on a server. No account, no sign-up, nothing to delete later.',
+    body: 'Your CV is saved in this browser, not on our computers. You do not need an account, and there is nothing to delete later.',
   },
   {
     icon: FileCheck2,
     title: 'A real A4 PDF',
-    body: 'Exports at true A4 with selectable, embedded text — so applicant tracking systems parse it instead of seeing a picture.',
+    body: 'Your file is the right size for printing, and the words inside are real text. Hiring software can read them instead of seeing only a picture.',
   },
   {
     icon: Unlock,
     title: 'Nothing is locked',
-    body: `All ${TEMPLATES.length} template combinations are included, and exported PDFs have no watermark.`,
+    body: `All ${TEMPLATES.length} designs are free to use, and your PDF has no logo or mark on it.`,
   },
   {
     icon: Eye,
     title: 'What you see is what prints',
-    body: 'The preview is the same component that generates your PDF, so the page cannot drift from the file you send.',
+    body: 'The CV on your screen is the same one inside your PDF. It will not look different when you send it.',
   },
 ]
 
@@ -36,7 +36,7 @@ export function Features() {
             Why build it here
           </span>
           <h2 className="text-3xl font-bold tracking-tight text-dark-100 md:text-4xl">
-            Free, private, <span className="text-dark-400">and actually readable</span>
+            Free, private, <span className="text-dark-400">and easy to read</span>
           </h2>
         </div>
 
