@@ -2628,10 +2628,22 @@ function GaugeResume({ model }: { model: PreviewModel }) {
     <Page className="flex bg-[#17130f] text-white">
       <div className="flex min-w-0 flex-1 flex-col gap-6 px-9 py-9">
         <header>
-          <h1 className="text-[40px] font-extrabold uppercase leading-[0.92] tracking-tight">{model.name}</h1>
-          <span className="mt-3 inline-block rounded-full bg-white px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-[#17130f]">
-            {model.title}
+          <span aria-hidden className="mb-3 flex flex-col gap-[3px]">
+            {[0, 1, 2].map((i) => (
+              <span key={i} className="h-[7px] w-[7px] border border-white/45" />
+            ))}
           </span>
+          <h1 className="text-[40px] font-extrabold uppercase leading-[0.92] tracking-tight">{model.name}</h1>
+          <div className="mt-3 flex items-center gap-3">
+            <span className="inline-block rounded-full bg-white px-5 py-1.5 text-[11px] font-bold text-[#17130f]">
+              {model.title}
+            </span>
+            <span aria-hidden className="flex gap-[3px]">
+              {[0, 1, 2].map((i) => (
+                <span key={i} className="h-[7px] w-[7px] border border-white/45" />
+              ))}
+            </span>
+          </div>
         </header>
 
         <section>
@@ -2673,11 +2685,14 @@ function GaugeResume({ model }: { model: PreviewModel }) {
           </div>
         </section>
 
-        <section className="rounded-xl bg-white/5 px-5 py-4">
-          <GaugeHeading title="Skills" accent={accent} icon={Wrench} />
+        <section className="rounded-2xl bg-white px-5 py-4 text-[#17130f]">
+          <h2 className="mb-3 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em]">
+            <Wrench size={12} strokeWidth={2.4} />
+            Skills
+          </h2>
           <div className="flex flex-wrap justify-between gap-y-3">
             {model.skills.slice(0, 5).map((skill) => (
-              <SkillRing key={skill.id} label={skill.name} percent={skillPercent(skill.level)} accent={accent} />
+              <SkillRing key={skill.id} label={skill.name} percent={skillPercent(skill.level)} accent="#17130f" onLight />
             ))}
           </div>
         </section>
@@ -2745,22 +2760,22 @@ function GaugeHeading({ title, accent, icon: Icon }: { title: string; accent: st
 }
 
 /** A skill drawn as a ring. Stroke-dasharray on a 2*pi*r circumference. */
-function SkillRing({ label, percent, accent }: { label: string; percent: number; accent: string }) {
+function SkillRing({ label, percent, accent, onLight = false }: { label: string; percent: number; accent: string; onLight?: boolean }) {
   const R = 17
   const C = 2 * Math.PI * R
   return (
     <div className="flex w-[19%] flex-col items-center gap-1.5">
       <svg width="44" height="44" viewBox="0 0 44 44">
-        <circle cx="22" cy="22" r={R} fill="none" stroke="rgba(255,255,255,0.16)" strokeWidth="4" />
+        <circle cx="22" cy="22" r={R} fill="none" stroke={onLight ? 'rgba(0,0,0,0.13)' : 'rgba(255,255,255,0.16)'} strokeWidth="4" />
         <circle
           cx="22" cy="22" r={R} fill="none" stroke={accent} strokeWidth="4" strokeLinecap="round"
           strokeDasharray={`${(C * percent) / 100} ${C}`} transform="rotate(-90 22 22)"
         />
-        <text x="22" y="22" textAnchor="middle" dominantBaseline="central" fill="#fff" fontSize="9.5" fontWeight="700">
+        <text x="22" y="22" textAnchor="middle" dominantBaseline="central" fill={onLight ? '#17130f' : '#fff'} fontSize="9.5" fontWeight="700">
           {percent}%
         </text>
       </svg>
-      <p className="text-center text-[7.5px] font-semibold uppercase leading-tight tracking-wide text-white/65">{label}</p>
+      <p className={cn('text-center text-[7.5px] font-semibold uppercase leading-tight tracking-wide', onLight ? 'text-gray-600' : 'text-white/65')}>{label}</p>
     </div>
   )
 }

@@ -13,9 +13,9 @@ import { useResumeStore } from '@/store/useResumeStore'
 // light professional, bold two-tone, dark with skill rings, rounded panel,
 // monospace -- and every one measured with its two columns ending level.
 const FLAGSHIP_IDS = [
+  'gauge-coral',
   'bureau-slate',
   'placard-burgundy',
-  'gauge-coral',
   'pillar-navy',
   'terminal-indigo',
 ]
@@ -121,7 +121,12 @@ export function TemplateSpotlight() {
                 custom={direction}
                 onClick={() => use(active.id)}
                 aria-label={`Use the ${active.name} template`}
-                className="group absolute inset-x-0 mx-auto cursor-pointer focus-ring"
+                // text-left is load-bearing: this is a <button>, and the UA
+                // stylesheet centres button text. That inherits all the way
+                // down into the resume, so every featured template rendered
+                // centre-aligned on the homepage while the same template was
+                // ranged left everywhere else.
+                className="group absolute inset-x-0 mx-auto cursor-pointer text-left focus-ring"
                 style={{ width: SLIDE_W }}
                 initial={{ opacity: 0, x: direction > 0 ? 150 : -150, scale: 0.93 }}
                 animate={{ opacity: 1, x: 0, scale: 1 }}
