@@ -4,7 +4,7 @@ import { LegalPage, Section } from '@/components/legal/LegalPage'
 export const metadata: Metadata = {
   title: 'Privacy Policy — Netsa CV',
   description:
-    'What Netsa CV does and does not collect. Your resume stays in your own browser; there are no accounts and no analytics.',
+    'What Netsa CV keeps and does not keep. Your CV stays in your own browser. There are no accounts and no tracking.',
 }
 
 export default function PrivacyPage() {

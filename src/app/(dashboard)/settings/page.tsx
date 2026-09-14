@@ -78,7 +78,7 @@ function parseBackup(content: string): ImportEntry[] {
     const storeState = state as Record<string, unknown>
     if (storageKey === 'cv-builder-resume') {
       if (!storeState.data || typeof storeState.data !== 'object' || Array.isArray(storeState.data)) {
-        throw new Error('The resume data in this backup is malformed.')
+        throw new Error('The CV data in this backup is damaged.')
       }
     } else if (!Array.isArray(storeState.applications)) {
       throw new Error('The application data in this backup is malformed.')
@@ -88,7 +88,7 @@ function parseBackup(content: string): ImportEntry[] {
   }
 
   if (entries.length === 0) {
-    throw new Error('This file does not contain resume or application backup data.')
+    throw new Error('This file does not hold CV or application backup data.')
   }
 
   return entries

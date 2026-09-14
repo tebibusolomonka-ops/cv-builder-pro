@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { TemplateShowcase } from '@/components/landing/TemplateShowcase'
 
 export const metadata: Metadata = {
-  title: 'Resume Templates — Netsa CV',
+  title: 'CV Templates — Netsa CV',
   description:
     'See every CV design. Each one is a different layout, all of them are free, and you can change any of them.',
 }

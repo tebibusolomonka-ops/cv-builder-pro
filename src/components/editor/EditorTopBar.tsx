@@ -19,7 +19,7 @@ export function EditorTopBar() {
   // The browser print dialog uses document.title as the filename.
   useEffect(() => {
     const safeName =
-      (title || 'Resume')
+      (title || 'CV')
         .trim()
         .replace(/[\\/:*?"<>|]+/g, '') // characters Windows rejects in filenames
         .replace(/\s+/g, '-')
@@ -68,7 +68,7 @@ export function EditorTopBar() {
       const url = URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      link.download = `${(title || 'Resume').trim().replace(/[\\/:*?"<>|]+/g, '').replace(/\s+/g, '-') || 'Resume'}.pdf`
+      link.download = `${(title || 'CV').trim().replace(/[\\/:*?"<>|]+/g, '').replace(/\s+/g, '-') || 'Resume'}.pdf`
       link.click()
       URL.revokeObjectURL(url)
       toast.success('PDF downloaded', { id: toastId })

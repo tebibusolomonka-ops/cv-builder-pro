@@ -45,7 +45,7 @@ function parseBackup(raw: string): Backup {
     throw new Error('That backup was made by a newer version of the app.')
   }
   if (!b.data || typeof b.data !== 'object' || !('personalInfo' in b.data)) {
-    throw new Error('That backup is missing its resume content.')
+    throw new Error('That backup has no CV inside it.')
   }
   return b as Backup
 }
@@ -67,7 +67,7 @@ export function BackupControls() {
     )
     const a = document.createElement('a')
     a.href = url
-    a.download = `${(title || 'resume').replace(/[^\w\-]+/g, '-').toLowerCase()}-backup.json`
+    a.download = `${(title || 'cv').replace(/[^\w\-]+/g, '-').toLowerCase()}-backup.json`
     a.click()
     URL.revokeObjectURL(url)
     toast.success('Backup downloaded')
@@ -93,7 +93,7 @@ export function BackupControls() {
       <button
         type="button"
         onClick={handleDownload}
-        title="Save a copy of this resume to your computer"
+        title="Save a copy of your CV on your computer"
         className="focus-ring flex items-center gap-2 rounded-lg border border-dark-700 px-3 py-2 text-sm text-dark-300 transition-colors hover:border-primary-500/50 hover:text-dark-100"
       >
         <Download size={15} />
@@ -103,7 +103,7 @@ export function BackupControls() {
       <button
         type="button"
         onClick={() => fileRef.current?.click()}
-        title="Load a resume from a backup file"
+        title="Load a CV from a backup file"
         className="focus-ring flex items-center gap-2 rounded-lg border border-dark-700 px-3 py-2 text-sm text-dark-300 transition-colors hover:border-primary-500/50 hover:text-dark-100"
       >
         <Upload size={15} />

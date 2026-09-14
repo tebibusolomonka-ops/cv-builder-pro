@@ -74,7 +74,7 @@ export default function WorkspacePage() {
 
   const templateId = data?.style?.templateId || "modern";
   const docTemplate = TEMPLATES.find((t) => t.id === templateId);
-  const docTitle = title || "Untitled Resume";
+  const docTitle = title || "Untitled CV";
   const firstName = info?.fullName?.trim().split(/\s+/)[0];
   const searchTerms = resumeSearchQuery.trim().toLowerCase().split(/\s+/).filter(Boolean);
   const searchHaystack = [

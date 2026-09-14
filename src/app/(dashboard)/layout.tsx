@@ -20,8 +20,8 @@ import { Dropdown } from '@/components/ui'
 
 const navLinks = [
   { label: 'Workspace', href: '/dashboard', icon: LayoutDashboard },
-  { label: 'Current Resume', href: '/resume/1/edit', icon: FileText },
-  { label: 'New Resume', href: '/resume/new', icon: FilePlus },
+  { label: 'Current CV', href: '/resume/1/edit', icon: FileText },
+  { label: 'New CV', href: '/resume/new', icon: FilePlus },
   { label: 'Applications', href: '/applications', icon: Briefcase },
   { label: 'Settings', href: '/settings', icon: Settings },
 ]
@@ -52,7 +52,7 @@ export default function DashboardLayout({
             {navLinks.map((link) => {
               const isActive = pathname === link.href
 
-              if (link.label === 'New Resume') {
+              if (link.label === 'New CV') {
                 return (
                   <button
                     key={link.label}
@@ -96,8 +96,8 @@ export default function DashboardLayout({
                   type="search"
                   value={resumeSearchQuery}
                   onChange={(event) => setResumeSearchQuery(event.target.value)}
-                  aria-label="Search resumes"
-                  placeholder="Search resumes..."
+                  aria-label="Search your CVs"
+                  placeholder="Search your CVs..."
                   className="w-36 border-none bg-transparent text-sm text-dark-200 outline-none placeholder:text-dark-400"
                 />
               </div>

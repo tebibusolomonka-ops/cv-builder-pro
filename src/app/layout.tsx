@@ -9,7 +9,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://netsacv.com'
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: 'Netsa CV — Free Resume Builder',
+  title: 'Netsa CV — Free CV and Resume Builder',
   description:
     'Netsa CV is a free CV builder. Choose a design, add your details, and download a PDF. No account, no payment, and your information stays on your device.',
   keywords: [
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: '/' },
   openGraph: {
-    title: 'Netsa CV — Free Resume Builder',
+    title: 'Netsa CV — Free CV and Resume Builder',
     description: 'Build your CV for free and download it as a PDF. No account needed, and nothing leaves your device.',
     type: 'website',
     siteName: 'Netsa CV',
