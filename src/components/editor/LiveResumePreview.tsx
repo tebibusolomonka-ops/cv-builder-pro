@@ -283,6 +283,7 @@ const RENDERERS: Record<TemplateLayoutId, (props: { model: PreviewModel }) => Re
   solstice: SolsticeResume,
   capsule: CapsuleResume,
   marquee: MarqueeResume,
+  bureau: BureauResume,
 }
 
 export function LiveResumePreview({ templateId, forceSample = false }: { templateId?: string; forceSample?: boolean }) {
@@ -709,7 +710,7 @@ function PremierResume({ model }: { model: PreviewModel }) {
         </main>
         {/* Spread the sections over the full height — see SideColumn. The
             sections' own mb-7 is dropped so only the distributed gap applies. */}
-        <aside className="flex h-full flex-col justify-between gap-7 border-l pl-8 [&>section]:mb-0" style={{ borderColor: `${accent}40` }}>
+        <aside className="flex flex-col gap-1 border-l pl-8" style={{ borderColor: `${accent}40` }}>
           <PremierSection title="Education" accent={accent} secondary={secondary}><EducationList items={model.education} /></PremierSection>
           <PremierSection title="Expertise" accent={accent} secondary={secondary}><SkillList skills={model.skills} accent={accent} /></PremierSection>
           {model.certifications.length > 0 && <PremierSection title="Certifications" accent={accent} secondary={secondary}><CertList items={model.certifications} /></PremierSection>}
@@ -1533,27 +1534,20 @@ function HaloResume({ model }: { model: PreviewModel }) {
 }
 
 /**
- * A column whose sections spread to fill the height instead of pooling the
- * leftover space at the bottom.
+ * A column that carries its own weight next to a long main column.
  *
- * The page fitter scales the whole page so the TALLEST column fits, so it has
- * no notion of the other column: whichever side holds less content simply
- * stops early and leaves a block of white. `justify-between` hands that slack
- * back to the gaps between sections, which reads as deliberate spacing rather
- * than an unfinished page — and it holds for any user's content, not just the
- * sample, which moving sections between columns would not.
+ * An earlier version of this spread the sections apart with
+ * `justify-between` so the last one touched the bottom of the page. That
+ * measured full and looked empty: the reader sees holes between sections, not
+ * a filled column. The owner's reference CVs fill their sidebars the real way
+ * — enough content, at normal spacing — so this just packs, and each layout is
+ * responsible for giving its short column enough to say.
  *
- * `gap-6` is the floor, so a column that is already full keeps its normal
- * rhythm; only genuine slack is distributed. Each child must be one complete
- * section (heading + body) or the two drift apart.
- *
- * Only worth applying to columns with THREE OR MORE sections. With two, the
- * whole slack lands in a single gap — measured at 20% of page height on
- * Banner — and a hole that size in mid-page looks like a bug, which is worse
- * than the trailing space it replaced.
+ * A vertical skills LIST is the usual answer: ten skills as list items is
+ * roughly a third of a page, where the same ten as chips is three lines.
  */
 function SideColumn({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <div className={cn('flex h-full flex-col justify-between gap-6', className)}>{children}</div>
+  return <div className={cn('flex flex-col gap-5', className)}>{children}</div>
 }
 
 function HaloHeading({ title, accent, secondary, className }: { title: string; accent: string; secondary: string; className?: string }) {
@@ -2088,6 +2082,17 @@ function CapsuleResume({ model }: { model: PreviewModel }) {
             <EducationList items={model.education} />
           </div>
           <div>
+            <CapsuleHeading title="skills" accent={accent} />
+            <ul className="space-y-1 text-[9.5px] text-gray-700">
+              {model.skills.map((skill) => (
+                <li key={skill.id} className="flex gap-1.5">
+                  <span style={{ color: accent }}>&bull;</span>
+                  {skill.name}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
             <CapsuleHeading title="contact" accent={accent} />
             <div className="space-y-1.5 text-[9.5px] text-gray-600">
               {model.phone && <p>{model.phone}</p>}
@@ -2100,12 +2105,6 @@ function CapsuleResume({ model }: { model: PreviewModel }) {
             <div>
               <CapsuleHeading title="languages" accent={accent} />
               <LanguageStars items={model.languages} accent={accent} />
-            </div>
-          )}
-          {model.references.length > 0 && (
-            <div>
-              <CapsuleHeading title="references" accent={accent} />
-              <RefList items={model.references} />
             </div>
           )}
         </SideColumn>
@@ -2126,24 +2125,16 @@ function CapsuleResume({ model }: { model: PreviewModel }) {
             <CapsuleHeading title="experience" accent={accent} />
             <ExperienceList items={model.experience} accent={accent} />
           </div>
-          <div>
-            <CapsuleHeading title="skills" accent={accent} />
-            <div className="flex flex-wrap gap-1.5">
-              {model.skills.map((skill) => (
-                <span
-                  key={skill.id}
-                  className="rounded-full px-3 py-[5px] text-[9px] font-medium"
-                  style={{ backgroundColor: `${accent}16`, color: accent }}
-                >
-                  {skill.name}
-                </span>
-              ))}
-            </div>
-          </div>
           {model.certifications.length > 0 && (
             <div>
               <CapsuleHeading title="awards" accent={accent} />
               <CertList items={model.certifications} />
+            </div>
+          )}
+          {model.references.length > 0 && (
+            <div>
+              <CapsuleHeading title="references" accent={accent} />
+              <RefList items={model.references} />
             </div>
           )}
         </SideColumn>
@@ -2171,17 +2162,29 @@ function MarqueeResume({ model }: { model: PreviewModel }) {
   const { accent, secondary } = model.template
   return (
     <Page className="flex" style={{ color: '#1f2937' }}>
-      <aside className="flex w-[232px] shrink-0 flex-col justify-between gap-6 px-6 py-8" style={{ backgroundColor: secondary }}>
+      <aside className="flex w-[232px] shrink-0 flex-col gap-5 px-6 py-8" style={{ backgroundColor: secondary }}>
         <div className="flex justify-center">
-          <Portrait model={model} className="h-[132px] w-[132px] rounded-full border-[3px]" style={{ borderColor: accent }} />
+          <Portrait model={model} className="h-[150px] w-[150px] rounded-full border-[3px]" style={{ borderColor: accent }} />
         </div>
         <div>
           <PillLabel title="Contact" accent={accent} />
-          <div className="space-y-1.5 text-[9.5px] text-white/75">
+          <div className="space-y-2.5 text-[11px] leading-relaxed text-white/75">
             {model.phone && <p>{model.phone}</p>}
             {model.email && <p className="break-all">{model.email}</p>}
             {model.website && <p className="break-all">{model.website}</p>}
             {model.location && <p>{model.location}</p>}
+          </div>
+        </div>
+        <div>
+          <PillLabel title="Education" accent={accent} />
+          <div className="space-y-3 text-[11px] leading-relaxed">
+            {model.education.map((edu) => (
+              <div key={edu.id}>
+                <p className="font-semibold text-white">{[edu.degree, edu.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</p>
+                <p className="text-white/60">{edu.school || 'University Name'}</p>
+                <p className="text-white/45">{[edu.startDate, edu.endDate].filter(Boolean).join(' - ')}</p>
+              </div>
+            ))}
           </div>
         </div>
         {model.languages.length > 0 && (
@@ -2193,9 +2196,9 @@ function MarqueeResume({ model }: { model: PreviewModel }) {
         {model.certifications.length > 0 && (
           <div>
             <PillLabel title="Certificates" accent={accent} />
-            <div className="space-y-2 text-[9.5px] leading-snug">
+            <div className="space-y-3 text-[11px] leading-relaxed">
               {model.certifications.map((cert) => (
-                <div key={cert.id}>
+                <div key={cert.id} className="leading-relaxed">
                   <p className="font-semibold text-white">{cert.name}</p>
                   <p className="text-white/60">{[cert.issuer, cert.date].filter(Boolean).join(' · ')}</p>
                 </div>
@@ -2206,9 +2209,9 @@ function MarqueeResume({ model }: { model: PreviewModel }) {
         {model.references.length > 0 && (
           <div>
             <PillLabel title="References" accent={accent} />
-            <div className="space-y-2.5">
+            <div className="space-y-3">
               {model.references.map((ref) => (
-                <div key={ref.id} className="text-[9.5px] leading-snug">
+                <div key={ref.id} className="text-[11px] leading-relaxed">
                   <p className="font-semibold text-white">{ref.name}</p>
                   <p className="text-white/60">{[ref.title, ref.company].filter(Boolean).join(", ")}</p>
                 </div>
@@ -2231,10 +2234,6 @@ function MarqueeResume({ model }: { model: PreviewModel }) {
           <div>
             <BarHeading title="Experience" icon={Briefcase} accent={accent} />
             <ExperienceList items={model.experience} accent={secondary} />
-          </div>
-          <div>
-            <BarHeading title="Education" icon={GraduationCap} accent={accent} />
-            <EducationList items={model.education} />
           </div>
           <div>
             <BarHeading title="Skills" icon={Wrench} accent={accent} />
@@ -2263,10 +2262,131 @@ function BarHeading({ title, icon: Icon, accent }: { title: string; icon: typeof
 function PillLabel({ title, accent }: { title: string; accent: string }) {
   return (
     <h2
-      className="mb-2.5 inline-block rounded-full border px-4 py-[4px] text-[9.5px] font-semibold uppercase tracking-[0.18em]"
+      className="mb-3 mt-1 inline-block rounded-full border px-4 py-[5px] text-[11px] font-semibold uppercase tracking-[0.18em]"
       style={{ borderColor: `${accent}99`, color: accent }}
     >
       {title}
     </h2>
+  )
+}
+
+// Bureau — tinted rail carrying photo, contact, education, skills and
+// languages against a plain column of summary and experience.
+//
+// The rail earns its height with a vertical skills list and a language list,
+// which is how the reference CVs keep both columns ending together. Do not
+// turn those into chips; three lines of chips is what left the rail empty.
+function BureauResume({ model }: { model: PreviewModel }) {
+  const { accent, secondary } = model.template
+  return (
+    <Page className="flex" style={{ color: '#2c3440' }}>
+      <aside className="w-[250px] shrink-0 px-7 py-9" style={{ backgroundColor: secondary }}>
+        <div className="flex justify-center">
+          <div className="rounded-full p-[3px]" style={{ backgroundColor: accent }}>
+            <Portrait model={model} className="h-[132px] w-[132px] rounded-full border-[3px] border-white" />
+          </div>
+        </div>
+
+        <BureauRailHeading title="Contact" />
+        <div className="space-y-2 text-[10px] leading-relaxed text-gray-700">
+          {model.phone && <p className="flex gap-2"><Phone size={10} className="mt-[1px] shrink-0" style={{ color: accent }} />{model.phone}</p>}
+          {model.email && <p className="flex gap-2"><Mail size={10} className="mt-[1px] shrink-0" style={{ color: accent }} /><span className="break-all">{model.email}</span></p>}
+          {model.location && <p className="flex gap-2"><MapPin size={10} className="mt-[1px] shrink-0" style={{ color: accent }} />{model.location}</p>}
+          {model.website && <p className="flex gap-2"><Globe size={10} className="mt-[1px] shrink-0" style={{ color: accent }} /><span className="break-all">{model.website}</span></p>}
+        </div>
+
+        <BureauRailHeading title="Education" />
+        <div className="space-y-4">
+          {model.education.map((edu) => (
+            <div key={edu.id} className="text-[10px] leading-relaxed">
+              <p className="font-bold" style={{ color: accent }}>{edu.school || 'University Name'}</p>
+              <p className="text-gray-700">{[edu.degree, edu.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</p>
+              <p className="text-gray-500">{[edu.startDate, edu.endDate].filter(Boolean).join(' - ')}</p>
+            </div>
+          ))}
+        </div>
+
+        <BureauRailHeading title="Key Skills" />
+        <ul className="space-y-[5px] text-[10px] text-gray-700">
+          {model.skills.map((skill) => (
+            <li key={skill.id} className="flex gap-2">
+              <span className="mt-[5px] h-[3px] w-[3px] shrink-0 rounded-full" style={{ backgroundColor: accent }} />
+              {skill.name}
+            </li>
+          ))}
+        </ul>
+
+        {model.languages.length > 0 && (
+          <>
+            <BureauRailHeading title="Language" />
+            <ul className="space-y-[5px] text-[10px] text-gray-700">
+              {model.languages.map((lang) => (
+                <li key={lang.id} className="flex gap-2">
+                  <span className="mt-[5px] h-[3px] w-[3px] shrink-0 rounded-full" style={{ backgroundColor: accent }} />
+                  {lang.name}
+                  <span className="text-gray-500">({lang.proficiency})</span>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+        {model.certifications.length > 0 && (
+          <>
+            <BureauRailHeading title="Certificates" />
+            <div className="space-y-3">
+              {model.certifications.map((cert) => (
+                <div key={cert.id} className="text-[10px] leading-relaxed">
+                  <p className="font-bold" style={{ color: accent }}>{cert.name}</p>
+                  <p className="text-gray-600">{[cert.issuer, cert.date].filter(Boolean).join(' · ')}</p>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+      </aside>
+
+      <div className="min-w-0 flex-1 px-8 py-8">
+        <header>
+          <h1 className="text-[30px] font-light uppercase leading-none tracking-[0.1em]" style={{ color: accent }}>{model.name}</h1>
+          <p className="mt-2 text-[13px] font-light text-gray-500">{model.title}</p>
+        </header>
+
+        <BureauSectionHead title="Summary" icon={User} accent={accent} />
+        <p className="text-justify text-[10px] leading-[1.7] text-gray-700">{model.summary}</p>
+
+        <BureauSectionHead title="Work Experience" icon={Briefcase} accent={accent} />
+        <div className="space-y-4">
+          {model.experience.map((exp) => (
+            <div key={exp.id}>
+              <h3 className="text-[11px] font-bold" style={{ color: '#1f2733' }}>
+                {[exp.title || exp.jobTitle || 'Job Title', exp.company].filter(Boolean).join(', ')}
+              </h3>
+              <p className="mt-0.5 text-[9px] text-gray-500">{expDates(exp)}</p>
+              <BulletLines text={exp.description} accent={accent} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </Page>
+  )
+}
+
+/** Plain bold caps label. The rail deliberately has no rules — the tint separates it. */
+function BureauRailHeading({ title }: { title: string }) {
+  return <h2 className="mb-2.5 mt-6 text-[12px] font-bold uppercase tracking-[0.06em] text-[#2c3440]">{title}</h2>
+}
+
+/** Filled disc holding the icon, label beside it, rule beneath the pair. */
+function BureauSectionHead({ title, icon: Icon, accent }: { title: string; icon: typeof User; accent: string }) {
+  return (
+    <div className="mb-3 mt-6">
+      <div className="flex items-center gap-2.5">
+        <span className="flex h-[19px] w-[19px] items-center justify-center rounded-full" style={{ backgroundColor: accent }}>
+          <Icon size={11} className="text-white" strokeWidth={2.4} />
+        </span>
+        <h2 className="text-[12.5px] font-bold uppercase tracking-[0.08em] text-[#2c3440]">{title}</h2>
+      </div>
+      <span className="mt-2 block h-px w-full" style={{ backgroundColor: `${accent}33` }} />
+    </div>
   )
 }

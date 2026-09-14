@@ -33,6 +33,7 @@ export type TemplateLayoutId =
   | 'solstice'
   | 'capsule'
   | 'marquee'
+  | 'bureau'
 
 export interface TemplateDefinition {
   id: string
@@ -85,6 +86,7 @@ const LAYOUT_META: Record<TemplateLayoutId, LayoutMeta> = {
   solstice: { label: 'Solstice', category: 'creative', columns: 2, family: 'panel', description: 'Portrait above a colour block that carries the name, balanced by a light editorial column.' },
   capsule: { label: 'Capsule', category: 'creative', columns: 2, family: 'ink', description: 'Outlined lozenge section labels and a ringed portrait on warm paper, for design and marketing roles.' },
   marquee: { label: 'Marquee', category: 'professional', columns: 2, family: 'dark', description: 'Solid icon heading bars beside a dark rail of pill labels, for corporate and administrative roles.' },
+  bureau: { label: 'Bureau', category: 'professional', columns: 2, family: 'panel', description: 'Tinted rail of contact, education, skills and languages beside a clean summary and experience column.' },
 }
 
 interface Hue {
@@ -186,6 +188,7 @@ export const SHOWCASE_VARIANT: Record<TemplateLayoutId, string> = {
   solstice: 'solstice-cobalt',
   capsule: 'capsule-coral',
   marquee: 'marquee-navy',
+  bureau: 'bureau-slate',
 }
 
 // Layout names without color prefixes.
