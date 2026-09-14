@@ -700,7 +700,9 @@ function PremierResume({ model }: { model: PreviewModel }) {
           {model.projects.length > 0 && <PremierSection title="Projects" accent={accent} secondary={secondary}><ProjectList items={model.projects} accent={secondary} /></PremierSection>}
           {model.references.length > 0 && <PremierSection title="References" accent={accent} secondary={secondary}><RefList items={model.references} /></PremierSection>}
         </main>
-        <aside className="border-l pl-8" style={{ borderColor: `${accent}40` }}>
+        {/* Spread the sections over the full height — see SideColumn. The
+            sections' own mb-7 is dropped so only the distributed gap applies. */}
+        <aside className="flex h-full flex-col justify-between gap-7 border-l pl-8 [&>section]:mb-0" style={{ borderColor: `${accent}40` }}>
           <PremierSection title="Education" accent={accent} secondary={secondary}><EducationList items={model.education} /></PremierSection>
           <PremierSection title="Expertise" accent={accent} secondary={secondary}><SkillList skills={model.skills} accent={accent} /></PremierSection>
           {model.certifications.length > 0 && <PremierSection title="Certifications" accent={accent} secondary={secondary}><CertList items={model.certifications} /></PremierSection>}
