@@ -2009,27 +2009,31 @@ function GazetteResume({ model }: { model: PreviewModel }) {
           )}
         </div>
 
-        <aside>
-          <GazetteHeading title="Education" accent={accent} secondary={secondary} />
-          <EducationList items={model.education} />
+        <SideColumn>
+          <div>
+            <GazetteHeading title="Education" accent={accent} secondary={secondary} />
+            <EducationList items={model.education} />
+          </div>
 
-          <GazetteHeading title="Skills" accent={accent} secondary={secondary} className="mt-6" />
-          <SkillList skills={model.skills} accent={accent} />
+          <div>
+            <GazetteHeading title="Skills" accent={accent} secondary={secondary} />
+            <SkillList skills={model.skills} accent={accent} />
+          </div>
 
           {model.languages.length > 0 && (
-            <>
-              <GazetteHeading title="Languages" accent={accent} secondary={secondary} className="mt-6" />
+            <div>
+              <GazetteHeading title="Languages" accent={accent} secondary={secondary} />
               <LanguageStars items={model.languages} accent={accent} />
-            </>
+            </div>
           )}
 
           {model.certifications.length > 0 && (
-            <>
-              <GazetteHeading title="Certifications" accent={accent} secondary={secondary} className="mt-6" />
+            <div>
+              <GazetteHeading title="Certifications" accent={accent} secondary={secondary} />
               <CertList items={model.certifications} />
-            </>
+            </div>
           )}
-        </aside>
+        </SideColumn>
       </div>
     </Page>
   )
