@@ -37,6 +37,25 @@ export type TemplateLayoutId =
   | 'terminal'
   | 'gauge'
   | 'tagged'
+  | 'placard'
+  | 'regent'
+  | 'signature'
+  | 'corner'
+  | 'dossier'
+  | 'pillar'
+  | 'bulletin'
+  | 'quill'
+  | 'rosette'
+  | 'bloom'
+  | 'column'
+  | 'alcove'
+  | 'tablet'
+  | 'gutter'
+  | 'billboard'
+  | 'verdant'
+  | 'envoy'
+  | 'ribbon'
+  | 'lattice'
 
 export interface TemplateDefinition {
   id: string
@@ -93,6 +112,25 @@ const LAYOUT_META: Record<TemplateLayoutId, LayoutMeta> = {
   terminal: { label: 'Terminal', category: 'creative', columns: 2, family: 'dark', description: 'Monospace throughout, every section a bordered block with a bracketed label, for engineering and technical roles.' },
   gauge: { label: 'Gauge', category: 'creative', columns: 2, family: 'dark', description: 'Dark page where skills are drawn as rings rather than bars, with the portrait banked down the right.' },
   tagged: { label: 'Tagged', category: 'modern', columns: 2, family: 'ink', description: 'Skills as grouped tags, dates as tinted pills, and paired project cards at the foot of the page.' },
+  placard: { label: 'Placard', category: 'professional', columns: 2, family: 'ink', description: 'Filled heading bars notched out of a pale rail, against a deep tinted main column.' },
+  regent: { label: 'Regent', category: 'professional', columns: 2, family: 'ink', description: 'Dark rail beside a full-width masthead band that carries the name.' },
+  signature: { label: 'Signature', category: 'creative', columns: 2, family: 'ink', description: 'A script given name over a bold surname, framed portrait and a blush rail.' },
+  corner: { label: 'Corner', category: 'simple', columns: 2, family: 'ink', description: 'A tinted block pinned in the top corner under a thin, wide-tracked name.' },
+  dossier: { label: 'Dossier', category: 'professional', columns: 2, family: 'dark', description: 'Deep rail with grouped skills beside a column dense enough for projects.' },
+  pillar: { label: 'Pillar', category: 'modern', columns: 2, family: 'dark', description: 'Contact and study collected into a rounded panel, leaving one clear run of experience.' },
+  bulletin: { label: 'Bulletin', category: 'professional', columns: 2, family: 'dark', description: 'Every section titled by a solid filled bar, on both sides of the page.' },
+  quill: { label: 'Quill', category: 'creative', columns: 2, family: 'ink', description: 'Warm rail with a framed portrait and a script hand set beneath it.' },
+  rosette: { label: 'Rosette', category: 'creative', columns: 2, family: 'ink', description: 'Soft tinted headings and a rounded portrait, light in weight throughout.' },
+  bloom: { label: 'Bloom', category: 'creative', columns: 2, family: 'dark', description: 'Rounded shapes throughout: an oval portrait, lozenge headings, outlined contact pills.' },
+  column: { label: 'Column', category: 'professional', columns: 2, family: 'dark', description: 'Rail headings centred rather than ranged left, reading as a spine down the page.' },
+  alcove: { label: 'Alcove', category: 'simple', columns: 2, family: 'ink', description: 'Rounded grey rail with the name set beneath the portrait rather than beside it.' },
+  tablet: { label: 'Tablet', category: 'modern', columns: 2, family: 'ink', description: 'Grey rail with dates carried as tinted pills ahead of each role.' },
+  gutter: { label: 'Gutter', category: 'professional', columns: 2, family: 'dark', description: 'Years live in their own channel so the dates line up down the page.' },
+  billboard: { label: 'Billboard', category: 'creative', columns: 2, family: 'ink', description: 'The portrait runs the full height of the page with contact set over its foot.' },
+  verdant: { label: 'Verdant', category: 'modern', columns: 2, family: 'dark', description: 'Deep single-colour page where each role is introduced by its own icon disc.' },
+  envoy: { label: 'Envoy', category: 'academic', columns: 2, family: 'ink', description: 'Centred masthead over a true three-column body.' },
+  ribbon: { label: 'Ribbon', category: 'modern', columns: 2, family: 'ink', description: 'Sections numbered down a tinted band, so the page reads in order.' },
+  lattice: { label: 'Lattice', category: 'modern', columns: 2, family: 'dark', description: 'Every section its own bordered card, tiled across the page.' },
 }
 
 interface Hue {
@@ -198,6 +236,25 @@ export const SHOWCASE_VARIANT: Record<TemplateLayoutId, string> = {
   terminal: 'terminal-indigo',
   gauge: 'gauge-coral',
   tagged: 'tagged-cobalt',
+  placard: 'placard-burgundy',
+  regent: 'regent-coral',
+  signature: 'signature-plum',
+  corner: 'corner-cobalt',
+  dossier: 'dossier-navy',
+  pillar: 'pillar-slate',
+  bulletin: 'bulletin-cobalt',
+  quill: 'quill-gold',
+  rosette: 'rosette-plum',
+  bloom: 'bloom-coral',
+  column: 'column-burgundy',
+  alcove: 'alcove-graphite',
+  tablet: 'tablet-slate',
+  gutter: 'gutter-graphite',
+  billboard: 'billboard-navy',
+  verdant: 'verdant-emerald',
+  envoy: 'envoy-navy',
+  ribbon: 'ribbon-indigo',
+  lattice: 'lattice-cobalt',
 }
 
 // Layout names without color prefixes.

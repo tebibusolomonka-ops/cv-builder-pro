@@ -287,6 +287,25 @@ const RENDERERS: Record<TemplateLayoutId, (props: { model: PreviewModel }) => Re
   terminal: TerminalResume,
   gauge: GaugeResume,
   tagged: TaggedResume,
+  placard: PlacardResume,
+  regent: RegentResume,
+  signature: SignatureResume,
+  corner: CornerResume,
+  dossier: DossierResume,
+  pillar: PillarResume,
+  bulletin: BulletinResume,
+  quill: QuillResume,
+  rosette: RosetteResume,
+  bloom: BloomResume,
+  column: ColumnResume,
+  alcove: AlcoveResume,
+  tablet: TabletResume,
+  gutter: GutterResume,
+  billboard: BillboardResume,
+  verdant: VerdantResume,
+  envoy: EnvoyResume,
+  ribbon: RibbonResume,
+  lattice: LatticeResume,
 }
 
 export function LiveResumePreview({ templateId, forceSample = false }: { templateId?: string; forceSample?: boolean }) {
@@ -2877,5 +2896,2079 @@ function TaggedResume({ model }: { model: PreviewModel }) {
 function TaggedHeading({ title, className }: { title: string; className?: string }) {
   return (
     <h2 className={cn('mb-2.5 text-[11px] font-bold uppercase tracking-[0.14em] text-gray-500', className)}>{title}</h2>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Reference set, batch A
+// ---------------------------------------------------------------------------
+
+// Placard — filled heading bars notched out of a pale rail, tinted main column.
+function PlacardResume({ model }: { model: PreviewModel }) {
+  const { accent, secondary } = model.template
+  return (
+    <Page className="flex" style={{ color: INK }}>
+      <div className="flex w-[268px] shrink-0 flex-col overflow-hidden bg-[#faf7f2] pb-8">
+        <div className="relative z-10 mt-9 px-6 py-5" style={{ backgroundColor: accent }}>
+          <h1 className="text-[24px] font-extrabold uppercase leading-[0.98] tracking-wide text-white">{model.name}</h1>
+          <p className="mt-1.5 text-[10px] text-white/80">{model.title}</p>
+          <p className="mt-3 text-[9px] leading-[1.7] text-white/75">{truncate(model.summary, 190)}</p>
+        </div>
+        <div className="mt-6 space-y-5 px-6">
+          <div>
+            <PlacardBar title="Contact" accent={accent} />
+            <div className="space-y-1.5 text-[10px] text-gray-700">
+              {model.phone ? <p>{model.phone}</p> : null}
+              {model.email ? <p className="break-all">{model.email}</p> : null}
+              {model.location ? <p>{model.location}</p> : null}
+              {model.website ? <p className="break-all">{model.website}</p> : null}
+            </div>
+          </div>
+          <div>
+            <PlacardBar title="Education" accent={accent} />
+            <ul className="space-y-2.5 text-[10px]">
+              {model.education.map((e) => (
+                <li key={e.id} className="flex gap-2">
+                  <span className="mt-[6px] h-[3px] w-[3px] shrink-0 rounded-full" style={{ backgroundColor: accent }} />
+                  <span>
+                    <span className="font-bold">{e.school || 'University'}</span>
+                    <br />
+                    <span className="text-gray-600">{[e.degree, e.endDate].filter(Boolean).join(', ')}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <PlacardBar title="Skills" accent={accent} />
+            <ul className="space-y-1.5 text-[10px] text-gray-700">
+              {model.skills.map((sk) => (
+                <li key={sk.id} className="flex gap-2">
+                  <span className="mt-[6px] h-[3px] w-[3px] shrink-0 rounded-full" style={{ backgroundColor: accent }} />
+                  {sk.name}
+                </li>
+              ))}
+            </ul>
+          </div>
+          {model.languages.length > 0 ? (
+            <div>
+              <PlacardBar title="Languages" accent={accent} />
+              <div className="space-y-1 text-[10px] text-gray-700">
+                {model.languages.map((l) => (
+                  <p key={l.id}>
+                    {l.name} <span className="text-gray-500">({l.proficiency})</span>
+                  </p>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </div>
+      </div>
+
+      <div className="min-w-0 flex-1 px-9 py-9 text-white" style={{ backgroundColor: secondary }}>
+        <div className="mb-6">
+          <Portrait model={model} className="h-[186px] w-full rounded-sm" />
+        </div>
+        <div className="space-y-5">
+          <div>
+            <PlacardHead title="Education" icon={GraduationCap} accent={accent} />
+            <div className="space-y-2.5">
+              {model.education.map((e) => (
+                <div key={e.id} className="flex gap-2.5 text-[9.5px]">
+                  <span className="mt-[5px] h-[5px] w-[5px] shrink-0 rounded-full" style={{ backgroundColor: accent }} />
+                  <div>
+                    <p className="font-bold text-white">{[e.degree, e.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</p>
+                    <p className="text-white/55">{[e.school, [e.startDate, e.endDate].filter(Boolean).join(' - ')].filter(Boolean).join(' | ')}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div>
+            <PlacardHead title="Experience" icon={Briefcase} accent={accent} />
+            <div className="space-y-3.5">
+              {model.experience.map((exp) => (
+                <div key={exp.id} className="flex gap-2.5">
+                  <span className="mt-[6px] h-[5px] w-[5px] shrink-0 rounded-full" style={{ backgroundColor: accent }} />
+                  <div className="min-w-0">
+                    <div className="flex items-baseline justify-between gap-3">
+                      <p className="text-[10.5px] font-bold text-white">{exp.title || exp.jobTitle || 'Job Title'}</p>
+                      <p className="shrink-0 text-[8.5px]" style={{ color: accent }}>{expDates(exp)}</p>
+                    </div>
+                    <p className="text-[9px] text-white/50">{exp.company}</p>
+                    <ul className="mt-1 space-y-[3px]">
+                      {exp.description.split('\n').filter(Boolean).map((line, i) => (
+                        <li key={i} className="text-[9px] leading-relaxed text-white/65">{line.replace(/^[-*]\s*/, '')}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          {model.certifications.length > 0 ? (
+            <div>
+              <PlacardHead title="Certifications" icon={Award} accent={accent} />
+              <div className="space-y-1.5 text-[9.5px]">
+                {model.certifications.map((c) => (
+                  <p key={c.id} className="text-white/75">
+                    <span className="font-semibold text-white">{c.name}</span> - {[c.issuer, c.date].filter(Boolean).join(', ')}
+                  </p>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </div>
+      </div>
+    </Page>
+  )
+}
+
+function PlacardBar({ title, accent }: { title: string; accent: string }) {
+  return (
+    <h2 className="mb-2.5 -ml-6 inline-block px-6 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] text-white" style={{ backgroundColor: accent }}>
+      {title}
+    </h2>
+  )
+}
+
+function PlacardHead({ title, icon: Icon, accent }: { title: string; icon: typeof User; accent: string }) {
+  return (
+    <h2 className="mb-2.5 flex items-center gap-2 border-b border-white/15 pb-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-white">
+      <Icon size={12} strokeWidth={2.4} style={{ color: accent }} />
+      {title}
+    </h2>
+  )
+}
+
+// Regent — dark rail beside a full-width masthead band that carries the name.
+function RegentResume({ model }: { model: PreviewModel }) {
+  const { accent, secondary } = model.template
+  return (
+    <Page className="flex" style={{ color: INK }}>
+      <aside className="flex w-[238px] shrink-0 flex-col gap-5 px-6 py-7 text-white" style={{ backgroundColor: secondary }}>
+        <div className="flex justify-center">
+          <Portrait model={model} className="h-[126px] w-[126px] rounded-full border-[3px] border-white/85" />
+        </div>
+        <div>
+          <RegentHeading title="About Me" accent={accent} />
+          <p className="text-[10px] leading-[1.75] text-white/70">{model.summary}</p>
+        </div>
+        <div>
+          <RegentHeading title="Education" accent={accent} />
+          <div className="space-y-2.5 text-[10px] leading-relaxed">
+            {model.education.map((e) => (
+              <div key={e.id}>
+                <p className="font-bold">{[e.degree, e.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</p>
+                <p className="text-white/60">{e.school}</p>
+                <p className="text-white/45">{[e.startDate, e.endDate].filter(Boolean).join(' - ')}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div>
+          <RegentHeading title="Skills" accent={accent} />
+          <SkillBars skills={model.skills} accent={accent} />
+        </div>
+        {model.languages.length > 0 ? (
+          <div>
+            <RegentHeading title="Language" accent={accent} />
+            <ul className="space-y-1 text-[10px] text-white/75">
+              {model.languages.map((l) => (
+                <li key={l.id} className="flex gap-2">
+                  <span style={{ color: accent }}>&bull;</span>
+                  {l.name}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+      </aside>
+
+      <div className="flex min-w-0 flex-1 flex-col">
+        <div className="px-9 py-6" style={{ backgroundColor: accent }}>
+          <h1 className="text-[28px] font-bold uppercase leading-none tracking-[0.06em] text-white">{model.name}</h1>
+          <p className="mt-2 text-[11px] tracking-[0.2em] text-white/80">{model.title}</p>
+        </div>
+        <div className="flex flex-wrap gap-x-6 gap-y-1.5 px-9 py-4 text-[9.5px] text-gray-600">
+          {model.phone ? <span className="flex items-center gap-1.5"><Phone size={10} style={{ color: accent }} />{model.phone}</span> : null}
+          {model.email ? <span className="flex items-center gap-1.5"><Mail size={10} style={{ color: accent }} />{model.email}</span> : null}
+          {model.website ? <span className="flex items-center gap-1.5"><Globe size={10} style={{ color: accent }} />{model.website}</span> : null}
+          {model.location ? <span className="flex items-center gap-1.5"><MapPin size={10} style={{ color: accent }} />{model.location}</span> : null}
+        </div>
+        <div className="px-9 pb-8">
+          <h2 className="mb-3 text-[12.5px] font-bold uppercase tracking-[0.2em]">Experience</h2>
+          <TimelineRail items={model.experience} accent={accent} secondary={INK} />
+          {model.references.length > 0 ? (
+            <>
+              <h2 className="mb-3 mt-6 text-[12.5px] font-bold uppercase tracking-[0.2em]">References</h2>
+              <div className="grid grid-cols-2 gap-5">
+                {model.references.map((r) => (
+                  <div key={r.id} className="text-[9.5px] leading-relaxed">
+                    <p className="text-[10.5px] font-bold">{r.name}</p>
+                    <p className="text-gray-500">{[r.title, r.company].filter(Boolean).join(' / ')}</p>
+                    {r.phone ? <p className="mt-1 text-gray-600"><span className="font-semibold">Phone:</span> {r.phone}</p> : null}
+                    {r.email ? <p className="break-all text-gray-600"><span className="font-semibold">Email:</span> {r.email}</p> : null}
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : null}
+        </div>
+      </div>
+    </Page>
+  )
+}
+
+function RegentHeading({ title, accent }: { title: string; accent: string }) {
+  return (
+    <h2 className="mb-2.5 text-[11px] font-bold uppercase tracking-[0.2em]">
+      {title}
+      <span className="mt-1.5 block h-px w-full" style={{ backgroundColor: `${accent}77` }} />
+    </h2>
+  )
+}
+
+// Signature — a script given name over a bold surname, framed portrait, blush rail.
+function SignatureResume({ model }: { model: PreviewModel }) {
+  const { accent } = model.template
+  const [given, ...rest] = model.name.split(' ')
+  return (
+    <Page className="flex" style={{ color: INK }}>
+      <aside className="flex w-[244px] shrink-0 flex-col gap-5 px-7 py-8" style={{ backgroundColor: `${accent}14` }}>
+        <div className="border-[6px] border-white bg-white shadow-sm">
+          <Portrait model={model} className="h-[178px] w-full" />
+        </div>
+        <div>
+          <SignatureHeading title="About Me" accent={accent} />
+          <p className="text-[9.5px] leading-[1.75] text-gray-600">{model.summary}</p>
+        </div>
+        <div>
+          <SignatureHeading title="Contact" accent={accent} />
+          <div className="space-y-1.5 text-[9.5px] text-gray-700">
+            {model.phone ? <p>{model.phone}</p> : null}
+            {model.email ? <p className="break-all">{model.email}</p> : null}
+            {model.website ? <p className="break-all">{model.website}</p> : null}
+            {model.location ? <p>{model.location}</p> : null}
+          </div>
+        </div>
+        <div>
+          <SignatureHeading title="Skills" accent={accent} />
+          <ul className="space-y-1.5 text-[9.5px] text-gray-700">
+            {model.skills.map((sk) => (
+              <li key={sk.id} className="flex gap-2">
+                <span className="mt-[6px] h-[3px] w-[3px] shrink-0 rounded-full" style={{ backgroundColor: accent }} />
+                {sk.name}
+              </li>
+            ))}
+          </ul>
+        </div>
+        {model.languages.length > 0 ? (
+          <div>
+            <SignatureHeading title="Languages" accent={accent} />
+            <ul className="space-y-1.5 text-[9.5px] text-gray-700">
+              {model.languages.map((l) => (
+                <li key={l.id} className="flex gap-2">
+                  <span className="mt-[6px] h-[3px] w-[3px] shrink-0 rounded-full" style={{ backgroundColor: accent }} />
+                  {l.name}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+      </aside>
+
+      <div className="min-w-0 flex-1 px-9 py-9">
+        <header>
+          <p className="text-[42px] italic leading-none" style={{ fontFamily: SERIF }}>{given}</p>
+          <h1 className="mt-1 text-[27px] font-extrabold uppercase tracking-[0.12em]">{rest.join(' ')}</h1>
+          <span className="mt-4 block h-px w-full bg-gray-200" />
+          <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.3em] text-gray-500">{model.title}</p>
+        </header>
+        <div className="mt-7 space-y-5">
+          <div>
+            <SignatureBand title="Work Experience" accent={accent} />
+            <div className="space-y-4">
+              {model.experience.map((exp) => (
+                <div key={exp.id}>
+                  <p className="text-[11px] font-bold uppercase tracking-wide">{exp.title || exp.jobTitle || 'Job Title'}</p>
+                  <p className="text-[10px] font-semibold" style={{ color: accent }}>{exp.company}</p>
+                  <p className="text-[9px] text-gray-400">{expDates(exp)}</p>
+                  <BulletLines text={exp.description} accent={accent} />
+                </div>
+              ))}
+            </div>
+          </div>
+          <div>
+            <SignatureBand title="Education" accent={accent} />
+            <div className="space-y-2.5">
+              {model.education.map((e) => (
+                <div key={e.id} className="text-[10px] leading-relaxed">
+                  <p className="font-bold uppercase tracking-wide">{[e.degree, e.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</p>
+                  <p className="text-gray-600">{e.school}</p>
+                  <p className="text-gray-400">{[e.startDate, e.endDate].filter(Boolean).join(' - ')}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          {model.certifications.length > 0 ? (
+            <div>
+              <SignatureBand title="Certifications" accent={accent} />
+              <CertList items={model.certifications} />
+            </div>
+          ) : null}
+        </div>
+      </div>
+    </Page>
+  )
+}
+
+function SignatureHeading({ title, accent }: { title: string; accent: string }) {
+  return (
+    <h2 className="mb-2.5 bg-white px-3 py-1.5 text-center text-[10px] font-bold uppercase tracking-[0.22em]" style={{ color: accent }}>
+      {title}
+    </h2>
+  )
+}
+
+function SignatureBand({ title, accent }: { title: string; accent: string }) {
+  return (
+    <h2 className="mb-3 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em]" style={{ backgroundColor: `${accent}1c` }}>
+      {title}
+    </h2>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Reference set, batch B
+// ---------------------------------------------------------------------------
+
+// Corner — a tinted block pinned in the top corner, thin wide-tracked name.
+function CornerResume({ model }: { model: PreviewModel }) {
+  const { accent } = model.template
+  return (
+    <Page className="relative px-10 py-9" style={{ color: INK }}>
+      <span aria-hidden className="absolute left-0 top-0 h-[54px] w-[156px]" style={{ backgroundColor: `${accent}30` }} />
+      <header className="relative grid grid-cols-[152px_1fr] items-center gap-7">
+        <div className="flex justify-center">
+          <Portrait model={model} className="h-[132px] w-[132px] rounded-full border-4 border-white shadow" />
+        </div>
+        <div>
+          <h1 className="text-[30px] font-light uppercase leading-none tracking-[0.2em]">{model.name}</h1>
+          <p className="mt-2.5 text-[12px] font-light tracking-[0.1em] text-gray-500">{model.title}</p>
+          <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-[9px] text-gray-600">
+            {model.phone ? <span className="flex items-center gap-1.5"><Phone size={9} style={{ color: accent }} />{model.phone}</span> : null}
+            {model.email ? <span className="flex items-center gap-1.5"><Mail size={9} style={{ color: accent }} />{model.email}</span> : null}
+            {model.website ? <span className="flex items-center gap-1.5"><Globe size={9} style={{ color: accent }} />{model.website}</span> : null}
+          </div>
+        </div>
+      </header>
+
+      <div className="mt-7 grid grid-cols-[214px_1fr] gap-8">
+        <SideColumn>
+          <div>
+            <CornerHeading title="Summary" accent={accent} />
+            <p className="text-[9.5px] leading-[1.75] text-gray-600">{model.summary}</p>
+          </div>
+          <div>
+            <CornerHeading title="Education" accent={accent} />
+            <div className="space-y-2.5 text-[10px] leading-relaxed">
+              {model.education.map((e) => (
+                <div key={e.id}>
+                  <p className="font-bold">{[e.degree, e.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</p>
+                  <p className="text-gray-600">{e.school}</p>
+                  <p className="text-gray-400">{[e.startDate, e.endDate].filter(Boolean).join(' - ')}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div>
+            <CornerHeading title="Skills" accent={accent} />
+            <ul className="space-y-1.5 text-[10px] text-gray-700">
+              {model.skills.map((sk) => (
+                <li key={sk.id} className="flex gap-2">
+                  <span className="mt-[6px] h-[3px] w-[3px] shrink-0 rounded-full" style={{ backgroundColor: accent }} />
+                  {sk.name}
+                </li>
+              ))}
+            </ul>
+          </div>
+          {model.languages.length > 0 ? (
+            <div>
+              <CornerHeading title="Language" accent={accent} />
+              <ul className="space-y-1.5 text-[10px] text-gray-700">
+                {model.languages.map((l) => (
+                  <li key={l.id} className="flex gap-2">
+                    <span className="mt-[6px] h-[3px] w-[3px] shrink-0 rounded-full" style={{ backgroundColor: accent }} />
+                    {l.name} <span className="text-gray-500">({l.proficiency})</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+        </SideColumn>
+
+        <div className="min-w-0">
+          <CornerHeading title="Experience" accent={accent} />
+          <div className="space-y-4">
+            {model.experience.map((exp) => (
+              <div key={exp.id}>
+                <div className="flex items-baseline justify-between gap-4">
+                  <p className="text-[11px] font-bold">{exp.title || exp.jobTitle || 'Job Title'}</p>
+                  <p className="shrink-0 text-[9px] font-semibold" style={{ color: accent }}>{expDates(exp)}</p>
+                </div>
+                <p className="mt-0.5 text-[9.5px] text-gray-500">{[exp.company, exp.location].filter(Boolean).join(' | ')}</p>
+                <BulletLines text={exp.description} accent={accent} />
+              </div>
+            ))}
+          </div>
+          {model.references.length > 0 ? (
+            <>
+              <CornerHeading title="References" accent={accent} className="mt-6" />
+              <div className="grid grid-cols-2 gap-5">
+                {model.references.map((r) => (
+                  <div key={r.id} className="text-[9.5px] leading-relaxed">
+                    <p className="font-bold">{r.name}</p>
+                    <p className="text-gray-500">{[r.title, r.company].filter(Boolean).join(', ')}</p>
+                    {r.phone ? <p className="text-gray-600">Phone: {r.phone}</p> : null}
+                    {r.email ? <p className="break-all text-gray-600">Email: {r.email}</p> : null}
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : null}
+        </div>
+      </div>
+    </Page>
+  )
+}
+
+function CornerHeading({ title, accent, className }: { title: string; accent: string; className?: string }) {
+  return (
+    <h2 className={cn('mb-2.5 text-[11.5px] font-bold uppercase tracking-[0.16em]', className)}>
+      {title}
+      <span className="mt-1.5 block h-px w-full" style={{ backgroundColor: `${accent}4d` }} />
+    </h2>
+  )
+}
+
+// Dossier — deep rail, grouped skills, and a main column dense enough to carry
+// projects as well as experience.
+function DossierResume({ model }: { model: PreviewModel }) {
+  const { accent, secondary } = model.template
+  return (
+    <Page className="flex" style={{ color: INK }}>
+      <aside className="flex w-[236px] shrink-0 flex-col gap-5 px-6 py-8 text-white" style={{ backgroundColor: secondary }}>
+        <div className="flex justify-center">
+          <Portrait model={model} className="h-[124px] w-[124px] rounded-full border-[3px] border-white/80" />
+        </div>
+        <div>
+          <DossierHeading title="Contact" accent={accent} />
+          <div className="space-y-1.5 text-[10px] leading-relaxed text-white/75">
+            {model.location ? <p>{model.location}</p> : null}
+            {model.phone ? <p>{model.phone}</p> : null}
+            {model.email ? <p className="break-all">{model.email}</p> : null}
+            {model.website ? <p className="break-all">{model.website}</p> : null}
+          </div>
+        </div>
+        <div>
+          <DossierHeading title="Education" accent={accent} />
+          <div className="space-y-2.5 text-[10px] leading-relaxed">
+            {model.education.map((e) => (
+              <div key={e.id}>
+                <p className="font-bold">{e.school || 'University'}</p>
+                <p className="text-white/65">{[e.degree, e.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</p>
+                <p className="text-white/45">{[e.startDate, e.endDate].filter(Boolean).join(' - ')}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div>
+          <DossierHeading title="Skills" accent={accent} />
+          <p className="mb-1.5 text-[9px] font-bold uppercase tracking-wide" style={{ color: accent }}>Technical</p>
+          <ul className="space-y-1 text-[10px] text-white/75">
+            {model.skills.slice(0, Math.ceil(model.skills.length / 2)).map((sk) => (
+              <li key={sk.id} className="flex gap-2"><span style={{ color: accent }}>&bull;</span>{sk.name}</li>
+            ))}
+          </ul>
+          <p className="mb-1.5 mt-3 text-[9px] font-bold uppercase tracking-wide" style={{ color: accent }}>Tools</p>
+          <ul className="space-y-1 text-[10px] text-white/75">
+            {model.skills.slice(Math.ceil(model.skills.length / 2)).map((sk) => (
+              <li key={sk.id} className="flex gap-2"><span style={{ color: accent }}>&bull;</span>{sk.name}</li>
+            ))}
+          </ul>
+        </div>
+        {model.languages.length > 0 ? (
+          <div>
+            <DossierHeading title="Languages" accent={accent} />
+            <ul className="space-y-1 text-[10px] text-white/75">
+              {model.languages.map((l) => (
+                <li key={l.id} className="flex gap-2"><span style={{ color: accent }}>&bull;</span>{l.name} ({l.proficiency})</li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+        {model.certifications.length > 0 ? (
+          <div>
+            <DossierHeading title="Certification" accent={accent} />
+            <ul className="space-y-1 text-[10px] text-white/75">
+              {model.certifications.map((c) => (
+                <li key={c.id} className="flex gap-2"><span style={{ color: accent }}>&bull;</span>{c.name}</li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+      </aside>
+
+      <div className="min-w-0 flex-1 px-8 py-8">
+        <h1 className="text-[31px] font-bold leading-none tracking-tight" style={{ color: secondary }}>{model.name}</h1>
+        <p className="mt-1.5 text-[13px] font-light text-gray-500">{model.title}</p>
+        <p className="mt-3 text-[9.5px] leading-[1.7] text-gray-600">{model.summary}</p>
+        <div className="mt-5 space-y-5">
+          <div>
+            <DossierMainHeading title="Work Experience" secondary={secondary} />
+            <div className="space-y-3.5">
+              {model.experience.map((exp) => (
+                <div key={exp.id}>
+                  <p className="text-[11px] font-bold">{[exp.title || exp.jobTitle || 'Job Title', exp.company].filter(Boolean).join(', ')}</p>
+                  <p className="mt-0.5 text-[9px] text-gray-500">{expDates(exp)}</p>
+                  <BulletLines text={exp.description} accent={accent} />
+                </div>
+              ))}
+            </div>
+          </div>
+          {model.projects.length > 0 ? (
+            <div>
+              <DossierMainHeading title="Projects" secondary={secondary} />
+              <div className="space-y-2.5">
+                {model.projects.map((pr) => (
+                  <div key={pr.id}>
+                    <p className="text-[10.5px] font-bold">{pr.name}</p>
+                    <p className="text-[9.5px] leading-relaxed text-gray-600">{pr.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+          {model.references.length > 0 ? (
+            <div>
+              <DossierMainHeading title="References" secondary={secondary} />
+              <div className="grid grid-cols-2 gap-5">
+                {model.references.map((r) => (
+                  <div key={r.id} className="text-[9.5px] leading-relaxed">
+                    <p className="font-bold">{r.name}</p>
+                    <p className="text-gray-500">{[r.title, r.company].filter(Boolean).join(', ')}</p>
+                    {r.phone ? <p className="text-gray-600">Phone: {r.phone}</p> : null}
+                    {r.email ? <p className="break-all text-gray-600">Email: {r.email}</p> : null}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </div>
+      </div>
+    </Page>
+  )
+}
+
+function DossierHeading({ title, accent }: { title: string; accent: string }) {
+  return (
+    <h2 className="mb-2 text-[12px] font-bold" style={{ color: accent }}>
+      {title}
+      <span className="mt-1 block h-px w-full bg-white/20" />
+    </h2>
+  )
+}
+
+function DossierMainHeading({ title, secondary }: { title: string; secondary: string }) {
+  return (
+    <h2 className="mb-2.5 text-[14px] font-bold" style={{ color: secondary }}>
+      {title}
+    </h2>
+  )
+}
+
+// Pillar — the quiet detail collected into a rounded dark panel on the right,
+// leaving the left free for one uninterrupted run of experience.
+function PillarResume({ model }: { model: PreviewModel }) {
+  const { accent, secondary } = model.template
+  return (
+    <Page className="flex gap-6 px-8 py-8" style={{ color: INK }}>
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header>
+          <h1 className="text-[30px] font-extrabold uppercase leading-none tracking-tight">{model.name}</h1>
+          <p className="mt-2 text-[13px] uppercase tracking-[0.2em] text-gray-500">{model.title}</p>
+        </header>
+        <div className="mt-6">
+          <PillarHeading title="Profile" />
+          <p className="text-[9.5px] leading-[1.75] text-gray-600">{model.summary}</p>
+        </div>
+        <div className="mt-6 flex-1">
+          <PillarHeading title="Work Experience" />
+          <div className="relative space-y-4 pl-5">
+            <span className="absolute left-[3px] top-2 bottom-2 w-px bg-gray-200" />
+            {model.experience.map((exp) => (
+              <div key={exp.id} className="relative">
+                <span className="absolute -left-5 top-[5px] h-[7px] w-[7px] rounded-full" style={{ backgroundColor: secondary }} />
+                <div className="flex items-baseline justify-between gap-3">
+                  <p className="text-[11px] font-bold">{exp.company || 'Company'}</p>
+                  <p className="shrink-0 text-[9px] font-semibold uppercase tracking-wide text-gray-400">{expDates(exp)}</p>
+                </div>
+                <p className="text-[10px] font-semibold" style={{ color: accent }}>{exp.title || exp.jobTitle || 'Job Title'}</p>
+                <BulletLines text={exp.description} accent={accent} />
+              </div>
+            ))}
+          </div>
+        </div>
+        {model.references.length > 0 ? (
+          <div className="mt-6">
+            <PillarHeading title="Reference" />
+            <div className="grid grid-cols-2 gap-5">
+              {model.references.map((r) => (
+                <div key={r.id} className="text-[9.5px] leading-relaxed">
+                  <p className="text-[10.5px] font-bold">{r.name}</p>
+                  <p className="text-gray-500">{[r.title, r.company].filter(Boolean).join(' / ')}</p>
+                  {r.phone ? <p className="text-gray-600">Phone: {r.phone}</p> : null}
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
+      </div>
+
+      <aside className="flex w-[232px] shrink-0 flex-col gap-5 rounded-3xl px-6 py-7 text-white" style={{ backgroundColor: secondary }}>
+        <div className="rounded-2xl bg-white/10 p-2">
+          <Portrait model={model} className="h-[150px] w-full rounded-xl" />
+        </div>
+        <div>
+          <PillarPanelHeading title="Contact" accent={accent} />
+          <div className="space-y-2 text-[10px] leading-relaxed text-white/75">
+            {model.phone ? <p className="flex gap-2"><Phone size={10} className="mt-[2px] shrink-0" style={{ color: accent }} />{model.phone}</p> : null}
+            {model.email ? <p className="flex gap-2"><Mail size={10} className="mt-[2px] shrink-0" style={{ color: accent }} /><span className="break-all">{model.email}</span></p> : null}
+            {model.location ? <p className="flex gap-2"><MapPin size={10} className="mt-[2px] shrink-0" style={{ color: accent }} />{model.location}</p> : null}
+            {model.website ? <p className="flex gap-2"><Globe size={10} className="mt-[2px] shrink-0" style={{ color: accent }} /><span className="break-all">{model.website}</span></p> : null}
+          </div>
+        </div>
+        <div>
+          <PillarPanelHeading title="Education" accent={accent} />
+          <div className="space-y-2.5 text-[10px] leading-relaxed">
+            {model.education.map((e) => (
+              <div key={e.id}>
+                <p className="font-semibold" style={{ color: accent }}>{[e.startDate, e.endDate].filter(Boolean).join(' - ')}</p>
+                <p className="font-bold uppercase">{e.school || 'University'}</p>
+                <p className="text-white/60">{[e.degree, e.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div>
+          <PillarPanelHeading title="Skills" accent={accent} />
+          <ul className="space-y-1.5 text-[10px] text-white/75">
+            {model.skills.map((sk) => (
+              <li key={sk.id} className="flex gap-2"><span style={{ color: accent }}>&bull;</span>{sk.name}</li>
+            ))}
+          </ul>
+        </div>
+        {model.languages.length > 0 ? (
+          <div>
+            <PillarPanelHeading title="Languages" accent={accent} />
+            <ul className="space-y-1.5 text-[10px] text-white/75">
+              {model.languages.map((l) => (
+                <li key={l.id} className="flex gap-2"><span style={{ color: accent }}>&bull;</span>{l.name}</li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+      </aside>
+    </Page>
+  )
+}
+
+function PillarHeading({ title }: { title: string }) {
+  return (
+    <h2 className="mb-2.5 text-[13px] font-extrabold uppercase tracking-[0.12em]">
+      {title}
+      <span className="mt-1.5 block h-[2px] w-full bg-gray-900" />
+    </h2>
+  )
+}
+
+function PillarPanelHeading({ title, accent }: { title: string; accent: string }) {
+  return (
+    <h2 className="mb-2 text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: accent }}>
+      {title}
+    </h2>
+  )
+}
+
+// Bulletin — every section titled by a solid filled bar, on both sides.
+function BulletinResume({ model }: { model: PreviewModel }) {
+  // Deliberately one colour only: the bars, the icons and the masthead all use
+  // `secondary`, which is what makes this layout read as a single block voice.
+  const { secondary } = model.template
+  return (
+    <Page className="flex flex-col" style={{ color: INK }}>
+      <div className="flex items-stretch">
+        <div className="w-[236px] shrink-0 bg-[#eef1f5] px-6 pt-6">
+          <Portrait model={model} className="h-[142px] w-full" />
+        </div>
+        <div className="flex flex-1 items-center px-8" style={{ backgroundColor: secondary }}>
+          <div>
+            <h1 className="text-[29px] font-bold leading-none text-white">{model.name}</h1>
+            <p className="mt-2.5 text-[12px] uppercase tracking-[0.24em] text-white/75">{model.title}</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-1">
+        <div className="w-[236px] shrink-0 space-y-4 bg-[#eef1f5] px-6 py-6">
+          <div className="space-y-2 text-[10px] text-gray-700">
+            {model.phone ? <p className="flex gap-2"><Phone size={11} className="mt-[1px] shrink-0" style={{ color: secondary }} />{model.phone}</p> : null}
+            {model.email ? <p className="flex gap-2"><Mail size={11} className="mt-[1px] shrink-0" style={{ color: secondary }} /><span className="break-all">{model.email}</span></p> : null}
+            {model.location ? <p className="flex gap-2"><MapPin size={11} className="mt-[1px] shrink-0" style={{ color: secondary }} />{model.location}</p> : null}
+          </div>
+          <div>
+            <BulletinBar title="More information" secondary={secondary} />
+            <ul className="space-y-1 text-[10px] text-gray-700">
+              {model.website ? <li>- {model.website}</li> : null}
+              {model.linkedin ? <li>- {model.linkedin}</li> : null}
+              <li>- Full availability</li>
+            </ul>
+          </div>
+          {model.languages.length > 0 ? (
+            <div>
+              <BulletinBar title="Languages" secondary={secondary} />
+              <div className="space-y-1.5 text-[10px]">
+                {model.languages.map((l) => (
+                  <div key={l.id}>
+                    <p className="font-bold">{l.name}</p>
+                    <p className="text-gray-600">{l.proficiency}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+          <div>
+            <BulletinBar title="Skills" secondary={secondary} />
+            <ul className="space-y-1 text-[10px] text-gray-700">
+              {model.skills.map((sk) => <li key={sk.id}>- {sk.name}</li>)}
+            </ul>
+          </div>
+          {model.certifications.length > 0 ? (
+            <div>
+              <BulletinBar title="Certificates" secondary={secondary} />
+              <ul className="space-y-1 text-[10px] text-gray-700">
+                {model.certifications.map((c) => <li key={c.id}>- {c.name}</li>)}
+              </ul>
+            </div>
+          ) : null}
+        </div>
+
+        <div className="min-w-0 flex-1 space-y-4 px-8 py-6">
+          <div>
+            <BulletinBar title="About me" secondary={secondary} />
+            <p className="text-[9.5px] leading-[1.75] text-gray-600">{model.summary}</p>
+          </div>
+          <div>
+            <BulletinBar title="Work experience" secondary={secondary} />
+            <div className="space-y-3">
+              {model.experience.map((exp) => (
+                <div key={exp.id}>
+                  <p className="text-[11px] font-bold">{exp.title || exp.jobTitle || 'Job Title'}</p>
+                  <p className="text-[9.5px] text-gray-500">{[exp.company, expDates(exp)].filter(Boolean).join(' | ')}</p>
+                  <ul className="mt-1 space-y-[3px]">
+                    {exp.description.split('\n').filter(Boolean).map((line, i) => (
+                      <li key={i} className="text-[9px] leading-relaxed text-gray-600">- {line.replace(/^[-*]\s*/, '')}</li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div>
+            <BulletinBar title="Academic data" secondary={secondary} />
+            <div className="space-y-2">
+              {model.education.map((e) => (
+                <div key={e.id} className="text-[10px] leading-relaxed">
+                  <p className="font-bold">{e.school || 'University'}</p>
+                  <p className="text-gray-600">{[[e.degree, e.fieldOfStudy].filter(Boolean).join(' in '), [e.startDate, e.endDate].filter(Boolean).join(' - ')].filter(Boolean).join(' | ')}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </Page>
+  )
+}
+
+function BulletinBar({ title, secondary }: { title: string; secondary: string }) {
+  return (
+    <h2 className="mb-2 px-3 py-1.5 text-[11px] font-bold text-white" style={{ backgroundColor: secondary }}>
+      {title}
+    </h2>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Reference set, batch C
+// ---------------------------------------------------------------------------
+
+// Quill — warm rail with a framed portrait and a script hand beneath it.
+function QuillResume({ model }: { model: PreviewModel }) {
+  const { accent } = model.template
+  return (
+    <Page className="flex" style={{ color: INK }}>
+      <aside className="flex w-[240px] shrink-0 flex-col gap-5 px-7 py-8" style={{ backgroundColor: `${accent}12` }}>
+        <div>
+          <Portrait model={model} className="h-[186px] w-full" />
+          <p className="mt-2 text-[17px] italic leading-none" style={{ fontFamily: SERIF, color: accent }}>{model.name}</p>
+        </div>
+        <div>
+          <QuillHeading title="Contact" />
+          <div className="space-y-2 text-[10px] leading-relaxed text-gray-700">
+            {model.email ? <p className="flex gap-2"><Mail size={10} className="mt-[2px] shrink-0" style={{ color: accent }} /><span className="break-all">{model.email}</span></p> : null}
+            {model.phone ? <p className="flex gap-2"><Phone size={10} className="mt-[2px] shrink-0" style={{ color: accent }} />{model.phone}</p> : null}
+            {model.location ? <p className="flex gap-2"><MapPin size={10} className="mt-[2px] shrink-0" style={{ color: accent }} />{model.location}</p> : null}
+            {model.website ? <p className="flex gap-2"><Globe size={10} className="mt-[2px] shrink-0" style={{ color: accent }} /><span className="break-all">{model.website}</span></p> : null}
+          </div>
+        </div>
+        <div>
+          <QuillHeading title="Expertise" />
+          <ul className="space-y-1.5 text-[10px] text-gray-700">
+            {model.skills.map((sk) => (
+              <li key={sk.id} className="flex gap-2">
+                <span className="mt-[6px] h-[3px] w-[3px] shrink-0 rounded-full" style={{ backgroundColor: accent }} />
+                {sk.name}
+              </li>
+            ))}
+          </ul>
+        </div>
+        {model.languages.length > 0 ? (
+          <div>
+            <QuillHeading title="Languages" />
+            <ul className="space-y-1.5 text-[10px] text-gray-700">
+              {model.languages.map((l) => (
+                <li key={l.id} className="flex gap-2">
+                  <span className="mt-[6px] h-[3px] w-[3px] shrink-0 rounded-full" style={{ backgroundColor: accent }} />
+                  {l.name}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+        {model.references.length > 0 ? (
+          <div>
+            <QuillHeading title="References" />
+            <div className="space-y-2.5 text-[10px] leading-relaxed">
+              {model.references.map((r) => (
+                <div key={r.id}>
+                  <p className="font-bold">{r.name}</p>
+                  <p className="text-gray-600">{[r.title, r.company].filter(Boolean).join(' | ')}</p>
+                  {r.phone ? <p className="text-gray-500">{r.phone}</p> : null}
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
+      </aside>
+
+      <div className="min-w-0 flex-1 px-9 py-9" style={{ backgroundColor: '#fdfcf9' }}>
+        <header>
+          <h1 className="text-[26px] font-extrabold uppercase leading-none tracking-[0.06em]">{model.name}</h1>
+          <p className="mt-2 text-[13px] font-bold" style={{ color: accent }}>{model.title}</p>
+        </header>
+        <p className="mt-4 text-justify text-[9.5px] leading-[1.8] text-gray-600">{model.summary}</p>
+        <div className="mt-6">
+          <QuillRule title="Work Experience" accent={accent} />
+          <div className="relative space-y-4">
+            {model.experience.map((exp) => (
+              <div key={exp.id} className="relative pr-4">
+                <span className="absolute right-0 top-[6px] h-[5px] w-[5px] rounded-full" style={{ backgroundColor: `${accent}99` }} />
+                <div className="flex items-baseline justify-between gap-4">
+                  <p className="text-[11px] font-extrabold uppercase tracking-wide">{exp.title || exp.jobTitle || 'Job Title'}</p>
+                  <p className="shrink-0 pr-4 text-[9px] font-bold text-gray-400">{expDates(exp)}</p>
+                </div>
+                <p className="text-[9.5px] italic text-gray-500">{exp.company}</p>
+                <BulletLines text={exp.description} accent={accent} />
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="mt-6">
+          <QuillRule title="Education" accent={accent} />
+          <div className="space-y-2.5">
+            {model.education.map((e) => (
+              <div key={e.id} className="text-[10px] leading-relaxed">
+                <p className="font-extrabold uppercase">{e.school || 'University'}</p>
+                <p className="text-gray-600">{[[e.degree, e.fieldOfStudy].filter(Boolean).join(' in '), [e.startDate, e.endDate].filter(Boolean).join(' - ')].filter(Boolean).join(' | ')}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+        {model.certifications.length > 0 ? (
+          <div className="mt-6">
+            <QuillRule title="Certifications" accent={accent} />
+            <CertList items={model.certifications} />
+          </div>
+        ) : null}
+      </div>
+    </Page>
+  )
+}
+
+function QuillHeading({ title }: { title: string }) {
+  return <h2 className="mb-2.5 text-[12px] font-extrabold uppercase tracking-[0.12em]">{title}</h2>
+}
+
+function QuillRule({ title, accent }: { title: string; accent: string }) {
+  return (
+    <h2 className="mb-3 text-center text-[13px] font-extrabold uppercase tracking-[0.14em]">
+      {title}
+      <span className="mx-auto mt-1.5 block h-px w-full" style={{ backgroundColor: `${accent}55` }} />
+    </h2>
+  )
+}
+
+// Rosette — soft tinted headings and a rounded portrait, lighter in weight
+// than Quill even though both run a rail and a column.
+function RosetteResume({ model }: { model: PreviewModel }) {
+  const { accent } = model.template
+  return (
+    <Page className="px-9 py-8" style={{ color: INK }}>
+      <header className="grid grid-cols-[168px_1fr] items-start gap-7">
+        <Portrait model={model} className="h-[168px] w-full rounded-2xl" />
+        <div>
+          <h1 className="text-[27px] font-extrabold uppercase leading-none tracking-[0.04em]" style={{ color: accent }}>{model.name}</h1>
+          <p className="mt-2 text-[13px] font-extrabold">{model.title}</p>
+          <p className="mt-3 text-[9px] leading-[1.75] text-gray-600">{model.summary}</p>
+        </div>
+      </header>
+      <span className="mt-5 block h-[3px] w-full rounded-full" style={{ backgroundColor: `${accent}55` }} />
+
+      <div className="mt-6 grid grid-cols-[208px_1fr] gap-8">
+        <SideColumn>
+          <div>
+            <RosetteHeading title="Contact" accent={accent} />
+            <div className="space-y-2 text-[10px] leading-relaxed text-gray-700">
+              {model.email ? <p className="break-all">{model.email}</p> : null}
+              {model.phone ? <p>{model.phone}</p> : null}
+              {model.location ? <p>{model.location}</p> : null}
+              {model.website ? <p className="break-all">{model.website}</p> : null}
+            </div>
+          </div>
+          <div>
+            <RosetteHeading title="Expertise" accent={accent} />
+            <ul className="space-y-1.5 text-[10px] text-gray-700">
+              {model.skills.map((sk) => (
+                <li key={sk.id} className="flex gap-2">
+                  <span className="mt-[6px] h-[3px] w-[3px] shrink-0 rounded-full" style={{ backgroundColor: accent }} />
+                  {sk.name}
+                </li>
+              ))}
+            </ul>
+          </div>
+          {model.languages.length > 0 ? (
+            <div>
+              <RosetteHeading title="Languages" accent={accent} />
+              <ul className="space-y-1.5 text-[10px] text-gray-700">
+                {model.languages.map((l) => (
+                  <li key={l.id} className="flex gap-2">
+                    <span className="mt-[6px] h-[3px] w-[3px] shrink-0 rounded-full" style={{ backgroundColor: accent }} />
+                    {l.name}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+          {model.references.length > 0 ? (
+            <div>
+              <RosetteHeading title="References" accent={accent} />
+              <div className="space-y-2.5 text-[10px] leading-relaxed">
+                {model.references.map((r) => (
+                  <div key={r.id}>
+                    <p className="font-bold">{r.name}</p>
+                    <p className="text-gray-600">{[r.title, r.company].filter(Boolean).join(' | ')}</p>
+                    {r.phone ? <p className="text-gray-500">{r.phone}</p> : null}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </SideColumn>
+
+        <div className="min-w-0">
+          <RosetteHeading title="Work Experience" accent={accent} />
+          <div className="space-y-4">
+            {model.experience.map((exp) => (
+              <div key={exp.id} className="relative pr-4">
+                <span className="absolute right-0 top-[6px] h-[6px] w-[6px] rounded-full" style={{ backgroundColor: `${accent}77` }} />
+                <div className="flex items-baseline justify-between gap-4">
+                  <p className="text-[11px] font-extrabold uppercase tracking-wide">{exp.title || exp.jobTitle || 'Job Title'}</p>
+                  <p className="shrink-0 pr-4 text-[9px] font-bold text-gray-400">{expDates(exp)}</p>
+                </div>
+                <p className="text-[9.5px]" style={{ color: accent }}>{exp.company}</p>
+                <BulletLines text={exp.description} accent={accent} />
+              </div>
+            ))}
+          </div>
+          <RosetteHeading title="Education" accent={accent} className="mt-6" />
+          <div className="space-y-2.5">
+            {model.education.map((e) => (
+              <div key={e.id} className="text-[10px] leading-relaxed">
+                <p className="font-extrabold uppercase">{e.school || 'University'}</p>
+                <p className="text-gray-600">{[e.degree, e.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</p>
+                <p className="text-gray-400">{[e.startDate, e.endDate].filter(Boolean).join(' - ')}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </Page>
+  )
+}
+
+function RosetteHeading({ title, accent, className }: { title: string; accent: string; className?: string }) {
+  return (
+    <h2 className={cn('mb-2.5 text-[12px] font-extrabold uppercase tracking-[0.16em]', className)} style={{ color: accent }}>
+      {title}
+    </h2>
+  )
+}
+
+// Bloom — rounded shapes throughout: an oval portrait, lozenge headings and
+// outlined contact pills.
+function BloomResume({ model }: { model: PreviewModel }) {
+  const { accent, secondary } = model.template
+  return (
+    <Page className="flex gap-5 px-6 py-6" style={{ backgroundColor: '#faf6f2', color: INK }}>
+      <div className="flex w-[238px] shrink-0 flex-col gap-4">
+        <div className="overflow-hidden rounded-[999px] border-[5px]" style={{ borderColor: secondary }}>
+          <Portrait model={model} className="h-[214px] w-full" />
+        </div>
+        <div className="space-y-2">
+          {model.email ? <BloomPill text={model.email} secondary={secondary} /> : null}
+          {model.website ? <BloomPill text={model.website} secondary={secondary} /> : null}
+          {model.phone ? <BloomPill text={model.phone} secondary={secondary} /> : null}
+        </div>
+        <div className="rounded-2xl px-5 py-4 text-white" style={{ backgroundColor: secondary }}>
+          <BloomHeading title="Achievements" accent={accent} />
+          <div className="space-y-2 text-[9.5px] leading-relaxed">
+            {model.certifications.map((c) => (
+              <div key={c.id}>
+                <p className="font-bold">{c.name}</p>
+                <p className="text-white/60">{[c.issuer, c.date].filter(Boolean).join(', ')}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="flex-1 rounded-2xl px-5 py-4 text-white" style={{ backgroundColor: secondary }}>
+          <BloomHeading title="Personal Skill" accent={accent} />
+          <ul className="space-y-1.5 text-[9.5px] text-white/80">
+            {model.skills.map((sk) => (
+              <li key={sk.id} className="flex gap-2"><span style={{ color: accent }}>&bull;</span>{sk.name}</li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      <div className="flex min-w-0 flex-1 flex-col gap-4">
+        <div className="rounded-2xl px-6 py-5 text-white" style={{ backgroundColor: secondary }}>
+          <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-white/60">{model.title}</p>
+          <h1 className="mt-1.5 text-[27px] font-extrabold uppercase leading-none tracking-wide">{model.name}</h1>
+          <p className="mt-2.5 text-[9px] leading-[1.7] text-white/70">{truncate(model.summary, 210)}</p>
+        </div>
+        <div className="flex-1 rounded-2xl bg-white px-6 py-5">
+          <BloomLozenge title="Work Experience" secondary={secondary} />
+          <div className="space-y-3.5">
+            {model.experience.map((exp) => (
+              <div key={exp.id}>
+                <div className="flex items-baseline justify-between gap-3">
+                  <p className="text-[11px] font-bold">{[exp.title || exp.jobTitle || 'Job Title', exp.company].filter(Boolean).join(' - ')}</p>
+                  <p className="shrink-0 text-[8.5px] text-gray-400">{expDates(exp)}</p>
+                </div>
+                <ul className="mt-1 space-y-[3px]">
+                  {exp.description.split('\n').filter(Boolean).map((line, i) => (
+                    <li key={i} className="flex gap-2 text-[9px] leading-relaxed text-gray-600">
+                      <span style={{ color: accent }}>&bull;</span>
+                      {line.replace(/^[-*]\s*/, '')}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+          <BloomLozenge title="Education" secondary={secondary} className="mt-5" />
+          <div className="space-y-2">
+            {model.education.map((e) => (
+              <div key={e.id} className="flex gap-2 text-[10px] leading-relaxed">
+                <span className="mt-[6px] h-[4px] w-[4px] shrink-0 rounded-full" style={{ backgroundColor: accent }} />
+                <span>
+                  <span className="font-bold">{[e.degree, e.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</span>
+                  <br />
+                  <span className="text-gray-600">{[e.school, [e.startDate, e.endDate].filter(Boolean).join(' - ')].filter(Boolean).join(' - ')}</span>
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </Page>
+  )
+}
+
+function BloomPill({ text, secondary }: { text: string; secondary: string }) {
+  return (
+    <p className="truncate rounded-full border px-4 py-1.5 text-center text-[9px]" style={{ borderColor: secondary, color: secondary }}>
+      {text}
+    </p>
+  )
+}
+
+function BloomHeading({ title, accent }: { title: string; accent: string }) {
+  return (
+    <h2 className="mb-2 text-[11px] font-bold" style={{ color: accent, fontFamily: SERIF }}>
+      {title}
+    </h2>
+  )
+}
+
+function BloomLozenge({ title, secondary, className }: { title: string; secondary: string; className?: string }) {
+  return (
+    <h2 className={cn('mb-3 inline-block rounded-full px-5 py-1.5 text-[11px] font-bold text-white', className)} style={{ backgroundColor: secondary, fontFamily: SERIF }}>
+      {title}
+    </h2>
+  )
+}
+
+// Column — rail headings centred rather than ranged left, which reads as a
+// spine down the page rather than a list.
+function ColumnResume({ model }: { model: PreviewModel }) {
+  const { accent, secondary } = model.template
+  return (
+    <Page className="flex" style={{ color: INK }}>
+      <aside className="flex w-[232px] shrink-0 flex-col gap-5 px-6 py-8 text-center text-white" style={{ backgroundColor: secondary }}>
+        <div className="flex justify-center">
+          <Portrait model={model} className="h-[132px] w-[132px] rounded-full border-[3px] border-white/85" />
+        </div>
+        <div>
+          <ColumnHeading title="Contact" accent={accent} />
+          <div className="space-y-2 text-[10px] leading-relaxed text-white/75">
+            {model.phone ? <p>{model.phone}</p> : null}
+            {model.email ? <p className="break-all">{model.email}</p> : null}
+            {model.website ? <p className="break-all">{model.website}</p> : null}
+            {model.location ? <p>{model.location}</p> : null}
+          </div>
+        </div>
+        <div>
+          <ColumnHeading title="Education" accent={accent} />
+          <div className="space-y-2.5 text-[10px] leading-relaxed">
+            {model.education.map((e) => (
+              <div key={e.id}>
+                <p className="font-bold">{[e.degree, e.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</p>
+                <p className="text-white/65">{e.school}</p>
+                <p className="text-white/45">{[e.startDate, e.endDate].filter(Boolean).join(' - ')}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div>
+          <ColumnHeading title="Skills" accent={accent} />
+          <ul className="space-y-1.5 text-[10px] text-white/75">
+            {model.skills.map((sk) => <li key={sk.id}>{sk.name}</li>)}
+          </ul>
+        </div>
+        {model.languages.length > 0 ? (
+          <div>
+            <ColumnHeading title="Language" accent={accent} />
+            <ul className="space-y-1.5 text-[10px] text-white/75">
+              {model.languages.map((l) => <li key={l.id}>{l.name}</li>)}
+            </ul>
+          </div>
+        ) : null}
+        {model.certifications.length > 0 ? (
+          <div>
+            <ColumnHeading title="Certificates" accent={accent} />
+            <ul className="space-y-1.5 text-[10px] text-white/75">
+              {model.certifications.map((c) => <li key={c.id}>{c.name}</li>)}
+            </ul>
+          </div>
+        ) : null}
+      </aside>
+
+      <div className="min-w-0 flex-1 px-9 py-9">
+        <h1 className="text-[33px] font-extrabold uppercase leading-[1.02] tracking-tight">{model.name}</h1>
+        <p className="mt-2.5 text-[13px] uppercase tracking-[0.3em] text-gray-500">{model.title}</p>
+        <div className="mt-7">
+          <ColumnMainHeading title="About me" />
+          <p className="text-[9.5px] leading-[1.8] text-gray-600">{model.summary}</p>
+        </div>
+        <div className="mt-6">
+          <ColumnMainHeading title="Experience" />
+          <div className="space-y-3.5">
+            {model.experience.map((exp) => (
+              <div key={exp.id}>
+                <div className="flex items-baseline justify-between gap-4">
+                  <p className="text-[11px] font-bold">{exp.title || exp.jobTitle || 'Job Title'}</p>
+                  <p className="shrink-0 text-[9px] text-gray-400">{expDates(exp)}</p>
+                </div>
+                <p className="text-[9.5px] text-gray-500">{exp.company}</p>
+                <BulletLines text={exp.description} accent={accent} />
+              </div>
+            ))}
+          </div>
+        </div>
+        {model.references.length > 0 ? (
+          <div className="mt-6">
+            <ColumnMainHeading title="Reference" />
+            <div className="grid grid-cols-2 gap-5">
+              {model.references.map((r) => (
+                <div key={r.id} className="text-[9.5px] leading-relaxed">
+                  <p className="font-bold">{[r.name, r.title].filter(Boolean).join(' | ')}</p>
+                  <p className="text-gray-500">{r.company}</p>
+                  {r.phone ? <p className="text-gray-600">{r.phone}</p> : null}
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
+      </div>
+    </Page>
+  )
+}
+
+function ColumnHeading({ title, accent }: { title: string; accent: string }) {
+  return (
+    <h2 className="mb-2.5 text-[11.5px] font-bold uppercase tracking-[0.18em]" style={{ color: accent }}>
+      {title}
+    </h2>
+  )
+}
+
+function ColumnMainHeading({ title }: { title: string }) {
+  return (
+    <h2 className="mb-2.5 text-[15px] font-extrabold">
+      {title}
+      <span className="mt-1.5 block h-px w-full bg-gray-300" />
+    </h2>
+  )
+}
+
+// Alcove — rounded grey rail with the name set beneath the portrait rather
+// than beside it.
+function AlcoveResume({ model }: { model: PreviewModel }) {
+  const { accent } = model.template
+  return (
+    <Page className="flex gap-7 px-7 py-7" style={{ color: INK }}>
+      <aside className="flex w-[228px] shrink-0 flex-col gap-5 rounded-[26px] bg-[#f0eeec] px-6 py-7">
+        <Portrait model={model} className="h-[174px] w-full rounded-[18px]" />
+        <div>
+          <p className="text-[13px] tracking-[0.24em] text-gray-500">{model.name.split(' ')[0]}</p>
+          <p className="text-[21px] font-extrabold uppercase leading-none tracking-wide">{model.name.split(' ').slice(1).join(' ')}</p>
+          <p className="mt-1.5 text-[10px] text-gray-500">{model.title}</p>
+        </div>
+        <div className="space-y-1.5 text-[10px] text-gray-700">
+          {model.phone ? <p className="flex gap-2"><Phone size={10} className="mt-[2px] shrink-0" style={{ color: accent }} />{model.phone}</p> : null}
+          {model.email ? <p className="flex gap-2"><Mail size={10} className="mt-[2px] shrink-0" style={{ color: accent }} /><span className="break-all">{model.email}</span></p> : null}
+        </div>
+        <div>
+          <AlcoveHeading title="Education" />
+          <div className="space-y-2.5 text-[10px] leading-relaxed">
+            {model.education.map((e) => (
+              <div key={e.id}>
+                <p className="font-semibold">{e.school || 'University'}</p>
+                <p className="text-gray-600">{[e.degree, e.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</p>
+                <p className="text-gray-400">{[e.startDate, e.endDate].filter(Boolean).join(' - ')}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div>
+          <AlcoveHeading title="Skills" />
+          <ul className="space-y-1.5 text-[10px] text-gray-700">
+            {model.skills.map((sk) => (
+              <li key={sk.id} className="flex gap-2">
+                <span className="mt-[6px] h-[3px] w-[3px] shrink-0 rounded-full" style={{ backgroundColor: accent }} />
+                {sk.name}
+              </li>
+            ))}
+          </ul>
+        </div>
+        {model.languages.length > 0 ? (
+          <div>
+            <AlcoveHeading title="Language" />
+            <ul className="space-y-1.5 text-[10px] text-gray-700">
+              {model.languages.map((l) => (
+                <li key={l.id} className="flex gap-2">
+                  <span className="mt-[6px] h-[3px] w-[3px] shrink-0 rounded-full" style={{ backgroundColor: accent }} />
+                  {l.name} <span className="text-gray-500">({l.proficiency})</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+      </aside>
+
+      <div className="min-w-0 flex-1 py-2">
+        <AlcoveMainHeading title="Summary" />
+        <p className="text-[9.5px] leading-[1.8] text-gray-600">{model.summary}</p>
+        <AlcoveMainHeading title="Work Experience" className="mt-6" />
+        <div className="space-y-4">
+          {model.experience.map((exp) => (
+            <div key={exp.id}>
+              <p className="text-[9.5px] text-gray-400">({expDates(exp)})</p>
+              <p className="text-[11px] font-bold">{[exp.title || exp.jobTitle || 'Job Title', exp.company].filter(Boolean).join(' | ')}</p>
+              <BulletLines text={exp.description} accent={accent} />
+            </div>
+          ))}
+        </div>
+        {model.references.length > 0 ? (
+          <>
+            <AlcoveMainHeading title="References" className="mt-6" />
+            <div className="grid grid-cols-2 gap-5">
+              {model.references.map((r) => (
+                <div key={r.id} className="text-[9.5px] leading-relaxed">
+                  <p className="font-bold">{r.name}</p>
+                  <p className="text-gray-500">{[r.title, r.company].filter(Boolean).join(', ')}</p>
+                  {r.phone ? <p className="text-gray-600">Phone: {r.phone}</p> : null}
+                  {r.email ? <p className="break-all text-gray-600">Email: {r.email}</p> : null}
+                </div>
+              ))}
+            </div>
+          </>
+        ) : null}
+      </div>
+    </Page>
+  )
+}
+
+function AlcoveHeading({ title }: { title: string }) {
+  return <h2 className="mb-2 text-[11.5px] font-bold uppercase tracking-[0.1em]">{title}</h2>
+}
+
+function AlcoveMainHeading({ title, className }: { title: string; className?: string }) {
+  return <h2 className={cn('mb-2.5 text-[13px] font-bold uppercase tracking-[0.1em]', className)}>{title}</h2>
+}
+
+// ---------------------------------------------------------------------------
+// Reference set, batch D
+// ---------------------------------------------------------------------------
+
+// Tablet — grey rail, and dates carried as tinted pills ahead of each role.
+function TabletResume({ model }: { model: PreviewModel }) {
+  const { accent } = model.template
+  return (
+    <Page className="flex" style={{ color: INK }}>
+      <aside className="flex w-[238px] shrink-0 flex-col gap-5 bg-[#eceae8] px-6 py-8">
+        <div className="flex justify-center">
+          <Portrait model={model} className="h-[128px] w-[128px] rounded-full border-[3px] border-white" />
+        </div>
+        <div>
+          <TabletHeading title="Contact" />
+          <div className="space-y-1.5 text-[10px] leading-relaxed text-gray-700">
+            {model.phone ? <p><span className="font-semibold">Phone:</span> {model.phone}</p> : null}
+            {model.email ? <p className="break-all"><span className="font-semibold">E-Mail:</span> {model.email}</p> : null}
+            {model.location ? <p><span className="font-semibold">Address:</span> {model.location}</p> : null}
+          </div>
+        </div>
+        <div>
+          <TabletHeading title="Education" />
+          <div className="space-y-2.5 text-[10px] leading-relaxed">
+            {model.education.map((e) => (
+              <div key={e.id}>
+                <p className="font-bold">{[e.degree, e.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</p>
+                <p className="text-gray-600">{e.school}</p>
+                <p className="text-gray-400">{[e.startDate, e.endDate].filter(Boolean).join(' - ')}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div>
+          <TabletHeading title="Skills" />
+          <SkillBars skills={model.skills} accent={accent} track="#d6d3d0" labelClass="text-gray-800" />
+        </div>
+        {model.languages.length > 0 ? (
+          <div>
+            <TabletHeading title="Language" />
+            <ul className="space-y-1.5 text-[10px] text-gray-700">
+              {model.languages.map((l) => (
+                <li key={l.id} className="flex gap-2">
+                  <span className="mt-[6px] h-[3px] w-[3px] shrink-0 rounded-full" style={{ backgroundColor: accent }} />
+                  {l.name}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+        {model.certifications.length > 0 ? (
+          <div>
+            <TabletHeading title="Certificates" />
+            <div className="space-y-2 text-[10px] leading-relaxed">
+              {model.certifications.map((c) => (
+                <div key={c.id}>
+                  <p className="font-semibold">{c.name}</p>
+                  <p className="text-gray-500">{[c.issuer, c.date].filter(Boolean).join(' - ')}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
+      </aside>
+
+      <div className="min-w-0 flex-1 px-9 py-8">
+        <h1 className="text-[31px] font-bold leading-none tracking-tight">{model.name}</h1>
+        <p className="mt-2 text-[14px] font-light text-gray-500">{model.title}</p>
+        <div className="mt-6">
+          <TabletMainHeading title="About Me" />
+          <p className="text-[9.5px] leading-[1.8] text-gray-600">{model.summary}</p>
+        </div>
+        <div className="mt-6">
+          <TabletMainHeading title="Experience" />
+          <div className="space-y-4">
+            {model.experience.map((exp) => (
+              <div key={exp.id}>
+                <span className="inline-block rounded px-2 py-[2px] text-[8.5px] font-semibold" style={{ backgroundColor: `${accent}1c`, color: accent }}>
+                  {expDates(exp)}
+                </span>
+                <p className="mt-1.5 text-[11px] font-bold">{exp.title || exp.jobTitle || 'Job Title'}</p>
+                <p className="text-[9.5px] text-gray-500">{[exp.company, exp.location].filter(Boolean).join(' | ')}</p>
+                <BulletLines text={exp.description} accent={accent} />
+              </div>
+            ))}
+          </div>
+        </div>
+        {model.references.length > 0 ? (
+          <div className="mt-6">
+            <TabletMainHeading title="References" />
+            <div className="grid grid-cols-2 gap-5">
+              {model.references.map((r) => (
+                <div key={r.id} className="text-[9.5px] leading-relaxed">
+                  <p className="font-bold">{r.name}</p>
+                  <p className="text-gray-500">{[r.title, r.company].filter(Boolean).join(' / ')}</p>
+                  {r.phone ? <p className="text-gray-600">Phone: {r.phone}</p> : null}
+                  {r.email ? <p className="break-all text-gray-600">Email: {r.email}</p> : null}
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
+      </div>
+    </Page>
+  )
+}
+
+function TabletHeading({ title }: { title: string }) {
+  return (
+    <h2 className="mb-2.5 text-[12px] font-bold">
+      {title}
+      <span className="mt-1.5 block h-px w-full bg-gray-300" />
+    </h2>
+  )
+}
+
+function TabletMainHeading({ title }: { title: string }) {
+  return <h2 className="mb-2.5 text-[14px] font-bold">{title}</h2>
+}
+
+// Gutter — years live in their own fixed channel to the left of every role,
+// so the dates line up down the page instead of trailing each heading.
+function GutterResume({ model }: { model: PreviewModel }) {
+  const { accent, secondary } = model.template
+  return (
+    <Page className="flex" style={{ color: INK }}>
+      <aside className="flex w-[240px] shrink-0 flex-col gap-5 px-6 py-8 text-white" style={{ backgroundColor: secondary }}>
+        <div className="flex justify-center">
+          <Portrait model={model} className="h-[136px] w-[136px] rounded-full border-[4px] border-white/25" />
+        </div>
+        <div>
+          <GutterRailHeading title="Contact" />
+          <div className="space-y-2 text-[10px] leading-relaxed text-white/75">
+            {model.phone ? <p className="flex gap-2"><Phone size={10} className="mt-[2px] shrink-0" style={{ color: accent }} />{model.phone}</p> : null}
+            {model.email ? <p className="flex gap-2"><Mail size={10} className="mt-[2px] shrink-0" style={{ color: accent }} /><span className="break-all">{model.email}</span></p> : null}
+            {model.location ? <p className="flex gap-2"><MapPin size={10} className="mt-[2px] shrink-0" style={{ color: accent }} />{model.location}</p> : null}
+          </div>
+        </div>
+        <div>
+          <GutterRailHeading title="Education" />
+          <div className="space-y-2.5 text-[10px] leading-relaxed">
+            {model.education.map((e) => (
+              <div key={e.id}>
+                <p className="font-bold">{e.school || 'University'}</p>
+                <p className="text-white/65">{[e.degree, e.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</p>
+                <p className="text-white/45">{[e.startDate, e.endDate].filter(Boolean).join(' - ')}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div>
+          <GutterRailHeading title="Skills" />
+          <ul className="space-y-1.5 text-[10px] text-white/75">
+            {model.skills.map((sk) => (
+              <li key={sk.id} className="flex gap-2"><span style={{ color: accent }}>&bull;</span>{sk.name}</li>
+            ))}
+          </ul>
+        </div>
+        {model.languages.length > 0 ? (
+          <div>
+            <GutterRailHeading title="Languages" />
+            <SkillBars skills={model.languages.map((l) => ({ id: l.id, name: l.name, level: 'expert' as const }))} accent={accent} />
+          </div>
+        ) : null}
+      </aside>
+
+      <div className="min-w-0 flex-1 px-9 py-8">
+        <h1 className="text-[33px] font-extrabold uppercase leading-[1.02] tracking-tight">{model.name}</h1>
+        <p className="mt-2 border-b border-gray-200 pb-3 text-[13px] font-light tracking-[0.06em] text-gray-500">{model.title}</p>
+        <div className="mt-6">
+          <GutterHead title="Profile" icon={User} accent={accent} />
+          <p className="text-[9.5px] leading-[1.8] text-gray-600">{model.summary}</p>
+        </div>
+        <div className="mt-6">
+          <GutterHead title="Experience" icon={Briefcase} accent={accent} />
+          <div className="space-y-4">
+            {model.experience.map((exp) => (
+              <div key={exp.id} className="grid grid-cols-[62px_1fr] gap-4">
+                <p className="pt-[2px] text-[9px] font-bold leading-snug" style={{ color: accent }}>
+                  {expDates(exp).split(' — ').map((part, i) => (
+                    <span key={i} className="block">{part}</span>
+                  ))}
+                </p>
+                <div className="border-l border-gray-200 pl-4">
+                  <p className="text-[11px] font-bold">{exp.company || 'Company'}</p>
+                  <p className="text-[9.5px] text-gray-500">{exp.title || exp.jobTitle || 'Job Title'}</p>
+                  <BulletLines text={exp.description} accent={accent} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        {model.references.length > 0 ? (
+          <div className="mt-6">
+            <GutterHead title="References" icon={Users} accent={accent} />
+            <div className="grid grid-cols-2 gap-5">
+              {model.references.map((r) => (
+                <div key={r.id} className="text-[9.5px] leading-relaxed">
+                  <p className="font-bold">{r.name}</p>
+                  <p className="text-gray-500">{[r.title, r.company].filter(Boolean).join(' / ')}</p>
+                  {r.email ? <p className="break-all text-gray-600">{r.email}</p> : null}
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
+      </div>
+    </Page>
+  )
+}
+
+function GutterRailHeading({ title }: { title: string }) {
+  return (
+    <h2 className="mb-2.5 text-[11.5px] font-bold uppercase tracking-[0.18em]">
+      {title}
+      <span className="mt-1.5 block h-px w-full bg-white/25" />
+    </h2>
+  )
+}
+
+function GutterHead({ title, icon: Icon, accent }: { title: string; icon: typeof User; accent: string }) {
+  return (
+    <h2 className="mb-2.5 flex items-center gap-2 text-[13px] font-bold uppercase tracking-[0.1em]">
+      <Icon size={13} strokeWidth={2.4} style={{ color: accent }} />
+      {title}
+    </h2>
+  )
+}
+
+// Billboard — the portrait runs the full height of the page down the left edge
+// with the contact details sitting over its foot.
+function BillboardResume({ model }: { model: PreviewModel }) {
+  const { accent, secondary } = model.template
+  return (
+    <Page className="flex" style={{ color: INK }}>
+      <div className="relative w-[272px] shrink-0">
+        <Portrait model={model} className="h-full w-full" />
+        <div className="absolute inset-x-0 bottom-0 px-6 pb-7 pt-16" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.88), rgba(0,0,0,0))' }}>
+          <div className="space-y-2 text-[9.5px] leading-snug text-white/85">
+            {model.phone ? (
+              <div>
+                <p className="text-[8px] font-bold uppercase tracking-[0.2em]" style={{ color: accent }}>Phone</p>
+                <p>{model.phone}</p>
+              </div>
+            ) : null}
+            {model.location ? (
+              <div>
+                <p className="text-[8px] font-bold uppercase tracking-[0.2em]" style={{ color: accent }}>Address</p>
+                <p>{model.location}</p>
+              </div>
+            ) : null}
+            {model.email ? (
+              <div>
+                <p className="text-[8px] font-bold uppercase tracking-[0.2em]" style={{ color: accent }}>Email</p>
+                <p className="break-all">{model.email}</p>
+              </div>
+            ) : null}
+          </div>
+        </div>
+      </div>
+
+      <div className="min-w-0 flex-1 px-8 py-8" style={{ backgroundColor: '#f2f1ef' }}>
+        <h1 className="text-[46px] font-extrabold uppercase leading-[0.86] tracking-tight" style={{ color: secondary }}>
+          {model.name.split(' ').map((w, i) => <span key={i} className="block">{w}</span>)}
+        </h1>
+        <p className="mt-3 text-[15px] italic text-gray-500" style={{ fontFamily: SERIF }}>{model.title}</p>
+        <div className="mt-6">
+          <BillboardHeading title="Summary" />
+          <p className="text-[9.5px] leading-[1.8] text-gray-600">{model.summary}</p>
+        </div>
+        <div className="mt-5">
+          <BillboardHeading title="Work Experience" />
+          <div className="space-y-3">
+            {model.experience.map((exp) => (
+              <div key={exp.id}>
+                <div className="flex items-baseline justify-between gap-3">
+                  <p className="text-[11px] font-bold">{exp.company || 'Company'}</p>
+                  <p className="shrink-0 text-[9px] text-gray-400">{expDates(exp)}</p>
+                </div>
+                <p className="text-[9.5px] italic text-gray-500">{exp.title || exp.jobTitle || 'Job Title'}</p>
+                <BulletLines text={exp.description} accent={accent} />
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="mt-5">
+          <BillboardHeading title="Education" />
+          <div className="space-y-2">
+            {model.education.map((e) => (
+              <div key={e.id} className="text-[10px] leading-relaxed">
+                <p className="font-bold">{e.school || 'University'}</p>
+                <p className="italic text-gray-600">{[e.degree, e.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</p>
+                <p className="text-gray-400">{[e.startDate, e.endDate].filter(Boolean).join(' - ')}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="mt-5">
+          <BillboardHeading title="Skills" />
+          <ul className="grid grid-cols-2 gap-x-5 gap-y-1 text-[10px] text-gray-700">
+            {model.skills.map((sk) => (
+              <li key={sk.id} className="flex gap-2">
+                <span className="mt-[6px] h-[3px] w-[3px] shrink-0 rounded-full" style={{ backgroundColor: accent }} />
+                {sk.name}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </Page>
+  )
+}
+
+function BillboardHeading({ title }: { title: string }) {
+  return <h2 className="mb-2 text-[12.5px] font-bold uppercase tracking-[0.14em]">{title}</h2>
+}
+
+// Verdant — deep single-colour page, each role introduced by its own icon disc.
+function VerdantResume({ model }: { model: PreviewModel }) {
+  const { accent, secondary } = model.template
+  return (
+    <Page className="px-9 py-8 text-white" style={{ backgroundColor: secondary }}>
+      <header className="grid grid-cols-[1fr_170px] items-start gap-7">
+        <div>
+          <h1 className="text-[31px] font-bold leading-none tracking-tight">{model.name}</h1>
+          <p className="mt-2 text-[12px] font-semibold" style={{ color: accent }}>{model.title}</p>
+          <p className="mt-3 text-[9.5px] leading-[1.75] text-white/70">{model.summary}</p>
+        </div>
+        <Portrait model={model} className="h-[152px] w-full rounded-xl" />
+      </header>
+
+      <div className="mt-7 grid grid-cols-[1fr_224px] gap-8">
+        <div className="min-w-0">
+          <VerdantHeading title="Work Experience" accent={accent} />
+          <div className="space-y-3.5">
+            {model.experience.map((exp) => (
+              <div key={exp.id} className="grid grid-cols-[30px_1fr] gap-3">
+                <span className="mt-[2px] flex h-[26px] w-[26px] items-center justify-center rounded-full" style={{ backgroundColor: `${accent}26` }}>
+                  <Briefcase size={12} strokeWidth={2.4} style={{ color: accent }} />
+                </span>
+                <div className="min-w-0">
+                  <p className="text-[11px] font-bold">{exp.title || exp.jobTitle || 'Job Title'}</p>
+                  <p className="text-[9px] font-semibold" style={{ color: accent }}>{expDates(exp)}</p>
+                  <p className="mt-1 text-[9px] leading-relaxed text-white/65">
+                    {exp.description.split('\n').filter(Boolean).map((l) => l.replace(/^[-*]\s*/, '')).join(' ')}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <SideColumn>
+          <div>
+            <VerdantHeading title="Education" accent={accent} />
+            <ul className="space-y-2 text-[10px] leading-relaxed">
+              {model.education.map((e) => (
+                <li key={e.id} className="flex gap-2">
+                  <span className="mt-[6px] h-[4px] w-[4px] shrink-0 rounded-full" style={{ backgroundColor: accent }} />
+                  <span>
+                    <span className="font-semibold">{e.school || 'University'}</span>
+                    <br />
+                    <span className="text-white/55">{[e.startDate, e.endDate].filter(Boolean).join(' - ')}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <VerdantHeading title="Skills" accent={accent} />
+            <SkillBars skills={model.skills} accent={accent} />
+          </div>
+          {model.languages.length > 0 ? (
+            <div>
+              <VerdantHeading title="Languages" accent={accent} />
+              <ul className="space-y-1.5 text-[10px] text-white/75">
+                {model.languages.map((l) => (
+                  <li key={l.id} className="flex gap-2"><span style={{ color: accent }}>&bull;</span>{l.name}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+          <div>
+            <VerdantHeading title="Contact Info" accent={accent} />
+            <div className="space-y-2 text-[10px] leading-relaxed text-white/75">
+              {model.phone ? <p className="flex gap-2"><Phone size={10} className="mt-[2px] shrink-0" style={{ color: accent }} />{model.phone}</p> : null}
+              {model.email ? <p className="flex gap-2"><Mail size={10} className="mt-[2px] shrink-0" style={{ color: accent }} /><span className="break-all">{model.email}</span></p> : null}
+              {model.website ? <p className="flex gap-2"><Globe size={10} className="mt-[2px] shrink-0" style={{ color: accent }} /><span className="break-all">{model.website}</span></p> : null}
+            </div>
+          </div>
+        </SideColumn>
+      </div>
+    </Page>
+  )
+}
+
+function VerdantHeading({ title, accent }: { title: string; accent: string }) {
+  return (
+    <h2 className="mb-2.5 text-[12.5px] font-bold">
+      {title}
+      <span className="mt-1.5 block h-px w-full" style={{ backgroundColor: `${accent}55` }} />
+    </h2>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Reference set, batch E
+// ---------------------------------------------------------------------------
+
+// Envoy — centred masthead over a true three-column body. The only layout in
+// the catalogue that splits the page three ways.
+function EnvoyResume({ model }: { model: PreviewModel }) {
+  const { accent, secondary } = model.template
+  return (
+    <Page className="px-9 py-8" style={{ color: INK }}>
+      <header className="border-y-[3px] py-5 text-center" style={{ borderColor: secondary }}>
+        <h1 className="text-[32px] font-extrabold uppercase leading-none tracking-[0.14em]">{model.name}</h1>
+        <p className="mt-2.5 text-[11px] font-semibold uppercase tracking-[0.34em]" style={{ color: accent }}>{model.title}</p>
+      </header>
+
+      <p className="mt-5 text-justify text-[9.5px] leading-[1.8] text-gray-600">{model.summary}</p>
+
+      <div className="mt-6 grid grid-cols-[176px_1fr_186px] gap-7">
+        <SideColumn>
+          <div>
+            <EnvoyHeading title="Contact" accent={accent} />
+            <div className="space-y-2 text-[9.5px] leading-relaxed text-gray-700">
+              {model.phone ? <p>{model.phone}</p> : null}
+              {model.email ? <p className="break-all">{model.email}</p> : null}
+              {model.location ? <p>{model.location}</p> : null}
+              {model.website ? <p className="break-all">{model.website}</p> : null}
+              {model.linkedin ? <p className="break-all">{model.linkedin}</p> : null}
+            </div>
+          </div>
+          <div>
+            <EnvoyHeading title="Education" accent={accent} />
+            <div className="space-y-2.5 text-[9.5px] leading-relaxed">
+              {model.education.map((e) => (
+                <div key={e.id}>
+                  <p className="font-bold">{e.school || 'University'}</p>
+                  <p className="text-gray-600">{[e.degree, e.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</p>
+                  <p className="text-gray-400">{[e.startDate, e.endDate].filter(Boolean).join(' - ')}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          {model.languages.length > 0 ? (
+            <div>
+              <EnvoyHeading title="Languages" accent={accent} />
+              <ul className="space-y-1.5 text-[9.5px] text-gray-700">
+                {model.languages.map((l) => (
+                  <li key={l.id}>{l.name} <span className="text-gray-500">({l.proficiency})</span></li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+        </SideColumn>
+
+        <div className="min-w-0 border-x border-gray-200 px-7">
+          <EnvoyHeading title="Experience" accent={accent} />
+          <div className="space-y-4">
+            {model.experience.map((exp) => (
+              <div key={exp.id}>
+                <p className="text-[11px] font-bold">{exp.title || exp.jobTitle || 'Job Title'}</p>
+                <p className="text-[9.5px] italic text-gray-500">{[exp.company, expDates(exp)].filter(Boolean).join(' | ')}</p>
+                <BulletLines text={exp.description} accent={accent} />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <SideColumn>
+          <div>
+            <EnvoyHeading title="Skills" accent={accent} />
+            <ul className="space-y-1.5 text-[9.5px] text-gray-700">
+              {model.skills.map((sk) => (
+                <li key={sk.id} className="flex gap-2">
+                  <span className="mt-[6px] h-[3px] w-[3px] shrink-0 rounded-full" style={{ backgroundColor: accent }} />
+                  {sk.name}
+                </li>
+              ))}
+            </ul>
+          </div>
+          {model.certifications.length > 0 ? (
+            <div>
+              <EnvoyHeading title="Certifications" accent={accent} />
+              <div className="space-y-2 text-[9.5px] leading-relaxed">
+                {model.certifications.map((c) => (
+                  <div key={c.id}>
+                    <p className="font-bold">{c.name}</p>
+                    <p className="text-gray-500">{[c.issuer, c.date].filter(Boolean).join(', ')}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+          {model.references.length > 0 ? (
+            <div>
+              <EnvoyHeading title="References" accent={accent} />
+              <div className="space-y-2 text-[9.5px] leading-relaxed">
+                {model.references.map((r) => (
+                  <div key={r.id}>
+                    <p className="font-bold">{r.name}</p>
+                    <p className="text-gray-500">{[r.title, r.company].filter(Boolean).join(', ')}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </SideColumn>
+      </div>
+    </Page>
+  )
+}
+
+function EnvoyHeading({ title, accent }: { title: string; accent: string }) {
+  return (
+    <h2 className="mb-2.5 text-[11px] font-bold uppercase tracking-[0.22em]">
+      {title}
+      <span className="mt-1.5 block h-px w-8" style={{ backgroundColor: accent }} />
+    </h2>
+  )
+}
+
+// Ribbon — sections numbered down a tinted band, so the page reads in order.
+function RibbonResume({ model }: { model: PreviewModel }) {
+  const { accent, secondary } = model.template
+  return (
+    <Page className="flex" style={{ color: INK }}>
+      <span aria-hidden className="w-[34px] shrink-0" style={{ backgroundColor: secondary }} />
+      <div className="min-w-0 flex-1 px-8 py-8">
+        <header className="flex items-start justify-between gap-6">
+          <div>
+            <h1 className="text-[32px] font-extrabold leading-none tracking-tight">{model.name}</h1>
+            <p className="mt-2 text-[12px] font-semibold uppercase tracking-[0.22em]" style={{ color: accent }}>{model.title}</p>
+            <div className="mt-3 space-y-0.5 text-[9.5px] text-gray-600">
+              {model.phone ? <p>{model.phone}</p> : null}
+              {model.email ? <p className="break-all">{model.email}</p> : null}
+              {model.location ? <p>{model.location}</p> : null}
+            </div>
+          </div>
+          <Portrait model={model} className="h-[124px] w-[112px] shrink-0 rounded-md" />
+        </header>
+
+        <div className="mt-6 space-y-5">
+          <section>
+            <RibbonHeading n="01" title="Profile" accent={accent} />
+            <p className="text-[9.5px] leading-[1.8] text-gray-600">{model.summary}</p>
+          </section>
+          <section>
+            <RibbonHeading n="02" title="Experience" accent={accent} />
+            <div className="space-y-3.5">
+              {model.experience.map((exp) => (
+                <div key={exp.id}>
+                  <div className="flex items-baseline justify-between gap-4">
+                    <p className="text-[11px] font-bold">{exp.title || exp.jobTitle || 'Job Title'}</p>
+                    <p className="shrink-0 text-[9px] text-gray-400">{expDates(exp)}</p>
+                  </div>
+                  <p className="text-[9.5px] italic text-gray-500">{exp.company}</p>
+                  <BulletLines text={exp.description} accent={accent} />
+                </div>
+              ))}
+            </div>
+          </section>
+          <section>
+            <RibbonHeading n="03" title="Education" accent={accent} />
+            <div className="grid grid-cols-2 gap-x-7 gap-y-2.5">
+              {model.education.map((e) => (
+                <div key={e.id} className="text-[10px] leading-relaxed">
+                  <p className="font-bold">{[e.degree, e.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</p>
+                  <p className="text-gray-600">{e.school}</p>
+                  <p className="text-gray-400">{[e.startDate, e.endDate].filter(Boolean).join(' - ')}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+          <section>
+            <RibbonHeading n="04" title="Skills" accent={accent} />
+            <div className="grid grid-cols-2 gap-x-7">
+              <ul className="space-y-1.5 text-[10px] text-gray-700">
+                {model.skills.slice(0, Math.ceil(model.skills.length / 2)).map((sk) => (
+                  <li key={sk.id} className="flex gap-2">
+                    <span className="mt-[6px] h-[3px] w-[3px] shrink-0 rounded-full" style={{ backgroundColor: accent }} />
+                    {sk.name}
+                  </li>
+                ))}
+              </ul>
+              <ul className="space-y-1.5 text-[10px] text-gray-700">
+                {model.skills.slice(Math.ceil(model.skills.length / 2)).map((sk) => (
+                  <li key={sk.id} className="flex gap-2">
+                    <span className="mt-[6px] h-[3px] w-[3px] shrink-0 rounded-full" style={{ backgroundColor: accent }} />
+                    {sk.name}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </section>
+          {model.certifications.length > 0 ? (
+            <section>
+              <RibbonHeading n="05" title="Certifications" accent={accent} />
+              <CertList items={model.certifications} />
+            </section>
+          ) : null}
+          {model.languages.length > 0 ? (
+            <section>
+              <RibbonHeading n="06" title="Languages" accent={accent} />
+              <LanguageStars items={model.languages} accent={accent} />
+            </section>
+          ) : null}
+        </div>
+      </div>
+    </Page>
+  )
+}
+
+function RibbonHeading({ n, title, accent }: { n: string; title: string; accent: string }) {
+  return (
+    <h2 className="mb-2.5 flex items-baseline gap-3">
+      <span className="text-[15px] font-extrabold" style={{ color: `${accent}55` }}>{n}</span>
+      <span className="text-[13px] font-bold uppercase tracking-[0.14em]">{title}</span>
+      <span className="ml-1 h-px flex-1" style={{ backgroundColor: '#e5e7eb' }} />
+    </h2>
+  )
+}
+
+// Lattice — every section is its own bordered card, tiled two across.
+function LatticeResume({ model }: { model: PreviewModel }) {
+  const { accent, secondary } = model.template
+  return (
+    <Page className="px-7 py-7" style={{ backgroundColor: '#f6f6f7', color: INK }}>
+      <header className="mb-3 flex items-center gap-5 rounded-xl px-6 py-5" style={{ backgroundColor: secondary }}>
+        <Portrait model={model} className="h-[84px] w-[84px] shrink-0 rounded-lg" />
+        <div className="min-w-0">
+          <h1 className="text-[26px] font-extrabold leading-none tracking-tight text-white">{model.name}</h1>
+          <p className="mt-1.5 text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: accent }}>{model.title}</p>
+          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-0.5 text-[9px] text-white/65">
+            {model.phone ? <span>{model.phone}</span> : null}
+            {model.email ? <span>{model.email}</span> : null}
+            {model.location ? <span>{model.location}</span> : null}
+          </div>
+        </div>
+      </header>
+
+      <LatticeCard title="Profile" accent={accent}>
+        <p className="text-[9.5px] leading-[1.75] text-gray-600">{model.summary}</p>
+      </LatticeCard>
+
+      <div className="mt-3 grid grid-cols-[1fr_232px] gap-3">
+        <LatticeCard title="Experience" accent={accent}>
+          <div className="space-y-3.5">
+            {model.experience.map((exp) => (
+              <div key={exp.id}>
+                <div className="flex items-baseline justify-between gap-3">
+                  <p className="text-[11px] font-bold">{exp.title || exp.jobTitle || 'Job Title'}</p>
+                  <p className="shrink-0 text-[8.5px] text-gray-400">{expDates(exp)}</p>
+                </div>
+                <p className="text-[9.5px] italic text-gray-500">{exp.company}</p>
+                <BulletLines text={exp.description} accent={accent} />
+              </div>
+            ))}
+          </div>
+        </LatticeCard>
+
+        <div className="flex flex-col gap-3">
+          <LatticeCard title="Education" accent={accent}>
+            <div className="space-y-2.5 text-[9.5px] leading-relaxed">
+              {model.education.map((e) => (
+                <div key={e.id}>
+                  <p className="font-bold">{[e.degree, e.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</p>
+                  <p className="text-gray-600">{e.school}</p>
+                  <p className="text-gray-400">{[e.startDate, e.endDate].filter(Boolean).join(' - ')}</p>
+                </div>
+              ))}
+            </div>
+          </LatticeCard>
+          <LatticeCard title="Skills" accent={accent}>
+            <ul className="space-y-1.5 text-[9.5px] text-gray-700">
+              {model.skills.map((sk) => (
+                <li key={sk.id} className="flex gap-2">
+                  <span className="mt-[6px] h-[3px] w-[3px] shrink-0 rounded-full" style={{ backgroundColor: accent }} />
+                  {sk.name}
+                </li>
+              ))}
+            </ul>
+          </LatticeCard>
+          {model.languages.length > 0 ? (
+            <LatticeCard title="Languages" accent={accent}>
+              <ul className="space-y-1 text-[9.5px] text-gray-700">
+                {model.languages.map((l) => (
+                  <li key={l.id}>{l.name} <span className="text-gray-500">({l.proficiency})</span></li>
+                ))}
+              </ul>
+            </LatticeCard>
+          ) : null}
+          {model.certifications.length > 0 ? (
+            <LatticeCard title="Certifications" accent={accent}>
+              <div className="space-y-2 text-[9.5px] leading-relaxed">
+                {model.certifications.map((c) => (
+                  <div key={c.id}>
+                    <p className="font-bold">{c.name}</p>
+                    <p className="text-gray-500">{[c.issuer, c.date].filter(Boolean).join(', ')}</p>
+                  </div>
+                ))}
+              </div>
+            </LatticeCard>
+          ) : null}
+        </div>
+      </div>
+    </Page>
+  )
+}
+
+function LatticeCard({ title, accent, children }: { title: string; accent: string; children: React.ReactNode }) {
+  return (
+    <section className="rounded-xl border border-gray-200 bg-white px-5 py-4">
+      <h2 className="mb-2.5 text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: accent }}>
+        {title}
+      </h2>
+      {children}
+    </section>
   )
 }
