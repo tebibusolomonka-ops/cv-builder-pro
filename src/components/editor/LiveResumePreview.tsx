@@ -193,10 +193,24 @@ const SAMPLE_PEOPLE = [
   { name: 'Marta Kebede', portrait: '10' },
 ] as const
 
+/**
+ * Layouts that show a specific sitter rather than whichever one the hash lands
+ * on. Use this for anything featured on the homepage, so the card a visitor
+ * sees first is a deliberate choice instead of an accident of string hashing.
+ * The key is the base layout, so every colourway of it shows the same person.
+ */
+const PINNED_PERSON: Partial<Record<TemplateLayoutId, string>> = {
+  gauge: 'Sumeya Ahmed',
+}
+
 function personFor(templateId: string) {
+  const base = templateId.split('-')[0] as TemplateLayoutId
+  const pinnedName = PINNED_PERSON[base]
+  const pinned = pinnedName ? SAMPLE_PEOPLE.find((x) => x.name === pinnedName) : undefined
+
   let hash = 0
   for (let i = 0; i < templateId.length; i++) hash = (hash * 31 + templateId.charCodeAt(i)) >>> 0
-  const p = SAMPLE_PEOPLE[hash % SAMPLE_PEOPLE.length]
+  const p = pinned ?? SAMPLE_PEOPLE[hash % SAMPLE_PEOPLE.length]
   const slug = p.name.toLowerCase().replace(/\s+/g, '-')
   const handle = p.name.toLowerCase().replace(/\s+/g, '.')
   return {
