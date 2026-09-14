@@ -4,7 +4,7 @@ import { TemplateShowcase } from '@/components/landing/TemplateShowcase'
 export const metadata: Metadata = {
   title: 'Resume Templates — Netsa CV',
   description:
-    'Browse every resume layout in the collection. Each one is a distinct design, rendered live, free to use and fully editable.',
+    'See every CV design. Each one is a different layout, all of them are free, and you can change any of them.',
 }
 
 export default function TemplatesPage() {

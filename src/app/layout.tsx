@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: 'Netsa CV — Free Resume Builder',
   description:
-    'Create an ATS-friendly resume, choose a professional layout, and export a free PDF without creating an account.',
+    'Netsa CV is a free CV builder. Choose a design, add your details, and download a PDF. No account, no payment, and your information stays on your device.',
   keywords: [
     'resume builder',
     'cv builder',
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   alternates: { canonical: '/' },
   openGraph: {
     title: 'Netsa CV — Free Resume Builder',
-    description: 'Build an ATS-friendly resume and export it as a free PDF. No account required.',
+    description: 'Build your CV for free and download it as a PDF. No account needed, and nothing leaves your device.',
     type: 'website',
     siteName: 'Netsa CV',
     url: SITE_URL,
