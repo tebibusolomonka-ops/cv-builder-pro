@@ -577,6 +577,42 @@ function langStars(proficiency: Language['proficiency']) {
   return 5
 }
 
+/**
+ * Languages drawn as bars rather than stars.
+ *
+ * Three layouts used to feed languages through SkillBars with the level
+ * hardcoded to 'expert', so every bar rendered full width and Basic looked
+ * identical to Native. The width now comes from the proficiency, on the same
+ * five steps langStars uses.
+ */
+function LanguageBars({
+  items,
+  accent,
+  track = 'rgba(255,255,255,0.18)',
+  labelClass = 'text-white/90',
+}: {
+  items: Language[]
+  accent: string
+  track?: string
+  labelClass?: string
+}) {
+  return (
+    <div className="space-y-2.5">
+      {items.map((item) => (
+        <div key={item.id}>
+          <p className={cn('mb-1 text-[10.5px] font-semibold', labelClass)}>{item.name}</p>
+          <div className="h-1.5 rounded-full" style={{ backgroundColor: track }}>
+            <div
+              className="h-1.5 rounded-full"
+              style={{ width: `${langStars(item.proficiency) * 20}%`, backgroundColor: accent }}
+            />
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 function Stars({ filled, color, dim = '#d1d5db' }: { filled: number; color: string; dim?: string }) {
   return (
     <span className="flex items-center gap-[3px]">
@@ -1823,7 +1859,7 @@ function VertexResume({ model }: { model: PreviewModel }) {
         <Portrait model={model} className="h-[300px] w-full shrink-0 rounded-md" />
         <div className="mt-3 flex flex-1 flex-col gap-5">
           <div><PanelHeading title="About Me" color="#fff" /><p className="text-[10.5px] leading-relaxed text-white/75">{model.summary}</p></div>
-          <div><PanelHeading title="Language" color="#fff" /><SkillBars skills={model.languages.map((l, i) => ({ id: String(i), name: l.name, level: 'expert' as const }))} accent="#fff" track="rgba(255,255,255,.25)" /></div>
+          <div><PanelHeading title="Language" color="#fff" /><LanguageBars items={model.languages} accent="#fff" track="rgba(255,255,255,.25)" /></div>
           {model.certifications.length > 0 && (
             <div><PanelHeading title="Certifications" color="#fff" />
               <div className="space-y-2.5">
@@ -2763,7 +2799,7 @@ function GaugeResume({ model }: { model: PreviewModel }) {
         {model.languages.length > 0 && (
           <div>
             <GaugeHeading title="Language" accent={accent} icon={LanguagesIcon} />
-            <SkillBars skills={model.languages.map((l) => ({ id: l.id, name: l.name, level: 'expert' as const }))} accent={accent} />
+            <LanguageBars items={model.languages} accent={accent} />
           </div>
         )}
         {model.certifications.length > 0 && (
@@ -4572,7 +4608,7 @@ function GutterResume({ model }: { model: PreviewModel }) {
         {model.languages.length > 0 ? (
           <div>
             <GutterRailHeading title="Languages" />
-            <SkillBars skills={model.languages.map((l) => ({ id: l.id, name: l.name, level: 'expert' as const }))} accent={accent} />
+            <LanguageBars items={model.languages} accent={accent} />
           </div>
         ) : null}
       </aside>
