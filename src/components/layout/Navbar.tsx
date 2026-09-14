@@ -75,7 +75,7 @@ export function Navbar() {
             <div className="hidden lg:flex items-center gap-3">
               <Link href="/dashboard">
                 <Button variant="gradient" size="sm">
-                  Build Your Resume
+                  Start Your CV
                 </Button>
               </Link>
             </div>
@@ -130,7 +130,7 @@ export function Navbar() {
               <div className="mt-8 space-y-3">
                 <Link href="/dashboard" onClick={() => setIsMobileOpen(false)}>
                   <Button variant="gradient" fullWidth>
-                    Build Your Resume
+                    Start Your CV
                   </Button>
                 </Link>
               </div>
