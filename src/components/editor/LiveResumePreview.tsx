@@ -1491,7 +1491,14 @@ function Portrait({
           className="object-cover"
           style={
             purpose
-              ? { objectPosition: '50% 50%' }
+              ? {
+                  // The tall crops frame the subject on the LEFT -- measured at
+                  // 23% and 26% of the width. A full-height rail is ~0.2 aspect
+                  // against a 0.67 source, so it shows barely a quarter of the
+                  // width: centring it lands on empty backdrop and slices the
+                  // face off. Wide crops lose far less and stay centred.
+                  objectPosition: variant === 'tall' ? '25% 50%' : '50% 50%',
+                }
               : { objectPosition: '50% 14%', transform: 'scale(1.1)', transformOrigin: '50% 14%' }
           }
         />
