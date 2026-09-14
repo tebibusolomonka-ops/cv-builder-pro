@@ -34,6 +34,9 @@ export type TemplateLayoutId =
   | 'capsule'
   | 'marquee'
   | 'bureau'
+  | 'terminal'
+  | 'gauge'
+  | 'tagged'
 
 export interface TemplateDefinition {
   id: string
@@ -87,6 +90,9 @@ const LAYOUT_META: Record<TemplateLayoutId, LayoutMeta> = {
   capsule: { label: 'Capsule', category: 'creative', columns: 2, family: 'ink', description: 'Outlined lozenge section labels and a ringed portrait on warm paper, for design and marketing roles.' },
   marquee: { label: 'Marquee', category: 'professional', columns: 2, family: 'dark', description: 'Solid icon heading bars beside a dark rail of pill labels, for corporate and administrative roles.' },
   bureau: { label: 'Bureau', category: 'professional', columns: 2, family: 'panel', description: 'Tinted rail of contact, education, skills and languages beside a clean summary and experience column.' },
+  terminal: { label: 'Terminal', category: 'creative', columns: 2, family: 'dark', description: 'Monospace throughout, every section a bordered block with a bracketed label, for engineering and technical roles.' },
+  gauge: { label: 'Gauge', category: 'creative', columns: 2, family: 'dark', description: 'Dark page where skills are drawn as rings rather than bars, with the portrait banked down the right.' },
+  tagged: { label: 'Tagged', category: 'modern', columns: 2, family: 'ink', description: 'Skills as grouped tags, dates as tinted pills, and paired project cards at the foot of the page.' },
 }
 
 interface Hue {
@@ -189,6 +195,9 @@ export const SHOWCASE_VARIANT: Record<TemplateLayoutId, string> = {
   capsule: 'capsule-coral',
   marquee: 'marquee-navy',
   bureau: 'bureau-slate',
+  terminal: 'terminal-indigo',
+  gauge: 'gauge-coral',
+  tagged: 'tagged-cobalt',
 }
 
 // Layout names without color prefixes.

@@ -284,6 +284,9 @@ const RENDERERS: Record<TemplateLayoutId, (props: { model: PreviewModel }) => Re
   capsule: CapsuleResume,
   marquee: MarqueeResume,
   bureau: BureauResume,
+  terminal: TerminalResume,
+  gauge: GaugeResume,
+  tagged: TaggedResume,
 }
 
 export function LiveResumePreview({ templateId, forceSample = false }: { templateId?: string; forceSample?: boolean }) {
@@ -307,6 +310,13 @@ const SERIF = "'Playfair Display', Georgia, 'Times New Roman', serif"
  * it uses this.
  */
 const INK = '#2c3440'
+
+const MONO = "'JetBrains Mono', 'Consolas', 'SF Mono', ui-monospace, monospace"
+
+/** skillWidth as a number, for anything that draws a value rather than a bar. */
+function skillPercent(level: Skill['level']) {
+  return level === 'beginner' ? 25 : level === 'intermediate' ? 50 : level === 'advanced' ? 75 : 100
+}
 
 // A4 at 96dpi. Apply zoom to Page because some templates require its direct children.
 const PAGE_W = 794
@@ -2458,5 +2468,414 @@ function BureauSectionHead({ title, icon: Icon, accent }: { title: string; icon:
       </div>
       <span className="mt-2 block h-px w-full" style={{ backgroundColor: `${accent}33` }} />
     </div>
+  )
+}
+
+// Terminal — monospace throughout, every section a bordered block with a
+// bracketed label. The only layout in the catalogue that is not set in a
+// proportional face, which is the whole point of it.
+function TerminalResume({ model }: { model: PreviewModel }) {
+  const { accent } = model.template
+  return (
+    <Page className="flex gap-5 bg-[#14141f] px-8 py-8 text-white" style={{ fontFamily: MONO }}>
+      <div className="flex w-[236px] shrink-0 flex-col gap-3.5">
+        <TerminalBlock label="profile" accent={accent}>
+          <div className="flex justify-center py-1">
+            <Portrait model={model} className="h-[104px] w-[104px] rounded-sm" />
+          </div>
+        </TerminalBlock>
+        <TerminalBlock label="contact" accent={accent}>
+          <div className="space-y-1.5 text-[9.5px] text-white/70">
+            {model.phone && <p>{model.phone}</p>}
+            {model.email && <p className="break-all">{model.email}</p>}
+            {model.location && <p>{model.location}</p>}
+            {model.website && <p className="break-all">{model.website}</p>}
+          </div>
+        </TerminalBlock>
+        <TerminalBlock label="skills" accent={accent}>
+          <div className="space-y-2">
+            {model.skills.map((skill) => (
+              <div key={skill.id}>
+                <div className="flex items-baseline justify-between text-[9.5px]">
+                  <span className="text-white/80">{skill.name}</span>
+                  <span style={{ color: accent }}>{skillPercent(skill.level)}%</span>
+                </div>
+                <div className="mt-1 h-[3px] rounded-full bg-white/12">
+                  <div className="h-[3px] rounded-full" style={{ width: skillWidth(skill.level), backgroundColor: accent }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </TerminalBlock>
+        <TerminalBlock label="education" accent={accent}>
+          <div className="space-y-2.5 text-[9.5px]">
+            {model.education.map((e) => (
+              <div key={e.id}>
+                <p className="text-white/85">{e.school || 'University'}</p>
+                <p className="text-white/50">{[e.degree, e.endDate].filter(Boolean).join(' · ')}</p>
+              </div>
+            ))}
+          </div>
+        </TerminalBlock>
+        {model.languages.length > 0 && (
+          <TerminalBlock label="languages" accent={accent}>
+            <div className="space-y-1 text-[9.5px] text-white/70">
+              {model.languages.map((l) => (
+                <p key={l.id}>{l.name} <span className="text-white/40">({l.proficiency})</span></p>
+              ))}
+            </div>
+          </TerminalBlock>
+        )}
+        {model.references.length > 0 && (
+          <TerminalBlock label="references" accent={accent}>
+            <div className="space-y-2 text-[9.5px]">
+              {model.references.map((r) => (
+                <div key={r.id}>
+                  <p className="text-white/85">{r.name}</p>
+                  <p className="text-white/50">{[r.title, r.company].filter(Boolean).join(', ')}</p>
+                </div>
+              ))}
+            </div>
+          </TerminalBlock>
+        )}
+      </div>
+
+      <div className="flex min-w-0 flex-1 flex-col gap-3.5">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-[27px] font-bold leading-none" style={{ color: accent }}>{model.name}</h1>
+            <p className="mt-2 text-[11px] text-white/60">{model.title}</p>
+          </div>
+        </div>
+        <TerminalBlock label="summary" accent={accent}>
+          <p className="text-[9.5px] leading-[1.75] text-white/70">{model.summary}</p>
+        </TerminalBlock>
+        <TerminalBlock label="experience" accent={accent}>
+          <div className="space-y-3.5">
+            {model.experience.map((exp) => (
+              <div key={exp.id}>
+                <div className="flex items-baseline justify-between gap-3">
+                  <p className="text-[11px] font-bold text-white">{exp.title || exp.jobTitle || 'Job Title'}</p>
+                  <span className="shrink-0 rounded-sm px-1.5 py-[2px] text-[8px] font-bold text-[#14141f]" style={{ backgroundColor: accent }}>
+                    {expDates(exp)}
+                  </span>
+                </div>
+                <p className="mt-0.5 text-[9.5px] text-white/45">{exp.company || 'Company'}</p>
+                <ul className="mt-1.5 space-y-1">
+                  {exp.description.split('\n').filter(Boolean).map((line, i) => (
+                    <li key={i} className="flex gap-2 text-[9px] leading-relaxed text-white/60">
+                      <span style={{ color: accent }}>&gt;</span>
+                      {line.replace(/^[-•*]\s*/, '')}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </TerminalBlock>
+        {model.certifications.length > 0 && (
+          <TerminalBlock label="certifications" accent={accent}>
+            <div className="space-y-1.5 text-[9.5px]">
+              {model.certifications.map((c) => (
+                <p key={c.id} className="text-white/70">
+                  {c.name} <span className="text-white/40">— {[c.issuer, c.date].filter(Boolean).join(', ')}</span>
+                </p>
+              ))}
+            </div>
+          </TerminalBlock>
+        )}
+      </div>
+    </Page>
+  )
+}
+
+/** Bordered block with its label notched into the top edge. */
+function TerminalBlock({ label, accent, children }: { label: string; accent: string; children: React.ReactNode }) {
+  return (
+    <section className="rounded-md border border-white/12 px-3.5 pb-3 pt-2.5">
+      <h2 className="mb-2 text-[9px] font-bold lowercase tracking-[0.18em]" style={{ color: accent }}>
+        [{label}]
+      </h2>
+      {children}
+    </section>
+  )
+}
+
+// Gauge — dark page where skills are drawn as rings rather than bars, with the
+// portrait and the quiet detail banked down the right.
+function GaugeResume({ model }: { model: PreviewModel }) {
+  const { accent } = model.template
+  return (
+    <Page className="flex bg-[#17130f] text-white">
+      <div className="flex min-w-0 flex-1 flex-col gap-6 px-9 py-9">
+        <header>
+          <h1 className="text-[40px] font-extrabold uppercase leading-[0.92] tracking-tight">{model.name}</h1>
+          <span className="mt-3 inline-block rounded-full bg-white px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-[#17130f]">
+            {model.title}
+          </span>
+        </header>
+
+        <section>
+          <GaugeHeading title="Education" accent={accent} icon={GraduationCap} />
+          <div className="relative space-y-3 pl-5">
+            <span className="absolute left-[3px] top-2 bottom-2 w-px bg-white/15" />
+            {model.education.map((e) => (
+              <div key={e.id} className="relative flex gap-3">
+                <span className="absolute -left-5 top-[5px] h-[7px] w-[7px] rounded-full" style={{ backgroundColor: accent }} />
+                <span className="shrink-0 rounded-full border px-2 py-[1px] text-[8.5px] font-bold" style={{ borderColor: `${accent}88`, color: accent }}>
+                  {[e.startDate, e.endDate].filter(Boolean).join('–') || '—'}
+                </span>
+                <div>
+                  <p className="text-[10.5px] font-bold uppercase">{e.school || 'University'}</p>
+                  <p className="text-[9.5px] text-white/55">{[e.degree, e.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="flex-1">
+          <GaugeHeading title="Experience" accent={accent} icon={Briefcase} />
+          <div className="space-y-3.5">
+            {model.experience.map((exp) => (
+              <div key={exp.id}>
+                <div className="flex items-baseline justify-between gap-3">
+                  <p className="text-[11px] font-bold">{exp.title || exp.jobTitle || 'Job Title'}</p>
+                  <p className="shrink-0 text-[8.5px] font-semibold" style={{ color: accent }}>{expDates(exp)}</p>
+                </div>
+                <p className="text-[9.5px] italic text-white/45">{exp.company || 'Company'}</p>
+                <ul className="mt-1 space-y-[3px]">
+                  {exp.description.split('\n').filter(Boolean).map((line, i) => (
+                    <li key={i} className="text-[9px] leading-relaxed text-white/60">— {line.replace(/^[-•*]\s*/, '')}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="rounded-xl bg-white/5 px-5 py-4">
+          <GaugeHeading title="Skills" accent={accent} icon={Wrench} />
+          <div className="flex flex-wrap justify-between gap-y-3">
+            {model.skills.slice(0, 5).map((skill) => (
+              <SkillRing key={skill.id} label={skill.name} percent={skillPercent(skill.level)} accent={accent} />
+            ))}
+          </div>
+        </section>
+      </div>
+
+      <aside className="flex w-[262px] shrink-0 flex-col gap-5 px-6 py-9" style={{ background: `linear-gradient(200deg, ${accent}2e, rgba(255,255,255,0.04) 62%)` }}>
+        <Portrait model={model} className="h-[196px] w-full rounded-lg" />
+        <div>
+          <GaugeHeading title="About Me" accent={accent} icon={User} />
+          <p className="text-[10.5px] leading-[1.75] text-white/70">{model.summary}</p>
+        </div>
+        {model.languages.length > 0 && (
+          <div>
+            <GaugeHeading title="Language" accent={accent} icon={LanguagesIcon} />
+            <SkillBars skills={model.languages.map((l) => ({ id: l.id, name: l.name, level: 'expert' as const }))} accent={accent} />
+          </div>
+        )}
+        {model.certifications.length > 0 && (
+          <div>
+            <GaugeHeading title="Certifications" accent={accent} icon={Award} />
+            <div className="space-y-2.5 text-[10.5px] leading-relaxed">
+              {model.certifications.map((c) => (
+                <div key={c.id}>
+                  <p className="font-semibold text-white/90">{c.name}</p>
+                  <p className="text-white/50">{[c.issuer, c.date].filter(Boolean).join(' · ')}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        {model.references.length > 0 && (
+          <div>
+            <GaugeHeading title="References" accent={accent} icon={Users} />
+            <div className="space-y-2.5 text-[10.5px] leading-relaxed">
+              {model.references.map((r) => (
+                <div key={r.id}>
+                  <p className="font-semibold text-white/90">{r.name}</p>
+                  <p className="text-white/50">{[r.title, r.company].filter(Boolean).join(', ')}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        <div className="rounded-xl bg-black/35 px-4 py-3.5">
+          <GaugeHeading title="Contact" accent={accent} icon={Phone} />
+          <div className="space-y-2 text-[10.5px] text-white/75">
+            {model.phone && <p>{model.phone}</p>}
+            {model.email && <p className="break-all">{model.email}</p>}
+            {model.location && <p>{model.location}</p>}
+            {model.website && <p className="break-all">{model.website}</p>}
+          </div>
+        </div>
+      </aside>
+    </Page>
+  )
+}
+
+function GaugeHeading({ title, accent, icon: Icon }: { title: string; accent: string; icon: typeof User }) {
+  return (
+    <h2 className="mb-2.5 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em]">
+      <Icon size={12} strokeWidth={2.4} style={{ color: accent }} />
+      {title}
+    </h2>
+  )
+}
+
+/** A skill drawn as a ring. Stroke-dasharray on a 2*pi*r circumference. */
+function SkillRing({ label, percent, accent }: { label: string; percent: number; accent: string }) {
+  const R = 17
+  const C = 2 * Math.PI * R
+  return (
+    <div className="flex w-[19%] flex-col items-center gap-1.5">
+      <svg width="44" height="44" viewBox="0 0 44 44">
+        <circle cx="22" cy="22" r={R} fill="none" stroke="rgba(255,255,255,0.16)" strokeWidth="4" />
+        <circle
+          cx="22" cy="22" r={R} fill="none" stroke={accent} strokeWidth="4" strokeLinecap="round"
+          strokeDasharray={`${(C * percent) / 100} ${C}`} transform="rotate(-90 22 22)"
+        />
+        <text x="22" y="22" textAnchor="middle" dominantBaseline="central" fill="#fff" fontSize="9.5" fontWeight="700">
+          {percent}%
+        </text>
+      </svg>
+      <p className="text-center text-[7.5px] font-semibold uppercase leading-tight tracking-wide text-white/65">{label}</p>
+    </div>
+  )
+}
+
+// Tagged — light and technical: skills as small tags grouped under their own
+// sub-labels, dates as tinted pills, projects paired at the foot of the page.
+function TaggedResume({ model }: { model: PreviewModel }) {
+  const { accent } = model.template
+  // Four roughly even groups, so the rail reads as a categorised index rather
+  // than one long undifferentiated list.
+  const groups = ['Core', 'Tools', 'Platforms', 'Practice']
+  const size = Math.ceil(model.skills.length / groups.length) || 1
+  return (
+    <Page className="px-10 py-9" style={{ color: INK }}>
+      <header className="grid grid-cols-[1fr_1.25fr] items-start gap-8 border-b border-gray-200 pb-5">
+        <div>
+          <h1 className="text-[31px] font-extrabold leading-none tracking-tight">{model.name}</h1>
+          <p className="mt-2 text-[12px] font-semibold" style={{ color: accent }}>{model.title}</p>
+        </div>
+        <p className="pt-1 text-[9.5px] leading-[1.75] text-gray-600">{model.summary}</p>
+      </header>
+
+      <div className="flex flex-wrap gap-x-6 gap-y-1 border-b border-gray-200 py-2.5 text-[9.5px] text-gray-600">
+        {model.email && <span className="flex items-center gap-1.5"><Mail size={10} style={{ color: accent }} />{model.email}</span>}
+        {model.phone && <span className="flex items-center gap-1.5"><Phone size={10} style={{ color: accent }} />{model.phone}</span>}
+        {model.location && <span className="flex items-center gap-1.5"><MapPin size={10} style={{ color: accent }} />{model.location}</span>}
+        {model.website && <span className="flex items-center gap-1.5"><Globe size={10} style={{ color: accent }} />{model.website}</span>}
+      </div>
+
+      <div className="mt-6 grid grid-cols-[212px_1fr] gap-8">
+        <SideColumn>
+          <div>
+            <TaggedHeading title="Skills" />
+            <div className="space-y-2.5">
+              {groups.map((g, gi) => {
+                const slice = model.skills.slice(gi * size, (gi + 1) * size)
+                if (!slice.length) return null
+                return (
+                  <div key={g}>
+                    <p className="mb-1 text-[9px] font-bold uppercase tracking-wide text-gray-400">{g}</p>
+                    <div className="flex flex-wrap gap-1">
+                      {slice.map((sk) => (
+                        <span key={sk.id} className="rounded px-1.5 py-[2px] text-[9px] font-medium" style={{ backgroundColor: `${accent}14`, color: accent }}>
+                          {sk.name}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+          <div>
+            <TaggedHeading title="Education" />
+            <div className="space-y-2.5">
+              {model.education.map((e) => (
+                <div key={e.id} className="text-[10px] leading-relaxed">
+                  <p className="font-bold">{[e.degree, e.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</p>
+                  <p className="text-gray-600">{e.school || 'University Name'}</p>
+                  <p className="text-gray-400">{[e.startDate, e.endDate].filter(Boolean).join(' – ')}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          {model.certifications.length > 0 && (
+            <div>
+              <TaggedHeading title="Certification" />
+              <div className="space-y-2.5">
+                {model.certifications.map((c) => (
+                  <div key={c.id} className="text-[10px] leading-relaxed">
+                    <p className="font-bold">{c.name}</p>
+                    <p className="text-gray-500">{[c.issuer, c.date].filter(Boolean).join(' · ')}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          {model.languages.length > 0 && (
+            <div>
+              <TaggedHeading title="Languages" />
+              <div className="space-y-1 text-[10px]">
+                {model.languages.map((l) => (
+                  <p key={l.id}><span className="font-semibold">{l.name}</span> <span className="text-gray-500">({l.proficiency})</span></p>
+                ))}
+              </div>
+            </div>
+          )}
+        </SideColumn>
+
+        <div className="min-w-0">
+          <TaggedHeading title="Work Experience" />
+          <div className="space-y-4">
+            {model.experience.map((exp) => (
+              <div key={exp.id}>
+                <div className="flex items-baseline justify-between gap-4">
+                  <p className="text-[11.5px] font-bold">{exp.title || exp.jobTitle || 'Job Title'}</p>
+                  <span className="shrink-0 rounded px-2 py-[2px] text-[8.5px] font-bold" style={{ backgroundColor: `${accent}18`, color: accent }}>
+                    {expDates(exp)}
+                  </span>
+                </div>
+                <p className="mt-0.5 text-[10px]" style={{ color: accent }}>{[exp.company, exp.location].filter(Boolean).join(', ')}</p>
+                <BulletLines text={exp.description} accent={accent} />
+              </div>
+            ))}
+          </div>
+
+          {model.projects.length > 0 && (
+            <>
+              <TaggedHeading title="Featured Projects" className="mt-6" />
+              <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+                {model.projects.map((pr) => (
+                  <div key={pr.id}>
+                    <p className="text-[10.5px] font-bold" style={{ color: accent }}>{pr.name}</p>
+                    {pr.technologies.length > 0 && (
+                      <div className="mt-1 flex flex-wrap gap-1">
+                        {pr.technologies.map((t) => (
+                          <span key={t} className="rounded px-1.5 py-[1px] text-[8px] font-medium text-gray-600" style={{ backgroundColor: '#f1f2f4' }}>{t}</span>
+                        ))}
+                      </div>
+                    )}
+                    <p className="mt-1 text-[9px] leading-relaxed text-gray-600">{pr.description}</p>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </Page>
+  )
+}
+
+function TaggedHeading({ title, className }: { title: string; className?: string }) {
+  return (
+    <h2 className={cn('mb-2.5 text-[11px] font-bold uppercase tracking-[0.14em] text-gray-500', className)}>{title}</h2>
   )
 }
