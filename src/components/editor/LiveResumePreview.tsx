@@ -1493,17 +1493,50 @@ function HaloResume({ model }: { model: PreviewModel }) {
           <HaloHeading title="Experience" accent={accent} secondary={secondary} />
           <ExperienceList items={model.experience} accent={accent} />
         </div>
-        <div>
-          <HaloHeading title="Education" accent={accent} secondary={secondary} />
-          <EducationList items={model.education} />
-          <HaloHeading title="Skills" accent={accent} secondary={secondary} className="mt-6" />
-          <SkillChips skills={model.skills} accent={accent} filled />
-          {model.languages.length > 0 && (<><HaloHeading title="Languages" accent={accent} secondary={secondary} className="mt-6" /><LanguageStars items={model.languages} accent={accent} /></>)}
-          {model.certifications.length > 0 && (<><HaloHeading title="Certifications" accent={accent} secondary={secondary} className="mt-6" /><CertList items={model.certifications} /></>)}
-        </div>
+        <SideColumn>
+          <div>
+            <HaloHeading title="Education" accent={accent} secondary={secondary} />
+            <EducationList items={model.education} />
+          </div>
+          <div>
+            <HaloHeading title="Skills" accent={accent} secondary={secondary} />
+            <SkillChips skills={model.skills} accent={accent} filled />
+          </div>
+          {model.languages.length > 0 && (
+            <div>
+              <HaloHeading title="Languages" accent={accent} secondary={secondary} />
+              <LanguageStars items={model.languages} accent={accent} />
+            </div>
+          )}
+          {model.certifications.length > 0 && (
+            <div>
+              <HaloHeading title="Certifications" accent={accent} secondary={secondary} />
+              <CertList items={model.certifications} />
+            </div>
+          )}
+        </SideColumn>
       </div>
     </Page>
   )
+}
+
+/**
+ * A column whose sections spread to fill the height instead of pooling the
+ * leftover space at the bottom.
+ *
+ * The page fitter scales the whole page so the TALLEST column fits, so it has
+ * no notion of the other column: whichever side holds less content simply
+ * stops early and leaves a block of white. `justify-between` hands that slack
+ * back to the gaps between sections, which reads as deliberate spacing rather
+ * than an unfinished page — and it holds for any user's content, not just the
+ * sample, which moving sections between columns would not.
+ *
+ * `gap-6` is the floor, so a column that is already full keeps its normal
+ * rhythm; only genuine slack is distributed. Each child must be one complete
+ * section (heading + body) or the two drift apart.
+ */
+function SideColumn({ children, className }: { children: React.ReactNode; className?: string }) {
+  return <div className={cn('flex h-full flex-col justify-between gap-6', className)}>{children}</div>
 }
 
 function HaloHeading({ title, accent, secondary, className }: { title: string; accent: string; secondary: string; className?: string }) {
