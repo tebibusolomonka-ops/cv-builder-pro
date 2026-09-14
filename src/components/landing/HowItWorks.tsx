@@ -8,18 +8,18 @@ import { LAYOUT_LABELS } from '@/lib/constants'
 const STEPS = [
   {
     art: '/illustrations/01.svg',
-    title: 'Pick a layout',
-    body: `${Object.keys(LAYOUT_LABELS).length} designed layouts, each shown as a live preview rather than a mockup. Nothing is locked.`,
+    title: 'Choose a design',
+    body: `${Object.keys(LAYOUT_LABELS).length} designs to choose from. You can see how each one really looks before you pick it, and they are all free.`,
   },
   {
     art: '/illustrations/02.svg',
     title: 'Fill in your details',
-    body: 'Guided sections for experience, education and skills. Your page updates as you type, and everything saves to this device.',
+    body: 'Add your work, your school and your skills. Your CV changes as you type, and it saves on your device.',
   },
   {
     art: '/illustrations/03.svg',
     title: 'Download the PDF',
-    body: 'A print-perfect A4 file with selectable text, so applicant tracking systems can actually read it.',
+    body: 'You get an A4 file with real text inside it. People can read it, and so can the software companies use to sort CVs.',
   },
 ]
 
