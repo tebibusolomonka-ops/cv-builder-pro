@@ -182,10 +182,15 @@ const SAMPLE_PERSONA = {
 // Keep each sample name paired with its portrait.
 const SAMPLE_PEOPLE = [
   { name: 'Selamawit Bekele', portrait: '01' },
-  { name: 'Rahel Tadesse', portrait: '02' },
-  { name: 'Hiwot Girma', portrait: '03' },
-  { name: 'Marta Assefa', portrait: '04' },
-  { name: 'Yonas Bekele', portrait: '05' },
+  { name: 'Yonas Alemu', portrait: '02' },
+  { name: 'Sumeya Ahmed', portrait: '03' },
+  { name: 'Dawit Haile', portrait: '04' },
+  { name: 'Rahel Tadesse', portrait: '05' },
+  { name: 'Hayat Mohammed', portrait: '06' },
+  { name: 'Abel Girma', portrait: '07' },
+  { name: 'Hiwot Tesfaye', portrait: '08' },
+  { name: 'Nahom Assefa', portrait: '09' },
+  { name: 'Marta Kebede', portrait: '10' },
 ] as const
 
 function personFor(templateId: string) {
@@ -197,7 +202,7 @@ function personFor(templateId: string) {
   return {
     name: p.name,
     // Version the URL when replacing a portrait file.
-    photo: `/sample/portraits/${p.portrait}.jpg?v=3`,
+    photo: `/sample/portraits/${p.portrait}.jpg?v=4`,
     email: `${handle}@example.com`,
     website: `${slug}.dev`,
     linkedin: `linkedin.com/in/${slug}`,
@@ -2056,6 +2061,185 @@ function GazetteHeading({
       <span className="mt-2 block text-[10px] font-bold uppercase tracking-[0.28em]" style={{ color: accent }}>
         {title}
       </span>
+    </h2>
+  )
+}
+
+// Capsule — outlined pill section labels, a ringed portrait, warm paper page.
+function CapsuleResume({ model }: { model: PreviewModel }) {
+  const { accent, secondary } = model.template
+  return (
+    <Page className="bg-[#fdfaf7] px-11 py-10" style={{ color: secondary }}>
+      <div className="grid h-full grid-cols-[206px_1fr] gap-8">
+        <SideColumn className="gap-5">
+          <div className="flex justify-center">
+            <div className="rounded-full p-[6px]" style={{ backgroundColor: `${accent}1f` }}>
+              <Portrait model={model} className="h-[142px] w-[142px] rounded-full border-[3px] border-white" />
+            </div>
+          </div>
+          <div>
+            <CapsuleHeading title="about me" accent={accent} />
+            <p className="text-[9.5px] leading-[1.75] text-gray-600">{model.summary}</p>
+          </div>
+          <div>
+            <CapsuleHeading title="education" accent={accent} />
+            <EducationList items={model.education} />
+          </div>
+          <div>
+            <CapsuleHeading title="contact" accent={accent} />
+            <div className="space-y-1.5 text-[9.5px] text-gray-600">
+              {model.phone && <p>{model.phone}</p>}
+              {model.email && <p className="break-all">{model.email}</p>}
+              {model.location && <p>{model.location}</p>}
+              {model.website && <p className="break-all">{model.website}</p>}
+            </div>
+          </div>
+        </SideColumn>
+
+        <SideColumn className="gap-5">
+          <header>
+            <h1 className="text-[40px] font-semibold leading-[1.05] tracking-tight" style={{ fontFamily: SERIF, color: secondary }}>
+              {model.name}
+            </h1>
+            <span
+              className="mt-3 inline-block rounded-full px-4 py-[5px] text-[10px] font-medium tracking-wide"
+              style={{ backgroundColor: `${accent}1f`, color: accent }}
+            >
+              {model.title}
+            </span>
+          </header>
+          <div>
+            <CapsuleHeading title="experience" accent={accent} />
+            <ExperienceList items={model.experience} accent={accent} />
+          </div>
+          <div>
+            <CapsuleHeading title="skills" accent={accent} />
+            <div className="flex flex-wrap gap-1.5">
+              {model.skills.map((skill) => (
+                <span
+                  key={skill.id}
+                  className="rounded-full px-3 py-[5px] text-[9px] font-medium"
+                  style={{ backgroundColor: `${accent}16`, color: accent }}
+                >
+                  {skill.name}
+                </span>
+              ))}
+            </div>
+          </div>
+          {model.certifications.length > 0 && (
+            <div>
+              <CapsuleHeading title="awards" accent={accent} />
+              <CertList items={model.certifications} />
+            </div>
+          )}
+        </SideColumn>
+      </div>
+    </Page>
+  )
+}
+
+/** The outlined lozenge that gives this layout its name. */
+function CapsuleHeading({ title, accent, className }: { title: string; accent: string; className?: string }) {
+  return (
+    <h2 className={cn('mb-3', className)}>
+      <span
+        className="inline-block rounded-full border px-5 py-[5px] text-[10.5px] font-medium lowercase tracking-wide"
+        style={{ borderColor: `${accent}66`, color: accent }}
+      >
+        {title}
+      </span>
+    </h2>
+  )
+}
+
+// Marquee — solid heading bars with icons beside a dark rail of pill labels.
+function MarqueeResume({ model }: { model: PreviewModel }) {
+  const { accent, secondary } = model.template
+  return (
+    <Page className="flex" style={{ color: '#1f2937' }}>
+      <aside className="flex w-[232px] shrink-0 flex-col gap-6 px-6 py-8" style={{ backgroundColor: secondary }}>
+        <div className="flex justify-center">
+          <Portrait model={model} className="h-[132px] w-[132px] rounded-full border-[3px]" style={{ borderColor: accent }} />
+        </div>
+        <div>
+          <PillLabel title="Contact" accent={accent} />
+          <div className="space-y-1.5 text-[9.5px] text-white/75">
+            {model.phone && <p>{model.phone}</p>}
+            {model.email && <p className="break-all">{model.email}</p>}
+            {model.website && <p className="break-all">{model.website}</p>}
+            {model.location && <p>{model.location}</p>}
+          </div>
+        </div>
+        {model.languages.length > 0 && (
+          <div>
+            <PillLabel title="Languages" accent={accent} />
+            <LanguageStars items={model.languages} accent={accent} dark />
+          </div>
+        )}
+        {model.references.length > 0 && (
+          <div>
+            <PillLabel title="References" accent={accent} />
+            <div className="space-y-2.5">
+              {model.references.map((ref) => (
+                <div key={ref.id} className="text-[9.5px] leading-snug">
+                  <p className="font-semibold text-white">{ref.name}</p>
+                  <p className="text-white/60">{[ref.position, ref.company].filter(Boolean).join(', ')}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </aside>
+
+      <div className="flex min-w-0 flex-1 flex-col px-9 py-8">
+        <header className="mb-6">
+          <h1 className="text-[33px] font-bold leading-none tracking-tight" style={{ color: secondary }}>{model.name}</h1>
+          <p className="mt-2 text-[12px] font-medium" style={{ color: accent }}>{model.title}</p>
+        </header>
+        <SideColumn className="gap-5">
+          <div>
+            <BarHeading title="Profile" icon={User} accent={accent} />
+            <Paragraph>{model.summary}</Paragraph>
+          </div>
+          <div>
+            <BarHeading title="Experience" icon={Briefcase} accent={accent} />
+            <ExperienceList items={model.experience} accent={secondary} />
+          </div>
+          <div>
+            <BarHeading title="Education" icon={GraduationCap} accent={accent} />
+            <EducationList items={model.education} />
+          </div>
+          <div>
+            <BarHeading title="Skills" icon={Wrench} accent={accent} />
+            <SkillChips skills={model.skills} accent={accent} filled />
+          </div>
+        </SideColumn>
+      </div>
+    </Page>
+  )
+}
+
+/** Solid bar heading. The icon sits inside the bar, not beside it. */
+function BarHeading({ title, icon: Icon, accent }: { title: string; icon: typeof User; accent: string }) {
+  return (
+    <h2
+      className="mb-2.5 flex items-center gap-2 rounded-sm px-3 py-[6px] text-[11px] font-bold uppercase tracking-[0.16em] text-white"
+      style={{ backgroundColor: accent }}
+    >
+      <Icon size={12} strokeWidth={2.5} />
+      {title}
+    </h2>
+  )
+}
+
+/** Outlined pill used for the dark rail's section names. */
+function PillLabel({ title, accent }: { title: string; accent: string }) {
+  return (
+    <h2
+      className="mb-2.5 inline-block rounded-full border px-4 py-[4px] text-[9.5px] font-semibold uppercase tracking-[0.18em]"
+      style={{ borderColor: `${accent}99`, color: accent }}
+    >
+      {title}
     </h2>
   )
 }
