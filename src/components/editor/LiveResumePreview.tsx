@@ -1411,12 +1411,12 @@ function ApertureResume({ model }: { model: PreviewModel }) {
           <ExperienceList items={model.experience} accent={accent} datePill />
           {model.projects.length > 0 && (<><ApertureHeading title="Projects" accent={accent} className="mt-6" /><ProjectList items={model.projects} accent={accent} /></>)}
         </main>
-        <aside>
-          <ApertureHeading title="Education" accent={accent} /><EducationList items={model.education} />
-          <ApertureHeading title="Skills" accent={accent} className="mt-6" /><SkillList skills={model.skills} accent={accent} />
-          {model.languages.length > 0 && (<><ApertureHeading title="Languages" accent={accent} className="mt-6" /><LanguageStars items={model.languages} accent={accent} /></>)}
-          {model.certifications.length > 0 && (<><ApertureHeading title="Certifications" accent={accent} className="mt-6" /><CertList items={model.certifications} /></>)}
-        </aside>
+        <SideColumn>
+          <div><ApertureHeading title="Education" accent={accent} /><EducationList items={model.education} /></div>
+          <div><ApertureHeading title="Skills" accent={accent} /><SkillList skills={model.skills} accent={accent} /></div>
+          {model.languages.length > 0 && (<div><ApertureHeading title="Languages" accent={accent} /><LanguageStars items={model.languages} accent={accent} /></div>)}
+          {model.certifications.length > 0 && (<div><ApertureHeading title="Certifications" accent={accent} /><CertList items={model.certifications} /></div>)}
+        </SideColumn>
       </div>
     </Page>
   )
@@ -1584,12 +1584,12 @@ function AtriumResume({ model }: { model: PreviewModel }) {
           <ExperienceList items={model.experience} accent={accent} datePill />
           {model.references.length > 0 && (<><ApertureHeading title="References" accent={accent} className="mt-6" /><RefList items={model.references} /></>)}
         </main>
-        <aside>
-          <ApertureHeading title="Education" accent={accent} /><EducationList items={model.education} />
-          <ApertureHeading title="Expertise" accent={accent} className="mt-6" /><SkillList skills={model.skills} accent={accent} />
-          {model.languages.length > 0 && (<><ApertureHeading title="Languages" accent={accent} className="mt-6" /><LanguageStars items={model.languages} accent={accent} /></>)}
-          {model.certifications.length > 0 && (<><ApertureHeading title="Certifications" accent={accent} className="mt-6" /><CertList items={model.certifications} /></>)}
-        </aside>
+        <SideColumn>
+          <div><ApertureHeading title="Education" accent={accent} /><EducationList items={model.education} /></div>
+          <div><ApertureHeading title="Expertise" accent={accent} /><SkillList skills={model.skills} accent={accent} /></div>
+          {model.languages.length > 0 && (<div><ApertureHeading title="Languages" accent={accent} /><LanguageStars items={model.languages} accent={accent} /></div>)}
+          {model.certifications.length > 0 && (<div><ApertureHeading title="Certifications" accent={accent} /><CertList items={model.certifications} /></div>)}
+        </SideColumn>
       </div>
     </Page>
   )
@@ -1625,12 +1625,12 @@ function VistaResume({ model }: { model: PreviewModel }) {
             <ExperienceList items={model.experience} accent={accent} />
             {model.projects.length > 0 && (<><ApertureHeading title="Projects" accent={accent} className="mt-6" /><ProjectList items={model.projects} accent={accent} /></>)}
           </main>
-          <aside>
-            <ApertureHeading title="Education" accent={accent} /><EducationList items={model.education} />
-            <ApertureHeading title="Skills" accent={accent} className="mt-6" /><SkillChips skills={model.skills} accent={accent} />
-            {model.languages.length > 0 && (<><ApertureHeading title="Languages" accent={accent} className="mt-6" /><LanguageStars items={model.languages} accent={accent} /></>)}
-            {model.certifications.length > 0 && (<><ApertureHeading title="Certifications" accent={accent} className="mt-6" /><CertList items={model.certifications} /></>)}
-          </aside>
+          <SideColumn>
+            <div><ApertureHeading title="Education" accent={accent} /><EducationList items={model.education} /></div>
+            <div><ApertureHeading title="Skills" accent={accent} /><SkillChips skills={model.skills} accent={accent} /></div>
+            {model.languages.length > 0 && (<div><ApertureHeading title="Languages" accent={accent} /><LanguageStars items={model.languages} accent={accent} /></div>)}
+            {model.certifications.length > 0 && (<div><ApertureHeading title="Certifications" accent={accent} /><CertList items={model.certifications} /></div>)}
+          </SideColumn>
         </div>
       </div>
     </Page>
