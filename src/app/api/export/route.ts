@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import puppeteer from 'puppeteer-core'
+import chromium from '@sparticuz/chromium'
 import { existsSync } from 'node:fs'
 
 /**
@@ -17,7 +18,15 @@ import { existsSync } from 'node:fs'
 export const runtime = 'nodejs'
 export const maxDuration = 60
 
-/** puppeteer-core ships no browser; use whichever Chrome/Edge is installed. */
+/**
+ * puppeteer-core ships no browser, so one has to be found.
+ *
+ * On a developer machine that is the installed Chrome or Edge. On a serverless
+ * host there is no browser at all: this route used to return 501 there, the
+ * client caught it and fell back to window.print(), and the user got the
+ * browser's print dialog instead of a download. @sparticuz/chromium supplies a
+ * Chromium built to run in that environment.
+ */
 const CHROME_CANDIDATES = [
   process.env.CHROME_PATH,
   'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
@@ -31,6 +40,23 @@ function findChrome(): string | null {
   return CHROME_CANDIDATES.find((p) => existsSync(p)) ?? null
 }
 
+/** Local Chrome when there is one, otherwise the bundled serverless build. */
+async function launchBrowser() {
+  const local = findChrome()
+  if (local) {
+    return puppeteer.launch({
+      executablePath: local,
+      headless: true,
+      args: ['--no-sandbox', '--disable-dev-shm-usage'],
+    })
+  }
+  return puppeteer.launch({
+    args: chromium.args,
+    executablePath: await chromium.executablePath(),
+    headless: true,
+  })
+}
+
 function safeFilename(title: string): string {
   const cleaned = title
     .trim()
@@ -41,14 +67,6 @@ function safeFilename(title: string): string {
 }
 
 export async function POST(request: Request) {
-  const chromePath = findChrome()
-  if (!chromePath) {
-    return NextResponse.json(
-      { error: 'No Chrome or Edge installation found. Set CHROME_PATH, or use Export via print instead.' },
-      { status: 501 }
-    )
-  }
-
   let payload: { title?: string; storeState?: unknown }
   try {
     payload = await request.json()
@@ -64,11 +82,7 @@ export async function POST(request: Request) {
   let browser
 
   try {
-    browser = await puppeteer.launch({
-      executablePath: chromePath,
-      headless: true,
-      args: ['--no-sandbox', '--disable-dev-shm-usage'],
-    })
+    browser = await launchBrowser()
 
     const page = await browser.newPage()
     // Puppeteer's default viewport is 800px wide. At that width the editor's
