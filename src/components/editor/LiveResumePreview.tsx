@@ -21,6 +21,8 @@ type PreviewModel = {
   linkedin: string
   github: string
   photo: string
+  photoWide: string
+  photoTall: string
   summary: string
   experience: WorkExperience[]
   education: Education[]
@@ -179,6 +181,11 @@ const SAMPLE_PERSONA = {
     'Detail-oriented frontend engineer with 8+ years of experience building high-traffic web products. Proven ability to lead architecture decisions, mentor teams, and ship accessible, performant interfaces that users love.',
 }
 
+// Sitters with a purpose-made crop for the frames a square headshot cannot
+// survive: a full-height rail, or a 3:1 letterbox strip.
+const WIDE_CROPS = new Set(['02', '03', '09'])
+const TALL_CROPS = new Set(['05', '07'])
+
 // Keep each sample name paired with its portrait.
 const SAMPLE_PEOPLE = [
   { name: 'Selamawit Bekele', portrait: '01' },
@@ -201,6 +208,18 @@ const SAMPLE_PEOPLE = [
  */
 const PINNED_PERSON: Partial<Record<TemplateLayoutId, string>> = {
   gauge: 'Sumeya Ahmed',
+  // These five frames need a purpose-made crop, and only some sitters have one,
+  // so the sitter is pinned rather than hashed. Change one and the crop must
+  // move with it -- see WIDE_CROPS / TALL_CROPS.
+  facet: 'Rahel Tadesse',
+  billboard: 'Abel Girma',
+  vista: 'Nahom Assefa',
+  // Placard and Gauge are both featured on the homepage, so they get different
+  // sitters: Sumeya has the square crop Gauge's near-square frame wants, and
+  // the spare wide crop goes to Placard. Aperture takes Sumeya's wide crop
+  // instead -- it is not featured, so the repeat is out of the carousel.
+  placard: 'Yonas Alemu',
+  aperture: 'Sumeya Ahmed',
 }
 
 function personFor(templateId: string) {
@@ -217,6 +236,8 @@ function personFor(templateId: string) {
     name: p.name,
     // Version the URL when replacing a portrait file.
     photo: `/sample/portraits/${p.portrait}.jpg?v=4`,
+    photoWide: WIDE_CROPS.has(p.portrait) ? `/sample/portraits/wide/${p.portrait}.jpg` : '',
+    photoTall: TALL_CROPS.has(p.portrait) ? `/sample/portraits/tall/${p.portrait}.jpg` : '',
     email: `${handle}@example.com`,
     website: `${slug}.dev`,
     linkedin: `linkedin.com/in/${slug}`,
@@ -257,6 +278,8 @@ function usePreviewModel(templateIdOverride?: string, forceSample = false): Prev
     linkedin: info.linkedin || SAMPLE_PERSONA.linkedin,
     github: info.github,
     photo: info.profilePhoto,
+    photoWide: '',
+    photoTall: '',
     summary: data.summary || SAMPLE_PERSONA.summary,
     experience: data.workExperience.length > 0 ? data.workExperience : sampleExperience,
     education: data.education.length > 0 ? data.education : sampleEducation,
@@ -1439,18 +1462,38 @@ function skillWidth(level: Skill['level']) {
 
 // Portrait layouts
 
-function Portrait({ model, className, style }: { model: PreviewModel; className?: string; style?: React.CSSProperties }) {
+function Portrait({
+  model,
+  className,
+  style,
+  variant,
+}: {
+  model: PreviewModel
+  className?: string
+  style?: React.CSSProperties
+  variant?: 'wide' | 'tall'
+}) {
+  // A square headshot dropped into a full-height rail or a letterbox strip gets
+  // cropped to a forehead or a single eye. Where a crop made for that frame
+  // exists for this sitter, use it; otherwise fall back to the square.
+  const purpose = variant === 'wide' ? model.photoWide : variant === 'tall' ? model.photoTall : ''
+  const src = purpose || model.photo
   return (
     <div className={cn('relative overflow-hidden bg-gray-200', className)} style={style}>
-      {model.photo ? (
-        // Bias rectangular portrait crops toward the face.
+      {src ? (
+        // The face-bias transform exists to rescue square crops. A purpose-made
+        // crop is already framed, so applying it again would push the face out.
         <Image
-          src={model.photo}
+          src={src}
           alt={model.name}
           fill
           unoptimized
           className="object-cover"
-          style={{ objectPosition: '50% 14%', transform: 'scale(1.1)', transformOrigin: '50% 14%' }}
+          style={
+            purpose
+              ? { objectPosition: '50% 50%' }
+              : { objectPosition: '50% 14%', transform: 'scale(1.1)', transformOrigin: '50% 14%' }
+          }
         />
       ) : (
         <span className="flex h-full w-full items-center justify-center text-2xl font-semibold text-gray-400">
@@ -1467,7 +1510,7 @@ function ApertureResume({ model }: { model: PreviewModel }) {
   return (
     <Page style={{ color: secondary }}>
       <header className="relative h-[300px] w-full">
-        <Portrait model={model} className="absolute inset-0 h-full w-full" />
+        <Portrait model={model} variant="wide" className="absolute inset-0 h-full w-full" />
         <div className="absolute inset-0" style={{ background: `linear-gradient(180deg, transparent 25%, ${secondary}f2 100%)` }} />
         <div className="absolute inset-x-0 bottom-0 px-12 pb-7">
           <h1 className="text-[40px] font-semibold leading-none tracking-tight text-white" style={{ fontFamily: SERIF }}>{model.name}</h1>
@@ -1509,7 +1552,7 @@ function FacetResume({ model }: { model: PreviewModel }) {
   return (
     <Page className="flex" style={{ color: secondary }}>
       <div className="relative w-[240px] shrink-0">
-        <Portrait model={model} className="absolute inset-0 h-full w-full" />
+        <Portrait model={model} variant="tall" className="absolute inset-0 h-full w-full" />
         <div className="absolute inset-0" style={{ background: `linear-gradient(180deg, ${secondary}22 0%, ${secondary}f5 62%)` }} />
         <div className="absolute inset-x-0 bottom-0 space-y-5 p-7 text-white">
           <div>
@@ -1679,7 +1722,7 @@ function VistaResume({ model }: { model: PreviewModel }) {
         </div>
       </header>
       <div className="relative h-[150px] w-full">
-        <Portrait model={model} className="absolute inset-0 h-full w-full" />
+        <Portrait model={model} variant="wide" className="absolute inset-0 h-full w-full" />
         <div className="absolute inset-0" style={{ background: `linear-gradient(90deg, transparent 40%, ${accent}33 100%)` }} />
       </div>
       <div className="h-[4px] w-full" style={{ backgroundColor: accent }} />
@@ -3009,7 +3052,7 @@ function PlacardResume({ model }: { model: PreviewModel }) {
 
       <div className="min-w-0 flex-1 px-9 py-9 text-white" style={{ backgroundColor: secondary }}>
         <div className="mb-6">
-          <Portrait model={model} className="h-[186px] w-full rounded-sm" />
+          <Portrait model={model} variant="wide" className="h-[186px] w-full rounded-sm" />
         </div>
         <div className="space-y-5">
           <div>
@@ -4603,7 +4646,7 @@ function BillboardResume({ model }: { model: PreviewModel }) {
   return (
     <Page className="flex" style={{ color: INK }}>
       <div className="relative w-[272px] shrink-0">
-        <Portrait model={model} className="h-full w-full" />
+        <Portrait model={model} variant="tall" className="h-full w-full" />
         <div className="absolute inset-x-0 bottom-0 px-6 pb-7 pt-16" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.88), rgba(0,0,0,0))' }}>
           <div className="space-y-2 text-[9.5px] leading-snug text-white/85">
             {model.phone ? (
