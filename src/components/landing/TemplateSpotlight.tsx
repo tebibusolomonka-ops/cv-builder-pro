@@ -69,14 +69,14 @@ export function TemplateSpotlight() {
       <div className="relative">
         <div className="mx-auto mb-14 max-w-3xl px-6 text-center">
           <span className="mb-5 inline-block text-xs font-semibold uppercase tracking-[0.28em] text-primary-400">
-            The Collection
+            Our Designs
           </span>
           <h2 className="font-display mb-5 text-4xl font-bold tracking-tight text-dark-100 md:text-5xl">
-            Five designs worth <span className="text-primary-400">applying in</span>
+            Five designs to <span className="text-primary-400">get you started</span>
           </h2>
           <p className="text-lg leading-relaxed text-dark-300">
-            Our curated set — each a different structure, not the same CV in a new colour. Every
-            preview is the real template, rendered live.
+            Each one has a different layout, not just a different colour. What you see here is
+            the real design, not a picture of it.
           </p>
         </div>
 
@@ -148,7 +148,7 @@ export function TemplateSpotlight() {
               {[
                 { k: 'Style', v: active.category },
                 { k: 'Structure', v: active.columns === 2 ? 'Two column' : 'Single column' },
-                { k: 'Parsing', v: 'ATS friendly' },
+                { k: 'Reading', v: 'Easy for software' },
                 { k: 'Price', v: 'Free' },
               ].map((row) => (
                 <div key={row.k}>
@@ -211,12 +211,12 @@ export function TemplateSpotlight() {
           <Link href="/templates" className="focus-ring group relative inline-flex">
             <span className="absolute -inset-1 rounded-xl bg-primary-500/25 opacity-0 blur-lg transition-opacity duration-500 group-hover:opacity-100" />
             <span className="relative inline-flex items-center gap-3 rounded-xl border border-primary-400/40 bg-primary-600 px-9 py-4 text-base font-semibold text-white shadow-lg shadow-primary-900/40 transition-all duration-300 group-hover:-translate-y-0.5 group-hover:bg-primary-500">
-              Explore the full collection
+              See all designs
               <ArrowRight className="h-4.5 w-4.5 transition-transform duration-300 group-hover:translate-x-1" />
             </span>
           </Link>
           <p className="text-xs tracking-wide text-dark-400">
-            {Object.keys(LAYOUT_LABELS).length} layouts — all free, all ATS-friendly
+            {Object.keys(LAYOUT_LABELS).length} designs. All free. Hiring software can read them all.
           </p>
         </div>
       </div>
