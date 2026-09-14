@@ -127,8 +127,8 @@ export function Hero() {
             className="font-display mb-6 text-balance text-5xl font-bold leading-[1.08] tracking-tight text-dark-100 sm:text-6xl md:text-7xl lg:text-[80px]"
             style={{ textShadow: '0 6px 34px rgba(0,0,0,0.65)' }}
           >
-            Make your experience <br className="hidden sm:block" />
-            <span className="text-dark-400">impossible to overlook</span>
+            Your work deserves <br className="hidden sm:block" />
+            <span className="text-dark-400">to be seen</span>
           </motion.h1>
 
           <motion.p
@@ -137,8 +137,8 @@ export function Hero() {
             transition={{ duration: 0.8, delay: 0.2, ease: 'easeOut' }}
             className="mx-auto mb-12 max-w-2xl text-base font-light leading-relaxed text-dark-300 sm:text-lg md:text-xl lg:text-2xl"
           >
-            Twenty-six designed layouts, live previews, and a clean PDF at the end. Everything stays
-            on your device, and none of it costs anything.
+            Netsa CV is a free tool for building your CV. Choose a design, add your details, and
+            download a PDF. Your information stays on your own device, and you never pay.
           </motion.p>
 
           <motion.div
@@ -149,7 +149,7 @@ export function Hero() {
             <Link href="/dashboard" className="inline-block">
               <span className="group inline-flex items-center gap-3 rounded-xl bg-primary-600 px-10 py-5 text-lg font-semibold text-white shadow-xl shadow-primary-900/40 transition-all duration-300 hover:-translate-y-1 hover:bg-primary-500 hover:shadow-primary-800/50 sm:text-xl">
                 <FileDown className="h-6 w-6 transition-transform group-hover:translate-y-0.5" />
-                Build Your Resume Free
+                Start Your Free CV
               </span>
             </Link>
           </motion.div>
