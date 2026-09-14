@@ -980,7 +980,7 @@ function TimelineResume({ model }: { model: PreviewModel }) {
             </div>
           </div>
         </main>
-        <aside>
+        <aside className="flex h-full flex-col justify-between gap-7 [&>section]:mb-0">
           <SimpleSection title="Education" accent={accent}><EducationList items={model.education} /></SimpleSection>
           <SimpleSection title="Skills" accent={accent}><SkillChips skills={model.skills} accent={accent} filled /></SimpleSection>
           {model.languages.length > 0 && <SimpleSection title="Languages" accent={accent}><LanguageStars items={model.languages} accent={accent} /></SimpleSection>}
@@ -1011,6 +1011,9 @@ function BannerResume({ model }: { model: PreviewModel }) {
       </header>
       <div className="h-1.5 w-full" style={{ backgroundColor: accent }} />
       <div className="grid grid-cols-2 gap-9 px-11 py-9">
+        {/* Deliberately NOT distributed: this column holds only two sections,
+            so the slack lands in a single ~20% hole between them, which reads
+            as a rendering fault. Trailing space is the lesser evil here. */}
         <div>
           <BannerSection title="Profile" accent={accent}><Paragraph>{model.summary}</Paragraph></BannerSection>
           <BannerSection title="Experience" accent={accent}><ExperienceList items={model.experience.slice(0, 2)} accent={secondary} /></BannerSection>
@@ -1536,6 +1539,11 @@ function HaloResume({ model }: { model: PreviewModel }) {
  * `gap-6` is the floor, so a column that is already full keeps its normal
  * rhythm; only genuine slack is distributed. Each child must be one complete
  * section (heading + body) or the two drift apart.
+ *
+ * Only worth applying to columns with THREE OR MORE sections. With two, the
+ * whole slack lands in a single gap — measured at 20% of page height on
+ * Banner — and a hole that size in mid-page looks like a bug, which is worse
+ * than the trailing space it replaced.
  */
 function SideColumn({ children, className }: { children: React.ReactNode; className?: string }) {
   return <div className={cn('flex h-full flex-col justify-between gap-6', className)}>{children}</div>
