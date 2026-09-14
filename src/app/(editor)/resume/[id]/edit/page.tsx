@@ -19,6 +19,7 @@ import { ExperienceForm } from '@/components/editor/ExperienceForm'
 import { EducationForm } from '@/components/editor/EducationForm'
 import { SkillsForm } from '@/components/editor/SkillsForm'
 import { AdditionalSectionsForm } from '@/components/editor/AdditionalSectionsForm'
+import { useTemplateFields } from '@/components/editor/useTemplateFields'
 import { LiveResumePreview } from '@/components/editor/LiveResumePreview'
 import { ResumePreviewFrame } from '@/components/editor/ResumePreviewFrame'
 import { TEMPLATES } from '@/lib/constants'
@@ -50,7 +51,8 @@ export default function ResumeEditorPage() {
   const templateStructure = selectedTemplate.columns === 1 ? 'Single column' : 'Two columns'
 
   const info = data.personalInfo
-  const sections: {
+  const { sectionOrder, uses } = useTemplateFields()
+  const allSections: {
     id: SectionId
     title: string
     hint: string
@@ -107,6 +109,19 @@ export default function ResumeEditorPage() {
       content: <AdditionalSectionsForm />,
     },
   ]
+
+  // The form follows the chosen template: sections appear in the order that
+  // template reads, and one that prints none of its parts is not shown at all.
+  // Personal always leads -- every layout needs a name and a way to reach you.
+  const extrasUsed =
+    uses('languages') || uses('certifications') || uses('projects') || uses('references')
+  const byId = new Map(allSections.map((section) => [section.id, section]))
+  const sections = [
+    byId.get('personal')!,
+    ...sectionOrder
+      .map((id) => byId.get(id))
+      .filter((section): section is (typeof allSections)[number] => Boolean(section)),
+  ].filter((section) => section.id !== 'extras' || extrasUsed)
 
   const doneCount = sections.filter((s) => s.done).length
   const progress = Math.round((doneCount / sections.length) * 100)

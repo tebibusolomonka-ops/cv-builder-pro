@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Award, BookOpen, Globe2, Plus, Trash2, UserRound } from 'lucide-react'
 import { Button, Input } from '@/components/ui'
 import { useResumeStore } from '@/store/useResumeStore'
 import { Language } from '@/types/resume'
+import { useTemplateFields } from './useTemplateFields'
 
 type Panel = 'languages' | 'certifications' | 'projects' | 'references'
 
@@ -16,7 +17,16 @@ const panels: { id: Panel; label: string; icon: React.ReactNode }[] = [
 ]
 
 export function AdditionalSectionsForm() {
-  const [activePanel, setActivePanel] = useState<Panel>('languages')
+  const { uses, templateName } = useTemplateFields()
+  // Only 13 of 51 layouts print projects and 33 print references, so offering
+  // every panel to everyone invites work that the CV then throws away.
+  const available = useMemo(() => panels.filter((panel) => uses(panel.id)), [uses])
+  const [requested, setRequested] = useState<Panel | null>(null)
+  const activePanel = available.some((panel) => panel.id === requested)
+    ? (requested as Panel)
+    : available[0]?.id
+
+  if (available.length === 0) return null
 
   return (
     <div className="space-y-5">
@@ -25,11 +35,11 @@ export function AdditionalSectionsForm() {
       </p>
 
       <div className="grid grid-cols-2 gap-2">
-        {panels.map((panel) => (
+        {available.map((panel) => (
           <button
             key={panel.id}
             type="button"
-            onClick={() => setActivePanel(panel.id)}
+            onClick={() => setRequested(panel.id)}
             className={`flex items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
               activePanel === panel.id
                 ? 'border-primary-500 bg-primary-500/20 text-primary-300'
@@ -46,6 +56,13 @@ export function AdditionalSectionsForm() {
       {activePanel === 'certifications' && <CertificationsEditor />}
       {activePanel === 'projects' && <ProjectsEditor />}
       {activePanel === 'references' && <ReferencesEditor />}
+
+      {available.length < panels.length ? (
+        <p className="text-xs text-dark-400">
+          {templateName} does not print the other optional sections, so they are not shown here.
+          Pick a different template to use them.
+        </p>
+      ) : null}
     </div>
   )
 }

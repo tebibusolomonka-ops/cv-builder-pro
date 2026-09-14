@@ -1,6 +1,7 @@
 'use client'
 
 import { useResumeStore } from '@/store/useResumeStore'
+import { useTemplateFields } from './useTemplateFields'
 import { Input } from '@/components/ui'
 import { User, Mail, Phone, MapPin, Link as LinkIcon } from 'lucide-react'
 import { FaGithub, FaLinkedin } from 'react-icons/fa'
@@ -150,6 +151,9 @@ async function prepareProfilePhoto(file: File) {
 export function PersonalInfoForm() {
   const { data, setPersonalInfo } = useResumeStore()
   const info = data.personalInfo
+  // Ask only for what the chosen template prints. Name, title, email, phone and
+  // location are on every layout, so they are never conditional.
+  const { uses } = useTemplateFields()
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -175,6 +179,7 @@ export function PersonalInfoForm() {
 
   return (
     <div className="space-y-6">
+      {uses('photo') ? (
       <div className="flex items-center gap-4 p-4 bg-dark-800/50 border border-dark-700 rounded-xl">
         <div className="w-16 h-16 rounded-full bg-dark-700 border-2 border-dark-600 flex items-center justify-center overflow-hidden shrink-0">
           {info.profilePhoto ? (
@@ -209,6 +214,7 @@ export function PersonalInfoForm() {
           <p className="mt-1 text-xs text-dark-400">JPEG, PNG, or WebP up to 10 MB. Photos are resized before saving.</p>
         </div>
       </div>
+      ) : null}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Input
           label="Full Name"
@@ -251,6 +257,7 @@ export function PersonalInfoForm() {
           placeholder="e.g. San Francisco, CA"
           leftIcon={<MapPin size={18} />}
         />
+        {uses('website') ? (
         <Input
           label="Website / Portfolio"
           name="website"
@@ -260,6 +267,8 @@ export function PersonalInfoForm() {
           placeholder="e.g. https://johndoe.com"
           leftIcon={<LinkIcon size={18} />}
         />
+        ) : null}
+        {uses('linkedin') ? (
         <Input
           label="LinkedIn URL"
           name="linkedin"
@@ -269,6 +278,8 @@ export function PersonalInfoForm() {
           placeholder="e.g. linkedin.com/in/johndoe"
           leftIcon={<FaLinkedin size={18} />}
         />
+        ) : null}
+        {uses('github') ? (
         <Input
           label="GitHub URL"
           name="github"
@@ -278,6 +289,7 @@ export function PersonalInfoForm() {
           placeholder="e.g. github.com/johndoe"
           leftIcon={<FaGithub size={18} />}
         />
+        ) : null}
       </div>
     </div>
   )
