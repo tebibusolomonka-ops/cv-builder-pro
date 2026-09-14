@@ -281,6 +281,8 @@ const RENDERERS: Record<TemplateLayoutId, (props: { model: PreviewModel }) => Re
   crest: CrestResume,
   obsidian: ObsidianResume,
   solstice: SolsticeResume,
+  capsule: CapsuleResume,
+  marquee: MarqueeResume,
 }
 
 export function LiveResumePreview({ templateId, forceSample = false }: { templateId?: string; forceSample?: boolean }) {
@@ -2094,6 +2096,18 @@ function CapsuleResume({ model }: { model: PreviewModel }) {
               {model.website && <p className="break-all">{model.website}</p>}
             </div>
           </div>
+          {model.languages.length > 0 && (
+            <div>
+              <CapsuleHeading title="languages" accent={accent} />
+              <LanguageStars items={model.languages} accent={accent} />
+            </div>
+          )}
+          {model.references.length > 0 && (
+            <div>
+              <CapsuleHeading title="references" accent={accent} />
+              <RefList items={model.references} />
+            </div>
+          )}
         </SideColumn>
 
         <SideColumn className="gap-5">
@@ -2157,7 +2171,7 @@ function MarqueeResume({ model }: { model: PreviewModel }) {
   const { accent, secondary } = model.template
   return (
     <Page className="flex" style={{ color: '#1f2937' }}>
-      <aside className="flex w-[232px] shrink-0 flex-col gap-6 px-6 py-8" style={{ backgroundColor: secondary }}>
+      <aside className="flex w-[232px] shrink-0 flex-col justify-between gap-6 px-6 py-8" style={{ backgroundColor: secondary }}>
         <div className="flex justify-center">
           <Portrait model={model} className="h-[132px] w-[132px] rounded-full border-[3px]" style={{ borderColor: accent }} />
         </div>
@@ -2176,6 +2190,19 @@ function MarqueeResume({ model }: { model: PreviewModel }) {
             <LanguageStars items={model.languages} accent={accent} dark />
           </div>
         )}
+        {model.certifications.length > 0 && (
+          <div>
+            <PillLabel title="Certificates" accent={accent} />
+            <div className="space-y-2 text-[9.5px] leading-snug">
+              {model.certifications.map((cert) => (
+                <div key={cert.id}>
+                  <p className="font-semibold text-white">{cert.name}</p>
+                  <p className="text-white/60">{[cert.issuer, cert.date].filter(Boolean).join(' · ')}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         {model.references.length > 0 && (
           <div>
             <PillLabel title="References" accent={accent} />
@@ -2183,7 +2210,7 @@ function MarqueeResume({ model }: { model: PreviewModel }) {
               {model.references.map((ref) => (
                 <div key={ref.id} className="text-[9.5px] leading-snug">
                   <p className="font-semibold text-white">{ref.name}</p>
-                  <p className="text-white/60">{[ref.position, ref.company].filter(Boolean).join(', ')}</p>
+                  <p className="text-white/60">{[ref.title, ref.company].filter(Boolean).join(", ")}</p>
                 </div>
               ))}
             </div>

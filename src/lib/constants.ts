@@ -31,6 +31,8 @@ export type TemplateLayoutId =
   | 'crest'
   | 'obsidian'
   | 'solstice'
+  | 'capsule'
+  | 'marquee'
 
 export interface TemplateDefinition {
   id: string
@@ -81,6 +83,8 @@ const LAYOUT_META: Record<TemplateLayoutId, LayoutMeta> = {
   crest: { label: 'Crest', category: 'professional', columns: 2, family: 'dark', description: 'Full-width colour masthead with the portrait set into it, an accent contact strip, and a timeline body.' },
   obsidian: { label: 'Obsidian', category: 'modern', columns: 2, family: 'dark', description: 'Near-black rail with a squared portrait and skill meters, beside a bright timeline-driven content column.' },
   solstice: { label: 'Solstice', category: 'creative', columns: 2, family: 'panel', description: 'Portrait above a colour block that carries the name, balanced by a light editorial column.' },
+  capsule: { label: 'Capsule', category: 'creative', columns: 2, family: 'ink', description: 'Outlined lozenge section labels and a ringed portrait on warm paper, for design and marketing roles.' },
+  marquee: { label: 'Marquee', category: 'professional', columns: 2, family: 'dark', description: 'Solid icon heading bars beside a dark rail of pill labels, for corporate and administrative roles.' },
 }
 
 interface Hue {
@@ -180,6 +184,8 @@ export const SHOWCASE_VARIANT: Record<TemplateLayoutId, string> = {
   crest: 'crest-burgundy',
   obsidian: 'obsidian-coral',
   solstice: 'solstice-cobalt',
+  capsule: 'capsule-coral',
+  marquee: 'marquee-navy',
 }
 
 // Layout names without color prefixes.
