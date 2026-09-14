@@ -2,7 +2,13 @@ import type { Metadata } from 'next'
 import { Toaster } from 'react-hot-toast'
 import './globals.css'
 
+// Relative URLs in metadata (Open Graph images, canonicals) resolve against
+// this. Without it Next warns and falls back to localhost, which then ships
+// localhost URLs into the production page head.
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://netsacv.com'
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: 'Netsa CV — Free Resume Builder',
   description:
     'Create an ATS-friendly resume, choose a professional layout, and export a free PDF without creating an account.',
@@ -15,10 +21,13 @@ export const metadata: Metadata = {
     'professional resume',
     'ATS resume',
   ],
+  alternates: { canonical: '/' },
   openGraph: {
     title: 'Netsa CV — Free Resume Builder',
     description: 'Build an ATS-friendly resume and export it as a free PDF. No account required.',
     type: 'website',
+    siteName: 'Netsa CV',
+    url: SITE_URL,
   },
 }
 
