@@ -493,6 +493,16 @@ function Page({ className, style, children }: { className?: string; style?: Reac
         zoom,
         width: PAGE_W / zoom,
         height: PAGE_H / zoom,
+        // A run of characters with no spaces -- a pasted URL, a long email, or
+        // someone simply typing -- has no break opportunity, so by default it
+        // runs straight out of its column and off the page. Measured at 306px
+        // past a 214px column on Gauge. `overflow-wrap` is inherited, so
+        // declaring it once here covers every template and every field.
+        //
+        // break-word, not anywhere: it breaks only when a word would otherwise
+        // overflow, and leaves min-content sizing alone, so column widths that
+        // the layouts were balanced against do not move.
+        overflowWrap: 'break-word',
         ...style,
       }}
     >
