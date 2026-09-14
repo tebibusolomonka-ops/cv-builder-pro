@@ -432,16 +432,42 @@ body {
     print-color-adjust: exact !important;
   }
 
-  #__next, main, .bg-surface, .bg-dark-950 {
-    height: auto !important;
-    min-height: 0 !important;
-    overflow: visible !important;
-    background: white !important;
-    display: block !important;
-  }
-
+  /* The editor chrome opts out by class: top bar, form panel, template
+     controls and the mobile tab bar all carry .no-print. */
   body .no-print, .no-print {
     display: none !important;
+  }
+
+  /*
+   * Every ancestor of the resume has to become an ordinary, unconstrained
+   * block before it can be printed.
+   *
+   * This is the difference between rendering to a screen and rendering to
+   * paper. The editor nests the preview inside `h-screen` / `flex-1` /
+   * `overflow-hidden` wrappers; on screen that is fine, and even a print-media
+   * *screenshot* looks correct, because the compositor just paints the
+   * viewport. Paginated layout is a separate pass: it has to place boxes into
+   * page boxes, and a frame that is absolutely positioned inside a clipped,
+   * zero-height flex ancestor belongs to no page at all. The result is a
+   * silent blank sheet — a valid PDF with a page and no content on it.
+   *
+   * So: flatten the whole chain, and leave the frame in normal flow as the
+   * only thing on the page. Do NOT reintroduce `position: absolute` here.
+   */
+  body :has(.resume-print-frame) {
+    display: block !important;
+    position: static !important;
+    width: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    flex: none !important;
+    background: white !important;
+    transform: none !important;
   }
 
   .a4-page {
@@ -454,12 +480,15 @@ body {
   }
 
   .resume-print-frame {
+    position: static !important;
+    display: block !important;
     width: 210mm !important;
     height: auto !important;
     overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
     box-shadow: none !important;
     border-radius: 0 !important;
-    margin: 0 !important;
   }
 
   .resume-print-frame > div {
@@ -468,34 +497,13 @@ body {
     height: auto !important;
   }
 
-  /* Hide the editor and pin the resume to one A4 page. */
-  body * {
-    visibility: hidden;
-  }
-
-  .resume-print-frame,
-  .resume-print-frame * {
-    visibility: visible;
-  }
-
-  .resume-print-frame {
-    position: absolute !important;
-    left: 0 !important;
-    top: 0 !important;
-    width: 210mm !important;
-    height: 297mm !important;
-    overflow: hidden !important;
-  }
-
   /* Inline article dimensions already account for the fitted zoom. */
   .resume-print-frame article {
     box-shadow: none !important;
     border-radius: 0 !important;
   }
-
 }
 
-/* Chromium only applies this reliably when @page is top-level. */
 @page {
   size: A4 portrait;
   margin: 0;
