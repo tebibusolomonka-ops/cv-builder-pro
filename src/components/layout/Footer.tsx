@@ -3,7 +3,7 @@ import { FileText } from 'lucide-react'
 
 const PRODUCT = [
   { label: 'Templates', href: '/templates' },
-  { label: 'Resume Builder', href: '/resume/1/edit' },
+  { label: 'CV Builder', href: '/resume/1/edit' },
   { label: 'Your Workspace', href: '/dashboard' },
 ]
 
@@ -27,8 +27,8 @@ export function Footer() {
               </span>
             </Link>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-dark-400">
-              A free resume builder that keeps your data on your own device. No account, no
-              subscription, no watermark.
+              A free CV builder that keeps your information on your own device. No account, no
+              payment, no mark on your PDF.
             </p>
           </div>
 
@@ -55,8 +55,8 @@ export function Footer() {
               Your data
             </h3>
             <p className="text-sm leading-relaxed text-dark-400">
-              Everything you type is stored in this browser only. Clearing your browser data removes
-              it permanently — there is no copy on a server.
+              Everything you type is saved in this browser only. If you clear your browser data,
+              your CV is gone. We do not keep a copy.
             </p>
             <ul className="mt-5 space-y-2.5">
               {LEGAL.map((l) => (

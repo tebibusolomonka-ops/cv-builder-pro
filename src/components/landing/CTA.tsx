@@ -23,16 +23,16 @@ export function CTA() {
           </div>
 
           <h2 className="text-4xl md:text-5xl font-bold font-heading text-white mb-6">
-            Finish your resume and export it today.
+            Make your CV today.
           </h2>
           <p className="text-xl text-dark-300 mb-10 max-w-2xl mx-auto">
-            Choose a layout, add your experience, and download an ATS-friendly PDF. No account is
-            required, and your details stay in this browser.
+            Choose a design, add your details, and download your PDF. You do not need an account,
+            and your information stays in this browser.
           </p>
 
           <Link href="/dashboard">
             <Button variant="gradient" size="lg" className="text-lg px-8 group">
-              Open Resume Builder
+              Start Your CV
               <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
           </Link>
