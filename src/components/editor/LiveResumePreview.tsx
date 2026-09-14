@@ -90,29 +90,6 @@ const sampleExperience: WorkExperience[] = [
   },
 ]
 
-const sampleProjects: Project[] = [
-  {
-    id: 'sample-proj-1',
-    name: 'Telebirr Merchant Dashboard',
-    description:
-      'Real-time analytics dashboard for 12,000 merchants, built with Next.js and a streaming API layer.',
-    technologies: ['Next.js', 'TypeScript', 'WebSockets'],
-    url: '',
-    startDate: '',
-    endDate: '',
-  },
-  {
-    id: 'sample-proj-2',
-    name: 'Amharic Accessibility Toolkit',
-    description:
-      'Open-source component library adding screen-reader and right-to-left support for Amharic interfaces.',
-    technologies: ['React', 'ARIA', 'i18n'],
-    url: '',
-    startDate: '',
-    endDate: '',
-  },
-]
-
 const sampleEducation: Education[] = [
   {
     id: 'sample-edu-1',
@@ -250,17 +227,22 @@ function usePreviewModel(templateIdOverride?: string, forceSample = false): Prev
   const template = TEMPLATES.find((item) => item.id === (templateIdOverride || data.style.templateId)) ?? TEMPLATES[0]
 
   if (forceSample) {
+    // Who is shown and what they do are picked separately, so the gallery is
+    // not one trade repeated fifty-one times.
+    const profession = professionFor(template.id)
     return {
       template,
       ...SAMPLE_PERSONA,
       ...personFor(template.id),
-      experience: sampleExperience,
-      education: sampleEducation,
-      skills: sampleSkills,
-      projects: sampleProjects,
-      certifications: sampleCertifications,
+      title: profession.title,
+      summary: profession.summary,
+      experience: profession.experience,
+      education: profession.education,
+      skills: profession.skills,
+      projects: profession.projects,
+      certifications: profession.certifications,
       languages: sampleLanguages,
-      references: sampleReferences,
+      references: profession.references,
     }
   }
 
@@ -4069,17 +4051,6 @@ function BloomResume({ model }: { model: PreviewModel }) {
             ))}
           </div>
         </div>
-        <div className="rounded-2xl px-5 py-4 text-white" style={{ backgroundColor: secondary }}>
-          <BloomHeading title="Education" accent={accent} />
-          <div className="space-y-2 text-[9.5px] leading-relaxed">
-            {model.education.map((e) => (
-              <div key={e.id}>
-                <p className="font-bold">{e.school || 'University'}</p>
-                <p className="text-white/60">{[e.degree, [e.startDate, e.endDate].filter(Boolean).join(' - ')].filter(Boolean).join(' | ')}</p>
-              </div>
-            ))}
-          </div>
-        </div>
         <div className="flex-1 rounded-2xl px-5 py-4 text-white" style={{ backgroundColor: secondary }}>
           <BloomHeading title="Personal Skill" accent={accent} />
           <ul className="space-y-1.5 text-[9.5px] text-white/80">
@@ -4139,6 +4110,19 @@ function BloomResume({ model }: { model: PreviewModel }) {
               </div>
             ))}
           </div>
+          {model.references.length > 0 ? (
+            <>
+              <BloomLozenge title="References" secondary={secondary} className="mt-5" />
+              <div className="grid grid-cols-2 gap-4">
+                {model.references.map((r) => (
+                  <div key={r.id} className="text-[9.5px] leading-relaxed">
+                    <p className="font-bold">{r.name}</p>
+                    <p className="text-gray-600">{[r.title, r.company].filter(Boolean).join(', ')}</p>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : null}
         </div>
       </div>
     </Page>
@@ -5151,4 +5135,473 @@ function LatticeCard({ title, accent, children }: { title: string; accent: strin
       {children}
     </section>
   )
+}
+
+// ---------------------------------------------------------------------------
+// Sample professions
+//
+// Every card in the gallery used to be the same frontend developer, which made
+// a catalogue meant for everyone look like it was built for one trade.
+//
+// Each profession below carries the SAME SHAPE and roughly the same density as
+// the original: four roles with 5/4/4/3 bullets, two degrees, eight skills,
+// three certificates, two referees. That is not decoration -- the per-column
+// balance every layout was tuned against assumes this much content. A thinner
+// profession would leave rails short again.
+// ---------------------------------------------------------------------------
+
+type Profession = {
+  title: string
+  summary: string
+  experience: WorkExperience[]
+  education: Education[]
+  skills: Skill[]
+  certifications: Certification[]
+  references: Reference[]
+  projects: Project[]
+}
+
+function exp(
+  n: number,
+  title: string,
+  company: string,
+  startDate: string,
+  endDate: string,
+  lines: string[]
+): WorkExperience {
+  return {
+    id: `p-exp-${n}`,
+    title,
+    jobTitle: title,
+    company,
+    location: 'Addis Ababa',
+    startDate,
+    endDate,
+    current: endDate === 'Present',
+    description: lines.join('\n'),
+    achievements: [],
+  }
+}
+
+function edu(n: number, degree: string, fieldOfStudy: string, school: string, startDate: string, endDate: string): Education {
+  return {
+    id: `p-edu-${n}`,
+    degree,
+    fieldOfStudy,
+    school,
+    location: 'Addis Ababa',
+    startDate,
+    endDate,
+    current: false,
+    gpa: '',
+    description: '',
+  }
+}
+
+function skills(names: string[]): Skill[] {
+  const levels: Skill['level'][] = ['expert', 'advanced', 'advanced', 'intermediate', 'advanced', 'intermediate', 'advanced', 'intermediate']
+  return names.map((name, i) => ({ id: `p-skill-${i}`, name, level: levels[i % levels.length] }))
+}
+
+function certs(rows: [string, string, string][]): Certification[] {
+  return rows.map(([name, issuer, date], i) => ({ id: `p-cert-${i}`, name, issuer, date, expiryDate: '', url: '' }))
+}
+
+function refs(rows: [string, string, string][]): Reference[] {
+  return rows.map(([name, title, company], i) => ({ id: `p-ref-${i}`, name, title, company, email: '', phone: '', relationship: '' }))
+}
+
+const PROFESSIONS: Profession[] = [
+  {
+    title: 'Senior Frontend Developer',
+    summary:
+      'Detail-oriented frontend engineer with 8+ years of experience building high-traffic web products. Proven ability to lead architecture decisions, mentor teams, and ship accessible, performant interfaces that users love.',
+    experience: [
+      exp(1, 'Senior Frontend Developer', 'Safaricom Ethiopia', '2021-03', 'Present', [
+        'Lead frontend architecture for a customer-facing telecom dashboard serving 3M+ subscribers across Ethiopia.',
+        'Migrated a five-year-old codebase to React and TypeScript, cutting bundle size by 60% and first paint by 1.8s.',
+        'Mentor a team of five engineers, run weekly accessibility audits and own the performance budget.',
+        'Introduced a shared component library now used by four product teams, halving new-feature build time.',
+        'Partner with design and product to ship a bilingual Amharic/English interface used daily by 40,000 agents.',
+      ]),
+      exp(2, 'Full-Stack Developer', 'iCog Labs', '2018-06', '2021-02', [
+        'Built real-time collaboration tools for research teams using React, WebSockets and a Python service layer.',
+        'Deployed and maintained containerised applications on AWS with Docker, Kubernetes and GitHub Actions.',
+        'Introduced an automated test suite that cut production regressions by 40% within two quarters.',
+        'Redesigned the annotation workflow, reducing dataset labelling from three days to seven hours.',
+      ]),
+      exp(3, 'Junior Web Developer', 'MIDROC Technology Group', '2016-09', '2018-05', [
+        'Developed and maintained internal portals used daily by the HR, logistics and finance departments.',
+        'Automated weekly reporting pipelines, saving the operations team more than ten hours every week.',
+        'Rebuilt intranet search, cutting average lookup time from 40 seconds to under 5.',
+        'Documented the deployment process and trained two junior developers who now own the portal.',
+      ]),
+      exp(4, 'Web Development Intern', 'Ethio Telecom', '2015-07', '2016-08', [
+        'Supported the digital services team on customer self-service portals used by 200,000 subscribers.',
+        'Built reusable form components later adopted across four internal products.',
+        'Wrote the onboarding guide still used to bring new interns up to speed.',
+      ]),
+    ],
+    education: [
+      edu(1, 'Master of Science', 'Computer Science', 'Addis Ababa University', '2018', '2020'),
+      edu(2, 'Bachelor of Science', 'Software Engineering', 'Addis Ababa Institute of Technology', '2012', '2016'),
+    ],
+    skills: skills(['React / Next.js', 'TypeScript', 'Node.js', 'Cloud Architecture', 'UI / UX Design', 'Team Leadership', 'Testing / CI', 'Accessibility']),
+    certifications: certs([
+      ['AWS Certified Solutions Architect', 'Amazon Web Services', '2023'],
+      ['Professional Scrum Master I', 'Scrum.org', '2022'],
+      ['Google UX Design Certificate', 'Coursera', '2021'],
+    ]),
+    references: refs([
+      ['Meseret Alemu', 'Engineering Manager', 'Safaricom Ethiopia'],
+      ['Daniel Kebede', 'Chief Technology Officer', 'iCog Labs'],
+    ]),
+    projects: [
+      { id: 'p-proj-1', name: 'Telebirr Merchant Dashboard', description: 'Real-time analytics dashboard for 12,000 merchants, built with Next.js and a streaming API layer.', url: '', startDate: '', endDate: '', technologies: ['Next.js', 'TypeScript', 'WebSockets'] },
+      { id: 'p-proj-2', name: 'Amharic Accessibility Toolkit', description: 'Open-source component library adding screen-reader and right-to-left support for Amharic interfaces.', url: '', startDate: '', endDate: '', technologies: ['React', 'ARIA', 'i18n'] },
+    ],
+  },
+
+  {
+    title: 'Senior Accountant',
+    summary:
+      'Accountant with 9 years of experience in financial reporting, budgeting and audit support. Strong record of closing books on time, tightening controls, and explaining the numbers clearly to people outside finance.',
+    experience: [
+      exp(1, 'Senior Accountant', 'Commercial Bank of Ethiopia', '2021-01', 'Present', [
+        'Own the month-end close for three branches, bringing the average close from eleven days to six.',
+        'Prepare monthly and annual financial statements in line with IFRS for a portfolio worth 1.4 billion birr.',
+        'Built a cash-flow forecast the branch managers now use to plan spending a quarter ahead.',
+        'Led the response to the external audit for three years running, each closed with no major findings.',
+        'Train and check the work of four junior accountants across the region.',
+      ]),
+      exp(2, 'Accountant', 'Dashen Bank', '2018-02', '2020-12', [
+        'Handled accounts payable and receivable for 300+ corporate clients, cutting overdue accounts by 35%.',
+        'Reconciled daily transactions across six accounts and cleared a two-year backlog of open items.',
+        'Introduced a simple expense checklist that reduced rejected claims by half.',
+        'Prepared VAT and withholding tax returns and filed every one on time.',
+      ]),
+      exp(3, 'Junior Accountant', 'Ethiopian Airlines', '2016-03', '2018-01', [
+        'Recorded and coded daily transactions for the catering and ground services units.',
+        'Supported the annual stock count across two warehouses and resolved every variance found.',
+        'Built the payment tracker still used by the unit to follow supplier invoices.',
+        'Answered supplier queries and cut the average response time from four days to one.',
+      ]),
+      exp(4, 'Accounts Intern', 'Awash Bank', '2015-06', '2016-02', [
+        'Filed and checked vouchers for a branch handling 400 transactions a day.',
+        'Helped prepare the monthly bank reconciliation under the supervision of the branch accountant.',
+        'Cleaned up the supplier register, removing 180 duplicate records.',
+      ]),
+    ],
+    education: [
+      edu(1, 'Master of Business Administration', 'Finance', 'Addis Ababa University', '2019', '2021'),
+      edu(2, 'Bachelor of Arts', 'Accounting and Finance', 'Hawassa University', '2011', '2015'),
+    ],
+    skills: skills(['IFRS Reporting', 'Peachtree / Sage', 'Budgeting & Forecasting', 'Tax Filing', 'Audit Support', 'Advanced Excel', 'Internal Controls', 'Payroll']),
+    certifications: certs([
+      ['ACCA Applied Knowledge', 'ACCA', '2022'],
+      ['Certified Peachtree Professional', 'Sage', '2020'],
+      ['IFRS for SMEs', 'Ethiopian Professional Association', '2019'],
+    ]),
+    references: refs([
+      ['Tigist Bekele', 'Finance Manager', 'Commercial Bank of Ethiopia'],
+      ['Solomon Girma', 'Branch Director', 'Dashen Bank'],
+    ]),
+    projects: [],
+  },
+
+  {
+    title: 'Marketing Manager',
+    summary:
+      'Marketing manager with 8 years of experience growing consumer brands in Ethiopia. Comfortable running a campaign end to end, from the research and the budget through to the numbers it delivered.',
+    experience: [
+      exp(1, 'Marketing Manager', 'Dashen Brewery', '2021-05', 'Present', [
+        'Run a yearly marketing budget of 18 million birr across radio, outdoor, retail and digital.',
+        'Grew brand awareness in the target region from 34% to 61% over two tracking studies.',
+        'Lead a team of six and coordinate three agencies on national campaigns.',
+        'Launched a trade programme with 900 outlets that lifted quarterly sales volume by 22%.',
+        'Built the monthly dashboard the leadership team now uses to review marketing spend.',
+      ]),
+      exp(2, 'Brand Officer', 'Ethio Telecom', '2018-04', '2021-04', [
+        'Managed campaigns for two mobile products with a combined base of 5 million subscribers.',
+        'Cut cost per acquisition by 28% by moving spend from print into targeted digital channels.',
+        'Wrote and produced advertising in Amharic and Afaan Oromoo for national broadcast.',
+        'Ran the customer research that shaped the tariff relaunch of 2020.',
+      ]),
+      exp(3, 'Marketing Officer', 'Moha Soft Drinks', '2016-02', '2018-03', [
+        'Planned and ran in-store activations in 120 supermarkets across four cities.',
+        'Managed the social media accounts and grew the combined following from 40,000 to 210,000.',
+        'Prepared the monthly competitor report used by the sales and product teams.',
+        'Coordinated sponsorship of two national sporting events within budget.',
+      ]),
+      exp(4, 'Marketing Assistant', 'Arowwai Industries', '2014-09', '2016-01', [
+        'Supported campaign planning and kept the marketing calendar for three product lines.',
+        'Collected and tidied sales data for the weekly performance meeting.',
+        'Handled supplier quotes and print production for point-of-sale materials.',
+      ]),
+    ],
+    education: [
+      edu(1, 'Master of Arts', 'Marketing Management', 'Addis Ababa University', '2017', '2019'),
+      edu(2, 'Bachelor of Arts', 'Business Management', 'Mekelle University', '2010', '2014'),
+    ],
+    skills: skills(['Campaign Strategy', 'Brand Management', 'Market Research', 'Budget Planning', 'Digital Advertising', 'Copywriting', 'Team Leadership', 'Analytics']),
+    certifications: certs([
+      ['Google Ads Search Certification', 'Google', '2023'],
+      ['Meta Certified Marketing Associate', 'Meta', '2022'],
+      ['Professional Diploma in Digital Marketing', 'DMI', '2021'],
+    ]),
+    references: refs([
+      ['Hanna Tesfaye', 'Commercial Director', 'Dashen Brewery'],
+      ['Yared Assefa', 'Head of Brand', 'Ethio Telecom'],
+    ]),
+    projects: [],
+  },
+
+  {
+    title: 'Registered Nurse',
+    summary:
+      'Registered nurse with 7 years of experience in emergency and general wards. Calm under pressure, careful with records, and trusted to take charge of a shift and support newer staff through it.',
+    experience: [
+      exp(1, 'Senior Staff Nurse', 'Black Lion Specialised Hospital', '2021-02', 'Present', [
+        'Take charge of the evening shift in a 40-bed medical ward with a team of eight nurses.',
+        'Assess, monitor and record the condition of up to 20 patients a shift alongside the duty doctor.',
+        'Introduced a handover checklist that cut missed medication rounds to zero over six months.',
+        'Mentor student nurses on placement and sign off their clinical practice records.',
+        'Sit on the infection prevention committee and run monthly hand-hygiene audits.',
+      ]),
+      exp(2, 'Staff Nurse, Emergency', 'Tikur Anbessa Hospital', '2018-06', '2021-01', [
+        'Triaged and treated emergency patients in a unit receiving 150 admissions a day.',
+        'Assisted in resuscitation and stabilised patients before transfer to theatre or intensive care.',
+        'Kept accurate treatment records and drug charts under heavy caseload.',
+        'Helped train twelve new nurses on the triage protocol during the 2020 surge.',
+      ]),
+      exp(3, 'Staff Nurse', 'Hayat Hospital', '2016-09', '2018-05', [
+        'Delivered day-to-day care on a 25-bed surgical ward, including wound care and post-operative monitoring.',
+        'Prepared patients for theatre and explained procedures to families in Amharic and English.',
+        'Managed ward stock and cut monthly consumable wastage by a quarter.',
+        'Covered the outpatient department during staff shortages without disruption to clinics.',
+      ]),
+      exp(4, 'Nursing Intern', 'Ethiopian Red Cross Society', '2015-07', '2016-08', [
+        'Rotated through maternal health, outpatient and community clinics.',
+        'Ran health education sessions on nutrition and vaccination for groups of up to 60 people.',
+        'Recorded patient data for the clinic register and monthly reports.',
+      ]),
+    ],
+    education: [
+      edu(1, 'Bachelor of Science', 'Nursing', 'Addis Ababa University', '2011', '2015'),
+      edu(2, 'Diploma', 'Emergency and Critical Care', 'Jimma University', '2017', '2018'),
+    ],
+    skills: skills(['Patient Assessment', 'Emergency Care', 'Medication Administration', 'Wound Care', 'Infection Control', 'Patient Records', 'Team Supervision', 'Health Education']),
+    certifications: certs([
+      ['Basic Life Support (BLS)', 'Ethiopian Red Cross', '2023'],
+      ['Advanced Cardiac Life Support', 'Ministry of Health', '2022'],
+      ['Infection Prevention and Control', 'WHO', '2021'],
+    ]),
+    references: refs([
+      ['Sister Almaz Wolde', 'Ward Matron', 'Black Lion Specialised Hospital'],
+      ['Dr. Mulugeta Hailu', 'Head of Emergency', 'Tikur Anbessa Hospital'],
+    ]),
+    projects: [],
+  },
+
+  {
+    title: 'Secondary School Teacher',
+    summary:
+      'Teacher with 9 years of classroom experience in mathematics and physics. Known for bringing weak students up to grade level and for sharing teaching materials that other staff actually use.',
+    experience: [
+      exp(1, 'Head of Mathematics Department', 'Kokebe Tsibah Secondary School', '2020-09', 'Present', [
+        'Lead a department of seven teachers covering grades 9 to 12 for 1,400 students.',
+        'Raised the national exam pass rate in mathematics from 58% to 79% over three years.',
+        'Set the yearly scheme of work and moderate all internal exam papers.',
+        'Run a Saturday support class for 80 students preparing for the national examination.',
+        'Introduced a shared bank of lesson materials now used across the whole department.',
+      ]),
+      exp(2, 'Mathematics and Physics Teacher', 'Menelik II Secondary School', '2017-09', '2020-08', [
+        'Taught mathematics and physics to five classes of about 55 students each.',
+        'Set up a small physics practical corner using low-cost materials the school could afford.',
+        'Coached the school team that reached the regional science fair final twice.',
+        'Kept detailed progress records and met parents each term to discuss them.',
+      ]),
+      exp(3, 'Mathematics Teacher', 'Bole Preparatory School', '2015-09', '2017-08', [
+        'Taught grade 9 and 10 mathematics and served as form teacher for a class of 52.',
+        'Ran a remedial group that moved 23 of 30 struggling students to a pass grade.',
+        'Helped write the school assessment policy still in use.',
+        'Supervised the mathematics club and its inter-school competitions.',
+      ]),
+      exp(4, 'Assistant Teacher', 'Addis Ketema Secondary School', '2014-09', '2015-08', [
+        'Supported two senior teachers across eight classes and supervised practical sessions.',
+        'Marked homework and kept attendance and grade records for 300 students.',
+        'Prepared teaching aids for the mathematics and science departments.',
+      ]),
+    ],
+    education: [
+      edu(1, 'Master of Education', 'Mathematics Education', 'Addis Ababa University', '2018', '2020'),
+      edu(2, 'Bachelor of Education', 'Mathematics and Physics', 'Bahir Dar University', '2010', '2014'),
+    ],
+    skills: skills(['Lesson Planning', 'Classroom Management', 'Assessment Design', 'Curriculum Development', 'Student Mentoring', 'Exam Preparation', 'Parent Communication', 'Teacher Training']),
+    certifications: certs([
+      ['Teaching Licence, Secondary Level', 'Ministry of Education', '2022'],
+      ['Certificate in Active Learning Methods', 'VSO Ethiopia', '2021'],
+      ['ICT for Teaching', 'British Council', '2019'],
+    ]),
+    references: refs([
+      ['Ato Getachew Bekele', 'School Director', 'Kokebe Tsibah Secondary School'],
+      ['W/ro Senait Desta', 'Vice Director', 'Menelik II Secondary School'],
+    ]),
+    projects: [],
+  },
+
+  {
+    title: 'Graphic Designer',
+    summary:
+      'Graphic designer with 7 years of experience across brand, print and digital work. Happy to own a project from the first sketch to the print check, and to explain the reasoning behind every choice.',
+    experience: [
+      exp(1, 'Senior Graphic Designer', 'Zewd Creative Agency', '2021-04', 'Present', [
+        'Lead design on brand projects for clients in banking, food and the non-profit sector.',
+        'Built visual identities for nine brands, including logo, colour, type and usage guidelines.',
+        'Manage two junior designers and review all work before it reaches the client.',
+        'Cut the average approval round from four revisions to two by changing how work is presented.',
+        'Prepare and check print files with suppliers, with no reprints in three years.',
+      ]),
+      exp(2, 'Graphic Designer', 'Kana Television', '2018-08', '2021-03', [
+        'Produced on-air graphics, title sequences and promotional material for six shows.',
+        'Designed social media artwork posted daily to an audience of 1.2 million followers.',
+        'Rebuilt the channel template set, halving the time needed to prepare a new programme.',
+        'Worked with the production team to keep every show visually consistent.',
+      ]),
+      exp(3, 'Junior Designer', 'Arowwai Industries', '2016-10', '2018-07', [
+        'Designed packaging, labels and point-of-sale material for three product ranges.',
+        'Adapted master artwork into 40+ sizes for print and outdoor placement.',
+        'Kept the asset library organised and retired 300 outdated files.',
+        'Supported photo shoots and handled basic retouching.',
+      ]),
+      exp(4, 'Design Intern', 'Ethiopian Tourism Organisation', '2015-09', '2016-09', [
+        'Produced brochures and exhibition panels for two international travel fairs.',
+        'Prepared simple maps and infographics for the visitor guide.',
+        'Helped catalogue the photography archive by region.',
+      ]),
+    ],
+    education: [
+      edu(1, 'Bachelor of Fine Arts', 'Graphic Design', 'Alle School of Fine Arts and Design', '2012', '2016'),
+      edu(2, 'Diploma', 'Multimedia and Motion Graphics', 'Addis Ababa University', '2017', '2018'),
+    ],
+    skills: skills(['Brand Identity', 'Adobe Illustrator', 'Adobe Photoshop', 'InDesign / Layout', 'Typography', 'Print Production', 'Motion Graphics', 'Art Direction']),
+    certifications: certs([
+      ['Adobe Certified Professional', 'Adobe', '2023'],
+      ['Certificate in Motion Design', 'School of Motion', '2021'],
+      ['Print Production Fundamentals', 'Ethiopian Printing Association', '2019'],
+    ]),
+    references: refs([
+      ['Selam Girma', 'Creative Director', 'Zewd Creative Agency'],
+      ['Bereket Hailu', 'Head of Production', 'Kana Television'],
+    ]),
+    projects: [
+      { id: 'p-proj-1', name: 'Habesha Coffee Rebrand', description: 'Full visual identity and packaging for a coffee exporter selling into four markets.', url: '', startDate: '', endDate: '', technologies: ['Illustrator', 'Packaging', 'Brand Guidelines'] },
+      { id: 'p-proj-2', name: 'Addis Jazz Festival', description: 'Poster series, programme and stage graphics for a three-day festival attended by 9,000 people.', url: '', startDate: '', endDate: '', technologies: ['InDesign', 'Poster', 'Motion'] },
+    ],
+  },
+
+  {
+    title: 'Finance and Administration Officer',
+    summary:
+      'Administration and finance officer with 8 years supporting busy offices and field programmes. Reliable with budgets, procurement and records, and used to keeping several departments moving at once.',
+    experience: [
+      exp(1, 'Finance and Administration Officer', 'Bridge Technology Solutions', '2022-01', 'Present', [
+        'Manage the office budget, petty cash and monthly expense reports for a staff of 45.',
+        'Run procurement end to end, from quotations and comparison to purchase order and delivery.',
+        'Prepare payroll inputs and pension filings, delivered on time every month for three years.',
+        'Keep personnel and contract records and handle renewals before they expire.',
+        'Organise travel, logistics and meeting arrangements for the management team.',
+      ]),
+      exp(2, 'Administrative Officer', 'Save the Children Ethiopia', '2019-03', '2021-12', [
+        'Supported three field offices with procurement, vehicle scheduling and supplier payments.',
+        'Reconciled field advances worth 2.6 million birr a quarter with no outstanding items.',
+        'Set up a shared filing system that cut document retrieval from hours to minutes.',
+        'Prepared documentation for donor audits and answered auditor queries directly.',
+      ]),
+      exp(3, 'Finance Assistant', 'Ethiopian Red Cross Society', '2017-02', '2019-02', [
+        'Checked and recorded payment requests against budget lines for four programmes.',
+        'Maintained the fixed asset register across two warehouses.',
+        'Prepared monthly bank reconciliations and cleared long-standing open items.',
+        'Trained four new staff on the expense claim process.',
+      ]),
+      exp(4, 'Office Assistant', 'Ginyard International', '2015-08', '2017-01', [
+        'Handled reception, correspondence and the central filing system.',
+        'Kept stationery and consumable stock and placed orders before shortages.',
+        'Supported HR with interview scheduling and new-staff paperwork.',
+      ]),
+    ],
+    education: [
+      edu(1, 'Bachelor of Arts', 'Management', 'Mettu University', '2011', '2015'),
+      edu(2, 'Diploma', 'Accounting', 'Hawassa Technical College', '2009', '2011'),
+    ],
+    skills: skills(['Budget Management', 'Procurement', 'Payroll Support', 'Record Keeping', 'Advanced Excel', 'Report Writing', 'Supplier Relations', 'Office Coordination']),
+    certifications: certs([
+      ['Certificate in Public Procurement', 'Ethiopian Management Institute', '2022'],
+      ['Effective Work Habits', 'British Council', '2020'],
+      ['Basic Accounting with Peachtree', 'Unity University', '2018'],
+    ]),
+    references: refs([
+      ['Zelalem Tsegaye', 'Operations Manager', 'Bridge Technology Solutions'],
+      ['Aster Mengistu', 'Country Finance Lead', 'Save the Children Ethiopia'],
+    ]),
+    projects: [],
+  },
+
+  {
+    title: 'Logistics and Supply Chain Officer',
+    summary:
+      'Supply chain officer with 8 years moving goods across Ethiopia and through customs. Practical about deadlines, careful with paperwork, and comfortable negotiating with transporters and clearing agents.',
+    experience: [
+      exp(1, 'Logistics Officer', 'Ethiopian Shipping and Logistics', '2021-06', 'Present', [
+        'Coordinate inbound shipments through Djibouti port for a monthly volume of 240 containers.',
+        'Cut average customs clearance time from nine days to five by reorganising document preparation.',
+        'Manage a panel of 14 transporters and negotiate rates reviewed every six months.',
+        'Track and report on delivery performance, holding on-time delivery above 94%.',
+        'Resolve damage and shortage claims with insurers and suppliers.',
+      ]),
+      exp(2, 'Supply Chain Officer', 'Moha Soft Drinks', '2018-09', '2021-05', [
+        'Planned distribution from two plants to 600 retail outlets across four regions.',
+        'Reduced stock-outs at depot level by 38% by changing the reorder points.',
+        'Ran the monthly stock count and investigated every variance above 0.5%.',
+        'Introduced a simple delivery log that made driver performance visible for the first time.',
+      ]),
+      exp(3, 'Warehouse Supervisor', 'MIDROC Ethiopia', '2016-04', '2018-08', [
+        'Supervised a 4,000 square metre warehouse and a team of eleven staff.',
+        'Kept inventory accuracy above 98% across 1,200 stock lines.',
+        'Rearranged the storage layout, cutting order picking time by a third.',
+        'Enforced safety procedures with no reportable incident in two years.',
+      ]),
+      exp(4, 'Logistics Assistant', 'Ethiopian Airlines Cargo', '2014-10', '2016-03', [
+        'Prepared airway bills and customs documents for outbound perishable cargo.',
+        'Coordinated cold-chain handling for flower and vegetable exports.',
+        'Kept daily records of cargo movement and reported delays to the duty manager.',
+      ]),
+    ],
+    education: [
+      edu(1, 'Master of Arts', 'Logistics and Supply Chain Management', 'Addis Ababa University', '2019', '2021'),
+      edu(2, 'Bachelor of Arts', 'Procurement and Supply Management', 'Jimma University', '2010', '2014'),
+    ],
+    skills: skills(['Customs Clearance', 'Inventory Control', 'Transport Planning', 'Supplier Negotiation', 'Warehouse Operations', 'ERP Systems', 'Cost Reduction', 'Team Supervision']),
+    certifications: certs([
+      ['CIPS Level 4 Diploma', 'Chartered Institute of Procurement & Supply', '2022'],
+      ['Certificate in Freight Forwarding', 'FIATA', '2020'],
+      ['Warehouse Safety Management', 'Ethiopian Management Institute', '2018'],
+    ]),
+    references: refs([
+      ['Fitsum Alemayehu', 'Head of Operations', 'Ethiopian Shipping and Logistics'],
+      ['Rahel Mekonnen', 'Distribution Manager', 'Moha Soft Drinks'],
+    ]),
+    projects: [],
+  },
+]
+
+/**
+ * Which trade a given template shows. Hashed like personFor, but seeded
+ * differently so the profession does not move in lockstep with the sitter --
+ * otherwise the same face and the same job would always appear together.
+ */
+function professionFor(templateId: string): Profession {
+  let hash = 7
+  for (let i = 0; i < templateId.length; i++) hash = (hash * 131 + templateId.charCodeAt(i)) >>> 0
+  return PROFESSIONS[hash % PROFESSIONS.length]
 }
