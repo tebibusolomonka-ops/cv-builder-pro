@@ -37,7 +37,7 @@ export function CTA() {
             </Button>
           </Link>
           <p className="mt-4 text-sm text-dark-400">
-            No sign-up. No credit card. Free to use.
+            No sign-up. No credit card. Netsa CV (NetsaCV) is free for everyone.
           </p>
         </motion.div>
       </div>

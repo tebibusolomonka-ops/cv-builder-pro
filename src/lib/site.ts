@@ -16,7 +16,15 @@ export const SITE_URL = 'https://netsacv.com'
 
 export const SITE_NAME = 'Netsa CV'
 
-export const SITE_TITLE = 'Netsa CV — Free Online CV and Resume Builder'
+/**
+ * The spaceless spelling people also search for and type.
+ *
+ * Declared to search engines as schema.org alternateName so the two spellings
+ * resolve to one entity rather than competing.
+ */
+export const SITE_ALTERNATE_NAME = 'NetsaCV'
+
+export const SITE_TITLE = 'Netsa CV — Free Online CV & Resume Builder'
 
 export const SITE_DESCRIPTION =
   'Build a CV online for free with Netsa CV. Pick from 50+ resume templates, fill in your details, and download a print-ready PDF. No account, no payment, and your information stays in your browser.'
