@@ -1,11 +1,13 @@
 import type { Metadata } from 'next'
+import { pageMetadata } from '@/lib/site'
 import { TemplateShowcase } from '@/components/landing/TemplateShowcase'
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: 'CV Templates — Netsa CV',
   description:
-    'See every CV design. Each one is a different layout, all of them are free, and you can change any of them.',
-}
+    'Browse every free CV template on Netsa CV. Each one is a different layout, and you can edit any of them and download it as a PDF.',
+  path: '/templates',
+})
 
 export default function TemplatesPage() {
   return (

@@ -14,6 +14,23 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     '/api/export': ['./node_modules/@sparticuz/chromium/bin/**'],
   },
+
+  async redirects() {
+    return [
+      // One address for the site. Vercel may already fold www into the apex at
+      // the edge, in which case this never fires; it is here so the preference
+      // holds even if that domain setting is changed or re-added later.
+      //
+      // It cannot loop: after the redirect the host is netsacv.com, which no
+      // longer matches the condition.
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: 'www.netsacv.com' }],
+        destination: 'https://netsacv.com/:path*',
+        permanent: true,
+      },
+    ]
+  },
 };
 
 export default nextConfig;

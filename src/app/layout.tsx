@@ -1,17 +1,16 @@
 import type { Metadata } from 'next'
 import { Toaster } from 'react-hot-toast'
+import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from '@/lib/site'
 import './globals.css'
 
-// Relative URLs in metadata (Open Graph images, canonicals) resolve against
-// this. Without it Next warns and falls back to localhost, which then ships
-// localhost URLs into the production page head.
-const SITE_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://netsacv.com'
-
 export const metadata: Metadata = {
+  // Relative URLs in metadata (the Open Graph image, canonicals) resolve
+  // against this. Without it Next falls back to localhost and ships localhost
+  // URLs into the production page head.
   metadataBase: new URL(SITE_URL),
-  title: 'Netsa CV — Free CV and Resume Builder',
-  description:
-    'Netsa CV is a free CV builder. Choose a design, add your details, and download a PDF. No account, no payment, and your information stays on your device.',
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
   keywords: [
     'resume builder',
     'cv builder',
@@ -21,13 +20,31 @@ export const metadata: Metadata = {
     'professional resume',
     'ATS resume',
   ],
-  alternates: { canonical: '/' },
+  // No `alternates` here on purpose. Metadata is inherited, so a canonical
+  // set on the root layout is handed down to every page that does not override
+  // it -- which had /templates, /privacy and /terms all naming the homepage as
+  // their canonical URL, telling Google not to index any of them. Each public
+  // page states its own through pageMetadata() instead.
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 },
+  },
   openGraph: {
-    title: 'Netsa CV — Free CV and Resume Builder',
-    description: 'Build your CV for free and download it as a PDF. No account needed, and nothing leaves your device.',
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
     type: 'website',
-    siteName: 'Netsa CV',
+    siteName: SITE_NAME,
     url: SITE_URL,
+    locale: 'en_US',
+    // No `images` key: src/app/opengraph-image.png is picked up by Next's
+    // file convention and given an absolute URL automatically. This block is
+    // only the fallback for the private screens; public pages set their own.
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
   },
 }
 

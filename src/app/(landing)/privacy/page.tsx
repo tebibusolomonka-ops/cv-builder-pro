@@ -1,11 +1,13 @@
 import type { Metadata } from 'next'
+import { pageMetadata } from '@/lib/site'
 import { LegalPage, Section } from '@/components/legal/LegalPage'
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: 'Privacy Policy — Netsa CV',
   description:
     'What Netsa CV keeps and does not keep. Your CV stays in your own browser. There are no accounts and no tracking.',
-}
+  path: '/privacy',
+})
 
 export default function PrivacyPage() {
   return (

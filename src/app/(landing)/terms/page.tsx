@@ -1,11 +1,13 @@
 import type { Metadata } from 'next'
+import { pageMetadata } from '@/lib/site'
 import { LegalPage, Section } from '@/components/legal/LegalPage'
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: 'Terms of Use — Netsa CV',
   description:
     'The terms for using Netsa CV: free to use, provided as-is, and your CV content remains yours.',
-}
+  path: '/terms',
+})
 
 export default function TermsPage() {
   return (
