@@ -105,7 +105,7 @@ export function TemplateSpotlight() {
               <span className="mt-5 ml-auto block h-px w-16 bg-primary-500/40" />
             </motion.div>
 
-            <div className="relative mx-auto h-[600px] w-full" style={{ maxWidth: SLIDE_W }}>
+            <div className="relative mx-auto aspect-[1/1.4142] w-full" style={{ maxWidth: SLIDE_W }}>
               <motion.div
                 aria-hidden
                 className="pointer-events-none absolute -inset-24 -z-10 rounded-full bg-[radial-gradient(circle,rgba(184,68,46,0.2),transparent_65%)] blur-2xl"
@@ -126,8 +126,7 @@ export function TemplateSpotlight() {
                 // down into the resume, so every featured template rendered
                 // centre-aligned on the homepage while the same template was
                 // ranged left everywhere else.
-                className="group absolute inset-x-0 mx-auto cursor-pointer text-left focus-ring"
-                style={{ width: SLIDE_W }}
+                className="group absolute inset-x-0 mx-auto w-full cursor-pointer text-left focus-ring"
                 initial={{ opacity: 0, x: direction > 0 ? 150 : -150, scale: 0.93 }}
                 animate={{ opacity: 1, x: 0, scale: 1 }}
                 exit={{ opacity: 0, x: direction > 0 ? -150 : 150, scale: 0.93 }}
@@ -174,7 +173,7 @@ export function TemplateSpotlight() {
             type="button"
             onClick={() => go(index - 1, -1)}
             aria-label="Previous template"
-            className="focus-ring absolute left-4 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-dark-700 bg-surface-elevated/80 text-dark-200 backdrop-blur transition-colors hover:border-primary-500/60 hover:text-primary-400 md:left-10"
+            className="focus-ring absolute left-4 top-1/2 z-10 hidden h-12 w-12 md:flex -translate-y-1/2 items-center justify-center rounded-full border border-dark-700 bg-surface-elevated/80 text-dark-200 backdrop-blur transition-colors hover:border-primary-500/60 hover:text-primary-400 md:left-10"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
@@ -182,7 +181,7 @@ export function TemplateSpotlight() {
             type="button"
             onClick={() => go(index + 1, 1)}
             aria-label="Next template"
-            className="focus-ring absolute right-4 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-dark-700 bg-surface-elevated/80 text-dark-200 backdrop-blur transition-colors hover:border-primary-500/60 hover:text-primary-400 md:right-10"
+            className="focus-ring absolute right-4 top-1/2 z-10 hidden h-12 w-12 md:flex -translate-y-1/2 items-center justify-center rounded-full border border-dark-700 bg-surface-elevated/80 text-dark-200 backdrop-blur transition-colors hover:border-primary-500/60 hover:text-primary-400 md:right-10"
           >
             <ChevronRight className="h-5 w-5" />
           </button>

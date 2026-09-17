@@ -318,7 +318,12 @@ export default function WorkspacePage() {
         <div className="mt-7 grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
           <button
             onClick={() => handleCreate()}
-            className="group flex aspect-[1/1.1] cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-dark-700 transition-all duration-300 hover:border-primary-500/50 hover:bg-primary-500/5"
+            // The square tile is sized for the five-column desktop grid. On a
+            // phone the grid collapses to one column, where that aspect ratio
+            // turned this into a 343x378 empty dashed box -- a screen of void
+            // between the heading and the first template. It becomes a compact
+            // row there instead.
+            className="group flex cursor-pointer flex-row items-center justify-center gap-3 rounded-xl border border-dashed border-dark-700 py-5 transition-all duration-300 hover:border-primary-500/50 hover:bg-primary-500/5 sm:aspect-[1/1.1] sm:flex-col sm:py-0"
           >
             <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary-600 text-white transition-transform duration-300 group-hover:scale-110">
               <Plus size={20} />

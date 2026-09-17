@@ -84,7 +84,7 @@ export function EditorTopBar() {
   return (
     <>
       <header className="h-16 border-b border-dark-700 bg-surface-elevated flex items-center justify-between px-4 sm:px-6 shrink-0 z-10 no-print">
-        <div className="flex items-center gap-2 sm:gap-4">
+        <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-4">
           <Link href="/dashboard" className="text-dark-400 hover:text-white transition-colors">
             <ArrowLeft size={20} />
           </Link>
@@ -94,14 +94,14 @@ export function EditorTopBar() {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Untitled Resume"
-            className="text-sm sm:text-base font-semibold text-white bg-transparent border border-transparent hover:border-dark-600 focus:border-primary-500 focus:bg-dark-900/50 outline-none px-2 py-1 rounded-lg transition-all truncate w-[150px] sm:w-[250px]"
+            className="text-sm sm:text-base font-semibold text-white bg-transparent border border-transparent hover:border-dark-600 focus:border-primary-500 focus:bg-dark-900/50 outline-none px-2 py-1 rounded-lg transition-all truncate w-full min-w-0 sm:w-[250px] sm:flex-none"
           />
-          <span className="px-2 py-0.5 rounded text-[10px] sm:text-xs font-medium bg-surface-elevated text-dark-300 border border-dark-700">
+          <span className="hidden shrink-0 rounded border border-dark-700 bg-surface-elevated px-2 py-0.5 text-[10px] font-medium text-dark-300 sm:inline sm:text-xs">
             DRAFT
           </span>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           <Button 
             variant="outline" 
             size="sm" 
@@ -115,10 +115,13 @@ export function EditorTopBar() {
           <Button
             variant="gradient"
             size="sm"
+            // The primary action on a phone, so it gets a full-height tap
+            // target. Height costs nothing here; width is the scarce axis.
+            className="min-h-[40px]"
             onClick={handleExportPDF}
             disabled={isExporting}
           >
-            <Download size={16} className="sm:mr-2" />
+            <Download size={18} className="sm:mr-2" />
             <span className="hidden sm:inline">
               {isExporting ? 'Preparing…' : 'Export PDF'}
             </span>
