@@ -14,6 +14,7 @@ import {
   VolunteerExperience,
   Reference,
   ResumeSection,
+  SectionType,
   defaultResumeData,
 } from '@/types/resume'
 import { MAX_UNDO_HISTORY } from '@/lib/constants'
@@ -82,6 +83,8 @@ interface ResumeState {
   removeReference: (id: string) => void
 
   // Actions - Sections
+  hideSection: (type: SectionType) => void
+  restoreSection: (type: SectionType) => void
   toggleSection: (sectionId: string) => void
   reorderSections: (sections: ResumeSection[]) => void
 
@@ -434,6 +437,29 @@ export const useResumeStore = create<ResumeState>()(
         })),
 
       // Sections
+      //
+      // Removing an optional section empties it rather than flagging the
+      // renderers: all 51 templates already gate a section on its array being
+      // non-empty, so the model handing them an empty list is enough to take
+      // it off the page everywhere.
+      hideSection: (type) =>
+        set((state) => ({
+          ...pushHistory(state),
+          data: {
+            ...state.data,
+            hiddenSections: [...new Set([...(state.data.hiddenSections ?? []), type])],
+          },
+        })),
+
+      restoreSection: (type) =>
+        set((state) => ({
+          ...pushHistory(state),
+          data: {
+            ...state.data,
+            hiddenSections: (state.data.hiddenSections ?? []).filter((hidden) => hidden !== type),
+          },
+        })),
+
       toggleSection: (sectionId) =>
         set((state) => ({
           ...pushHistory(state),

@@ -221,8 +221,18 @@ function personFor(templateId: string) {
   }
 }
 
+/** The optional sections a reader can take off the page from the preview. */
+export const REMOVABLE_SECTIONS = ['projects', 'certifications', 'languages', 'references'] as const
+export type RemovableSection = (typeof REMOVABLE_SECTIONS)[number]
+
 function usePreviewModel(templateIdOverride?: string, forceSample = false): PreviewModel {
   const { data } = useResumeStore()
+  const hidden = new Set(data.hiddenSections ?? [])
+  // A removed section is handed over empty. Every template already gates its
+  // sections on a non-empty array, so this takes it off all 51 without any of
+  // them needing to know the feature exists.
+  const unlessHidden = <T,>(section: RemovableSection, items: T[]): T[] =>
+    hidden.has(section) ? [] : items
   const info = data.personalInfo
   const template = TEMPLATES.find((item) => item.id === (templateIdOverride || data.style.templateId)) ?? TEMPLATES[0]
 
@@ -266,10 +276,10 @@ function usePreviewModel(templateIdOverride?: string, forceSample = false): Prev
     experience: orSample(data.workExperience, sampleExperience),
     education: orSample(data.education, sampleEducation),
     skills: orSample(data.skills, sampleSkills),
-    projects: filled(data.projects),
-    certifications: orSample(data.certifications, sampleCertifications),
-    languages: orSample(data.languages, sampleLanguages),
-    references: orSample(data.references, sampleReferences),
+    projects: unlessHidden('projects', filled(data.projects)),
+    certifications: unlessHidden('certifications', orSample(data.certifications, sampleCertifications)),
+    languages: unlessHidden('languages', orSample(data.languages, sampleLanguages)),
+    references: unlessHidden('references', orSample(data.references, sampleReferences)),
   }
 }
 
@@ -842,25 +852,25 @@ function PremierResume({ model }: { model: PreviewModel }) {
               ))}
             </div>
           </PremierSection>
-          {model.projects.length > 0 && <PremierSection title="Projects" accent={accent} secondary={secondary}><ProjectList items={model.projects} accent={secondary} /></PremierSection>}
-          {model.references.length > 0 && <PremierSection title="References" accent={accent} secondary={secondary}><RefList items={model.references} /></PremierSection>}
+          {model.projects.length > 0 && <PremierSection data-cv-section="projects" title="Projects" accent={accent} secondary={secondary}><ProjectList items={model.projects} accent={secondary} /></PremierSection>}
+          {model.references.length > 0 && <PremierSection data-cv-section="references" title="References" accent={accent} secondary={secondary}><RefList items={model.references} /></PremierSection>}
         </main>
         {/* Spread the sections over the full height — see SideColumn. The
             sections' own mb-7 is dropped so only the distributed gap applies. */}
         <aside className="flex flex-col gap-1 border-l pl-8" style={{ borderColor: `${accent}40` }}>
           <PremierSection title="Education" accent={accent} secondary={secondary}><EducationList items={model.education} /></PremierSection>
           <PremierSection title="Expertise" accent={accent} secondary={secondary}><SkillList skills={model.skills} accent={accent} /></PremierSection>
-          {model.certifications.length > 0 && <PremierSection title="Certifications" accent={accent} secondary={secondary}><CertList items={model.certifications} /></PremierSection>}
-          {model.languages.length > 0 && <PremierSection title="Languages" accent={accent} secondary={secondary}><LanguageStars items={model.languages} accent={accent} /></PremierSection>}
+          {model.certifications.length > 0 && <PremierSection data-cv-section="certifications" title="Certifications" accent={accent} secondary={secondary}><CertList items={model.certifications} /></PremierSection>}
+          {model.languages.length > 0 && <PremierSection data-cv-section="languages" title="Languages" accent={accent} secondary={secondary}><LanguageStars items={model.languages} accent={accent} /></PremierSection>}
         </aside>
       </div>
     </Page>
   )
 }
 
-function PremierSection({ title, accent, secondary, children }: { title: string; accent: string; secondary: string; children: React.ReactNode }) {
+function PremierSection({ title, accent, secondary, children, 'data-cv-section': sectionTag }: { title: string; accent: string; secondary: string; children: React.ReactNode; 'data-cv-section'?: string }) {
   return (
-    <section className="mb-7">
+    <section data-cv-section={sectionTag} className="mb-7">
       <h2 className="mb-3 text-[13px] font-semibold uppercase tracking-[0.28em]" style={{ fontFamily: SERIF, color: secondary }}>
         {title}
         <span className="mt-1.5 block h-px w-9" style={{ backgroundColor: accent }} />
@@ -891,9 +901,9 @@ function ModernResume({ model }: { model: PreviewModel }) {
           </div>
         </SideSection>
         <SideSection title="Skills" accent={accent} dark><SkillBars skills={model.skills} accent={accent} /></SideSection>
-        {model.languages.length > 0 && <SideSection title="Languages" accent={accent} dark><LanguageStars items={model.languages} accent={accent} dark /></SideSection>}
+        {model.languages.length > 0 && <SideSection data-cv-section="languages" title="Languages" accent={accent} dark><LanguageStars items={model.languages} accent={accent} dark /></SideSection>}
         {model.certifications.length > 0 && (
-          <SideSection title="Certifications" accent={accent} dark>
+          <SideSection data-cv-section="certifications" title="Certifications" accent={accent} dark>
             <div className="space-y-2.5 text-[11px] leading-relaxed text-white/80">
               {model.certifications.map((c) => (
                 <p key={c.id}>
@@ -913,8 +923,8 @@ function ModernResume({ model }: { model: PreviewModel }) {
         </header>
         <MainSection title="Profile" accent={accent}><Paragraph>{model.summary}</Paragraph></MainSection>
         <MainSection title="Experience" accent={accent}><ExperienceList items={model.experience} accent={secondary} datePill /></MainSection>
-        {model.projects.length > 0 && <MainSection title="Projects" accent={accent}><ProjectList items={model.projects} accent={secondary} /></MainSection>}
-        {model.references.length > 0 && <MainSection title="References" accent={accent}><div className="grid grid-cols-2 gap-4"><RefList items={[model.references[0]]} />{model.references[1] && <RefList items={[model.references[1]]} />}</div></MainSection>}
+        {model.projects.length > 0 && <MainSection data-cv-section="projects" title="Projects" accent={accent}><ProjectList items={model.projects} accent={secondary} /></MainSection>}
+        {model.references.length > 0 && <MainSection data-cv-section="references" title="References" accent={accent}><div className="grid grid-cols-2 gap-4"><RefList items={[model.references[0]]} />{model.references[1] && <RefList items={[model.references[1]]} />}</div></MainSection>}
       </main>
     </Page>
   )
@@ -945,25 +955,25 @@ function ProfessionalResume({ model }: { model: PreviewModel }) {
           <IconSection title="Contact" icon={User} accent={accent}><ContactChips model={model} chipBg={accent} chipColor="#ffffff" textClass="text-gray-700" /></IconSection>
           <IconSection title="Education" icon={GraduationCap} accent={accent}><EducationList items={model.education} /></IconSection>
           <IconSection title="Skills" icon={Wrench} accent={accent}><SkillList skills={model.skills} accent={accent} /></IconSection>
-          {model.languages.length > 0 && <IconSection title="Languages" icon={LanguagesIcon} accent={accent}><LanguageStars items={model.languages} accent={accent} /></IconSection>}
+          {model.languages.length > 0 && <IconSection data-cv-section="languages" title="Languages" icon={LanguagesIcon} accent={accent}><LanguageStars items={model.languages} accent={accent} /></IconSection>}
         </aside>
         <main className="flex-1 px-9 py-8">
           <IconSection title="Experience" icon={Briefcase} accent={accent}><ExperienceList items={model.experience} accent="#1f2937" datePill /></IconSection>
           <div className="mt-2 grid grid-cols-2 gap-5">
             {model.certifications.length > 0 && (
-              <div className="rounded-md p-5" style={{ backgroundColor: secondary }}>
+              <div data-cv-section="certifications" className="rounded-md p-5" style={{ backgroundColor: secondary }}>
                 <IconHeading title="Certifications" icon={Award} accent={accent} />
                 <CertList items={model.certifications} />
               </div>
             )}
             {model.references.length > 0 && (
-              <div className="rounded-md p-5" style={{ backgroundColor: secondary }}>
+              <div data-cv-section="references" className="rounded-md p-5" style={{ backgroundColor: secondary }}>
                 <IconHeading title="References" icon={Users} accent={accent} />
                 <RefList items={model.references} />
               </div>
             )}
           </div>
-          {model.projects.length > 0 && <div className="mt-5"><IconSection title="Projects" icon={Wrench} accent={accent}><ProjectList items={model.projects} accent="#1f2937" /></IconSection></div>}
+          {model.projects.length > 0 && <div data-cv-section="projects" className="mt-5"><IconSection title="Projects" icon={Wrench} accent={accent}><ProjectList items={model.projects} accent="#1f2937" /></IconSection></div>}
         </main>
       </div>
     </Page>
@@ -979,9 +989,9 @@ function IconHeading({ title, icon: Icon, accent }: { title: string; icon: React
   )
 }
 
-function IconSection({ title, icon, accent, children }: { title: string; icon: React.ComponentType<{ size?: number | string }>; accent: string; children: React.ReactNode }) {
+function IconSection({ title, icon, accent, children, 'data-cv-section': sectionTag }: { title: string; icon: React.ComponentType<{ size?: number | string }>; accent: string; children: React.ReactNode; 'data-cv-section'?: string }) {
   return (
-    <section className="mb-6">
+    <section data-cv-section={sectionTag} className="mb-6">
       <IconHeading title={title} icon={icon} accent={accent} />
       {children}
     </section>
@@ -1003,13 +1013,13 @@ function MinimalResume({ model }: { model: PreviewModel }) {
         <main className="flex flex-col [&>section:last-child]:mb-0">
           <SimpleSection title="Profile" accent={accent}><Paragraph>{model.summary}</Paragraph></SimpleSection>
           <SimpleSection title="Experience" accent={accent}><ExperienceList items={model.experience} accent={accent} /></SimpleSection>
-          {model.projects.length > 0 && <SimpleSection title="Projects" accent={accent}><ProjectList items={model.projects} accent={accent} /></SimpleSection>}
+          {model.projects.length > 0 && <SimpleSection data-cv-section="projects" title="Projects" accent={accent}><ProjectList items={model.projects} accent={accent} /></SimpleSection>}
         </main>
         <aside className="flex flex-col [&>section:last-child]:mb-0">
           <SimpleSection title="Education" accent={accent}><EducationList items={model.education} /></SimpleSection>
           <SimpleSection title="Expertise" accent={accent}><SkillList skills={model.skills} accent={accent} /></SimpleSection>
-          {model.languages.length > 0 && <SimpleSection title="Languages" accent={accent}><LanguageStars items={model.languages} accent={accent} /></SimpleSection>}
-          {model.certifications.length > 0 && <SimpleSection title="Certifications" accent={accent}><CertList items={model.certifications} /></SimpleSection>}
+          {model.languages.length > 0 && <SimpleSection data-cv-section="languages" title="Languages" accent={accent}><LanguageStars items={model.languages} accent={accent} /></SimpleSection>}
+          {model.certifications.length > 0 && <SimpleSection data-cv-section="certifications" title="Certifications" accent={accent}><CertList items={model.certifications} /></SimpleSection>}
         </aside>
       </div>
     </Page>
@@ -1029,8 +1039,8 @@ function AcademicResume({ model }: { model: PreviewModel }) {
         </div>
         <SideSection title="Education" accent={accent}><EducationList items={model.education} /></SideSection>
         <SideSection title="Expertise" accent={accent}><SkillList skills={model.skills} accent={accent} /></SideSection>
-        {model.languages.length > 0 && <SideSection title="Languages" accent={accent}><LanguageStars items={model.languages} accent={accent} /></SideSection>}
-        {model.certifications.length > 0 && <SideSection title="Certifications" accent={accent}><CertList items={model.certifications} /></SideSection>}
+        {model.languages.length > 0 && <SideSection data-cv-section="languages" title="Languages" accent={accent}><LanguageStars items={model.languages} accent={accent} /></SideSection>}
+        {model.certifications.length > 0 && <SideSection data-cv-section="certifications" title="Certifications" accent={accent}><CertList items={model.certifications} /></SideSection>}
       </aside>
       <main className="px-11 py-12">
         <header className="mb-9">
@@ -1040,8 +1050,8 @@ function AcademicResume({ model }: { model: PreviewModel }) {
         </header>
         <MainSection title="Profile" accent={accent}><Paragraph>{model.summary}</Paragraph></MainSection>
         <MainSection title="Experience" accent={accent}><ExperienceList items={model.experience} accent={accent} /></MainSection>
-        {model.projects.length > 0 && <MainSection title="Research & Projects" accent={accent}><ProjectList items={model.projects} accent={accent} /></MainSection>}
-        {model.references.length > 0 && <MainSection title="References" accent={accent}><div className="grid grid-cols-2 gap-4"><RefList items={[model.references[0]]} />{model.references[1] && <RefList items={[model.references[1]]} />}</div></MainSection>}
+        {model.projects.length > 0 && <MainSection data-cv-section="projects" title="Research & Projects" accent={accent}><ProjectList items={model.projects} accent={accent} /></MainSection>}
+        {model.references.length > 0 && <MainSection data-cv-section="references" title="References" accent={accent}><div className="grid grid-cols-2 gap-4"><RefList items={[model.references[0]]} />{model.references[1] && <RefList items={[model.references[1]]} />}</div></MainSection>}
       </main>
     </Page>
   )
@@ -1067,13 +1077,13 @@ function CreativeResume({ model }: { model: PreviewModel }) {
           </div>
           <SideSection title="Skills" accent={accent}><SkillChips skills={model.skills} accent={accent} /></SideSection>
           <SideSection title="Education" accent={accent}><EducationList items={model.education} /></SideSection>
-          {model.languages.length > 0 && <SideSection title="Languages" accent={accent}><LanguageStars items={model.languages} accent={accent} /></SideSection>}
+          {model.languages.length > 0 && <SideSection data-cv-section="languages" title="Languages" accent={accent}><LanguageStars items={model.languages} accent={accent} /></SideSection>}
         </aside>
         <main>
           <MainSection title="Profile" accent={accent}><Paragraph>{model.summary}</Paragraph></MainSection>
           <MainSection title="Experience" accent={accent}><ExperienceList items={model.experience} accent={accent} /></MainSection>
-          {model.projects.length > 0 && <MainSection title="Projects" accent={accent}><ProjectList items={model.projects} accent={accent} /></MainSection>}
-          {model.certifications.length > 0 && <MainSection title="Certifications" accent={accent}><CertList items={model.certifications} /></MainSection>}
+          {model.projects.length > 0 && <MainSection data-cv-section="projects" title="Projects" accent={accent}><ProjectList items={model.projects} accent={accent} /></MainSection>}
+          {model.certifications.length > 0 && <MainSection data-cv-section="certifications" title="Certifications" accent={accent}><CertList items={model.certifications} /></MainSection>}
         </main>
       </div>
     </Page>
@@ -1098,9 +1108,9 @@ function AtsResume({ model }: { model: PreviewModel }) {
         <AtsSection title="Skills"><SkillList skills={model.skills} accent={accent} /></AtsSection>
       </div>
       <div className="grid grid-cols-2 gap-10">
-        {model.certifications.length > 0 && <AtsSection title="Certifications"><CertList items={model.certifications} /></AtsSection>}
+        {model.certifications.length > 0 && <AtsSection data-cv-section="certifications" title="Certifications"><CertList items={model.certifications} /></AtsSection>}
         {model.languages.length > 0 && (
-          <AtsSection title="Languages">
+          <AtsSection data-cv-section="languages" title="Languages">
             <p className="text-[11px] text-gray-700">{model.languages.map((l) => `${l.name} (${l.proficiency})`).join(', ')}</p>
           </AtsSection>
         )}
@@ -1144,8 +1154,8 @@ function TimelineResume({ model }: { model: PreviewModel }) {
         <aside className="flex flex-col gap-7 [&>section]:mb-0">
           <SimpleSection title="Education" accent={accent}><EducationList items={model.education} /></SimpleSection>
           <SimpleSection title="Skills" accent={accent}><SkillChips skills={model.skills} accent={accent} filled /></SimpleSection>
-          {model.languages.length > 0 && <SimpleSection title="Languages" accent={accent}><LanguageStars items={model.languages} accent={accent} /></SimpleSection>}
-          {model.certifications.length > 0 && <SimpleSection title="Certifications" accent={accent}><CertList items={model.certifications} /></SimpleSection>}
+          {model.languages.length > 0 && <SimpleSection data-cv-section="languages" title="Languages" accent={accent}><LanguageStars items={model.languages} accent={accent} /></SimpleSection>}
+          {model.certifications.length > 0 && <SimpleSection data-cv-section="certifications" title="Certifications" accent={accent}><CertList items={model.certifications} /></SimpleSection>}
         </aside>
       </div>
     </Page>
@@ -1184,8 +1194,8 @@ function BannerResume({ model }: { model: PreviewModel }) {
           <BannerSection title="Education" accent={accent}><EducationList items={model.education} /></BannerSection>
           <BannerSection title="Skills" accent={accent}><SkillChips skills={model.skills} accent={accent} filled /></BannerSection>
           <div className="grid grid-cols-2 gap-6">
-            {model.languages.length > 0 && <BannerSection title="Languages" accent={accent}><LanguageStars items={model.languages} accent={accent} /></BannerSection>}
-            {model.references.length > 0 && <BannerSection title="References" accent={accent}><RefList items={model.references.slice(0, 1)} /></BannerSection>}
+            {model.languages.length > 0 && <BannerSection data-cv-section="languages" title="Languages" accent={accent}><LanguageStars items={model.languages} accent={accent} /></BannerSection>}
+            {model.references.length > 0 && <BannerSection data-cv-section="references" title="References" accent={accent}><RefList items={model.references.slice(0, 1)} /></BannerSection>}
           </div>
         </div>
       </div>
@@ -1193,9 +1203,9 @@ function BannerResume({ model }: { model: PreviewModel }) {
   )
 }
 
-function BannerSection({ title, accent, children }: { title: string; accent: string; children: React.ReactNode }) {
+function BannerSection({ title, accent, children, 'data-cv-section': sectionTag }: { title: string; accent: string; children: React.ReactNode; 'data-cv-section'?: string }) {
   return (
-    <section className="mb-6">
+    <section data-cv-section={sectionTag} className="mb-6">
       <h2 className="mb-3 border-b-2 pb-1.5 text-[12.5px] font-black uppercase tracking-[0.18em] text-gray-900" style={{ borderColor: accent }}>{title}</h2>
       {children}
     </section>
@@ -1215,15 +1225,15 @@ function DuoResume({ model }: { model: PreviewModel }) {
         </header>
         <MainSection title="Profile" accent={accent}><Paragraph>{model.summary}</Paragraph></MainSection>
         <MainSection title="Experience" accent={accent}><ExperienceList items={model.experience} accent="#1f2937" /></MainSection>
-        {model.projects.length > 0 && <MainSection title="Projects" accent={accent}><ProjectList items={model.projects} accent="#1f2937" /></MainSection>}
-        {model.references.length > 0 && <MainSection title="References" accent={accent}><div className="grid grid-cols-2 gap-4"><RefList items={[model.references[0]]} />{model.references[1] && <RefList items={[model.references[1]]} />}</div></MainSection>}
+        {model.projects.length > 0 && <MainSection data-cv-section="projects" title="Projects" accent={accent}><ProjectList items={model.projects} accent="#1f2937" /></MainSection>}
+        {model.references.length > 0 && <MainSection data-cv-section="references" title="References" accent={accent}><div className="grid grid-cols-2 gap-4"><RefList items={[model.references[0]]} />{model.references[1] && <RefList items={[model.references[1]]} />}</div></MainSection>}
       </main>
       <aside className="w-[250px] shrink-0 px-7 py-11" style={{ backgroundColor: secondary }}>
         <div className="mb-7 flex justify-center"><Avatar model={model} size={116} ring={accent} /></div>
         <SideSection title="Contact" accent={accent}><ContactChips model={model} chipBg={accent} chipColor="#ffffff" textClass="text-gray-700" /></SideSection>
         <SideSection title="Education" accent={accent}><EducationList items={model.education} /></SideSection>
         <SideSection title="Skills" accent={accent}><SkillBars skills={model.skills} accent={accent} track="rgba(0,0,0,0.08)" labelClass="text-gray-700" /></SideSection>
-        {model.languages.length > 0 && <SideSection title="Languages" accent={accent}><LanguageStars items={model.languages} accent={accent} /></SideSection>}
+        {model.languages.length > 0 && <SideSection data-cv-section="languages" title="Languages" accent={accent}><LanguageStars items={model.languages} accent={accent} /></SideSection>}
       </aside>
     </Page>
   )
@@ -1267,13 +1277,13 @@ function MonogramResume({ model }: { model: PreviewModel }) {
           <EducationList items={model.education} />
         </section>
         {model.certifications.length > 0 && (
-          <section>
+          <section data-cv-section="certifications">
             <MonogramHeading title="Certifications" accent={accent} />
             <CertList items={model.certifications} />
           </section>
         )}
         {model.languages.length > 0 && (
-          <section>
+          <section data-cv-section="languages">
             <MonogramHeading title="Languages" accent={accent} />
             <LanguageStars items={model.languages} accent={accent} />
           </section>
@@ -1315,22 +1325,22 @@ function SplitResume({ model }: { model: PreviewModel }) {
         <main className="flex flex-col [&>section:last-child]:mb-0">
           <SplitSection title="About" accent={accent}><Paragraph>{model.summary}</Paragraph></SplitSection>
           <SplitSection title="Experience" accent={accent}><ExperienceList items={model.experience} accent={secondary} /></SplitSection>
-          {model.projects.length > 0 && <SplitSection title="Projects" accent={accent}><ProjectList items={model.projects} accent={secondary} /></SplitSection>}
+          {model.projects.length > 0 && <SplitSection data-cv-section="projects" title="Projects" accent={accent}><ProjectList items={model.projects} accent={secondary} /></SplitSection>}
         </main>
         <aside className="flex flex-col [&>section:last-child]:mb-0">
           <SplitSection title="Education" accent={accent}><EducationList items={model.education} /></SplitSection>
           <SplitSection title="Skills" accent={accent}><SkillBars skills={model.skills} accent={accent} track="rgba(0,0,0,0.08)" labelClass="text-gray-700" /></SplitSection>
-          {model.languages.length > 0 && <SplitSection title="Languages" accent={accent}><LanguageStars items={model.languages} accent={accent} /></SplitSection>}
-          {model.references.length > 0 && <SplitSection title="References" accent={accent}><RefList items={model.references.slice(0, 1)} /></SplitSection>}
+          {model.languages.length > 0 && <SplitSection data-cv-section="languages" title="Languages" accent={accent}><LanguageStars items={model.languages} accent={accent} /></SplitSection>}
+          {model.references.length > 0 && <SplitSection data-cv-section="references" title="References" accent={accent}><RefList items={model.references.slice(0, 1)} /></SplitSection>}
         </aside>
       </div>
     </Page>
   )
 }
 
-function SplitSection({ title, accent, children }: { title: string; accent: string; children: React.ReactNode }) {
+function SplitSection({ title, accent, children, 'data-cv-section': sectionTag }: { title: string; accent: string; children: React.ReactNode; 'data-cv-section'?: string }) {
   return (
-    <section className="mb-6">
+    <section data-cv-section={sectionTag} className="mb-6">
       <h2 className="mb-3 text-[12.5px] font-black uppercase tracking-[0.22em] text-gray-900">
         {title}
         <span className="mt-1 block h-[3px] w-8" style={{ backgroundColor: accent }} />
@@ -1371,16 +1381,16 @@ function CompactResume({ model }: { model: PreviewModel }) {
       </CompactSection>
       <div className="mt-2 grid grid-cols-3 gap-7">
         <CompactSection title="Skills" accent={accent}><SkillList skills={model.skills} accent={accent} /></CompactSection>
-        {model.languages.length > 0 && <CompactSection title="Languages" accent={accent}><LanguageStars items={model.languages} accent={accent} /></CompactSection>}
-        {model.certifications.length > 0 && <CompactSection title="Certifications" accent={accent}><CertList items={model.certifications} /></CompactSection>}
+        {model.languages.length > 0 && <CompactSection data-cv-section="languages" title="Languages" accent={accent}><LanguageStars items={model.languages} accent={accent} /></CompactSection>}
+        {model.certifications.length > 0 && <CompactSection data-cv-section="certifications" title="Certifications" accent={accent}><CertList items={model.certifications} /></CompactSection>}
       </div>
     </Page>
   )
 }
 
-function CompactSection({ title, accent, children }: { title: string; accent: string; children: React.ReactNode }) {
+function CompactSection({ title, accent, children, 'data-cv-section': sectionTag }: { title: string; accent: string; children: React.ReactNode; 'data-cv-section'?: string }) {
   return (
-    <section className="mt-5">
+    <section data-cv-section={sectionTag} className="mt-5">
       <h2 className="mb-2.5 text-[11.5px] font-black uppercase tracking-[0.24em]" style={{ color: accent }}>{title}</h2>
       {children}
     </section>
@@ -1428,7 +1438,7 @@ function ElegantResume({ model }: { model: PreviewModel }) {
         <section>
           <ElegantHeading title="Skills & Languages" accent={accent} small />
           <SkillList skills={model.skills.slice(0, 5)} accent={accent} />
-          {model.languages.length > 0 && <div className="mt-4"><LanguageStars items={model.languages} accent={accent} /></div>}
+          {model.languages.length > 0 && <div data-cv-section="languages" className="mt-4"><LanguageStars items={model.languages} accent={accent} /></div>}
         </section>
       </div>
     </Page>
@@ -1457,9 +1467,9 @@ function ElegantDivider({ accent }: { accent: string }) {
 
 // Shared sections
 
-function MainSection({ title, accent, children }: { title: string; accent: string; children: React.ReactNode }) {
+function MainSection({ title, accent, children, 'data-cv-section': sectionTag }: { title: string; accent: string; children: React.ReactNode; 'data-cv-section'?: string }) {
   return (
-    <section className="mb-7">
+    <section data-cv-section={sectionTag} className="mb-7">
       <h2 className="mb-4 flex items-center gap-4 text-[15px] font-black uppercase tracking-widest">
         <span>{title}</span>
         <span className="h-px flex-1" style={{ backgroundColor: accent }} />
@@ -1470,27 +1480,27 @@ function MainSection({ title, accent, children }: { title: string; accent: strin
   )
 }
 
-function SimpleSection({ title, accent, children }: { title: string; accent: string; children: React.ReactNode }) {
+function SimpleSection({ title, accent, children, 'data-cv-section': sectionTag }: { title: string; accent: string; children: React.ReactNode; 'data-cv-section'?: string }) {
   return (
-    <section className="mb-7">
+    <section data-cv-section={sectionTag} className="mb-7">
       <h2 className="mb-3 text-sm font-bold uppercase tracking-[0.22em]" style={{ color: accent }}>{title}</h2>
       {children}
     </section>
   )
 }
 
-function AtsSection({ title, children }: { title: string; children: React.ReactNode }) {
+function AtsSection({ title, children, 'data-cv-section': sectionTag }: { title: string; children: React.ReactNode; 'data-cv-section'?: string }) {
   return (
-    <section className="mt-7">
+    <section data-cv-section={sectionTag} className="mt-7">
       <h2 className="mb-3 border-b border-gray-300 pb-1 text-sm font-bold uppercase tracking-wide text-gray-950">{title}</h2>
       {children}
     </section>
   )
 }
 
-function SideSection({ title, accent, dark = false, children }: { title: string; accent: string; dark?: boolean; children: React.ReactNode }) {
+function SideSection({ title, accent, dark = false, children, 'data-cv-section': sectionTag }: { title: string; accent: string; dark?: boolean; children: React.ReactNode; 'data-cv-section'?: string }) {
   return (
-    <section className="mb-7">
+    <section data-cv-section={sectionTag} className="mb-7">
       <h2 className={cn('mb-4 flex items-center gap-3 text-[12px] font-black uppercase tracking-widest', dark && 'text-white')}>
         <span>{title}</span>
         <span className="h-px flex-1" style={{ backgroundColor: accent }} />
@@ -1597,22 +1607,22 @@ function ApertureResume({ model }: { model: PreviewModel }) {
           <ApertureHeading title="Profile" accent={accent} /><Paragraph>{model.summary}</Paragraph>
           <ApertureHeading title="Experience" accent={accent} className="mt-6" />
           <ExperienceList items={model.experience} accent={accent} datePill />
-          {model.projects.length > 0 && (<><ApertureHeading title="Projects" accent={accent} className="mt-6" /><ProjectList items={model.projects} accent={accent} /></>)}
+          {model.projects.length > 0 && (<><ApertureHeading data-cv-section="projects" title="Projects" accent={accent} className="mt-6" /><ProjectList data-cv-section="projects" items={model.projects} accent={accent} /></>)}
         </main>
         <SideColumn>
           <div><ApertureHeading title="Education" accent={accent} /><EducationList items={model.education} /></div>
           <div><ApertureHeading title="Skills" accent={accent} /><SkillList skills={model.skills} accent={accent} /></div>
-          {model.languages.length > 0 && (<div><ApertureHeading title="Languages" accent={accent} /><LanguageStars items={model.languages} accent={accent} /></div>)}
-          {model.certifications.length > 0 && (<div><ApertureHeading title="Certifications" accent={accent} /><CertList items={model.certifications} /></div>)}
+          {model.languages.length > 0 && (<div data-cv-section="languages"><ApertureHeading title="Languages" accent={accent} /><LanguageStars items={model.languages} accent={accent} /></div>)}
+          {model.certifications.length > 0 && (<div data-cv-section="certifications"><ApertureHeading title="Certifications" accent={accent} /><CertList items={model.certifications} /></div>)}
         </SideColumn>
       </div>
     </Page>
   )
 }
 
-function ApertureHeading({ title, accent, className }: { title: string; accent: string; className?: string }) {
+function ApertureHeading({ title, accent, className, 'data-cv-section': sectionTag }: { title: string; accent: string; className?: string; 'data-cv-section'?: string }) {
   return (
-    <h2 className={cn('mb-2.5 flex items-center gap-2.5 text-[10px] font-bold uppercase tracking-[0.26em]', className)} style={{ color: accent }}>
+    <h2 data-cv-section={sectionTag} className={cn('mb-2.5 flex items-center gap-2.5 text-[10px] font-bold uppercase tracking-[0.26em]', className)} style={{ color: accent }}>
       {title}<span className="h-px flex-1" style={{ backgroundColor: `${accent}44` }} />
     </h2>
   )
@@ -1639,7 +1649,7 @@ function FacetResume({ model }: { model: PreviewModel }) {
             <div className="mt-2"><SkillBars skills={model.skills.slice(0, 6)} accent={accent} /></div>
           </div>
           {model.languages.length > 0 && (
-            <div>
+            <div data-cv-section="languages">
               <h2 className="text-[9px] font-bold uppercase tracking-[0.24em]" style={{ color: accent }}>Languages</h2>
               <div className="mt-2"><LanguageStars items={model.languages} accent={accent} dark /></div>
             </div>
@@ -1655,8 +1665,8 @@ function FacetResume({ model }: { model: PreviewModel }) {
         <ExperienceList items={model.experience} accent={accent} />
         <ApertureHeading title="Education" accent={accent} className="mt-6" />
         <EducationList items={model.education} />
-        {model.certifications.length > 0 && (<><ApertureHeading title="Certifications" accent={accent} className="mt-6" /><CertList items={model.certifications} /></>)}
-        {model.references.length > 0 && (<><ApertureHeading title="References" accent={accent} className="mt-6" /><RefList items={model.references} /></>)}
+        {model.certifications.length > 0 && (<><ApertureHeading data-cv-section="certifications" title="Certifications" accent={accent} className="mt-6" /><CertList data-cv-section="certifications" items={model.certifications} /></>)}
+        {model.references.length > 0 && (<><ApertureHeading data-cv-section="references" title="References" accent={accent} className="mt-6" /><RefList data-cv-section="references" items={model.references} /></>)}
       </div>
     </Page>
   )
@@ -1696,13 +1706,13 @@ function HaloResume({ model }: { model: PreviewModel }) {
             <SkillChips skills={model.skills} accent={accent} filled />
           </div>
           {model.languages.length > 0 && (
-            <div>
+            <div data-cv-section="languages">
               <HaloHeading title="Languages" accent={accent} secondary={secondary} />
               <LanguageStars items={model.languages} accent={accent} />
             </div>
           )}
           {model.certifications.length > 0 && (
-            <div>
+            <div data-cv-section="certifications">
               <HaloHeading title="Certifications" accent={accent} secondary={secondary} />
               <CertList items={model.certifications} />
             </div>
@@ -1763,13 +1773,13 @@ function AtriumResume({ model }: { model: PreviewModel }) {
           <ApertureHeading title="Profile" accent={accent} /><Paragraph>{model.summary}</Paragraph>
           <ApertureHeading title="Experience" accent={accent} className="mt-6" />
           <ExperienceList items={model.experience} accent={accent} datePill />
-          {model.references.length > 0 && (<><ApertureHeading title="References" accent={accent} className="mt-6" /><RefList items={model.references} /></>)}
+          {model.references.length > 0 && (<><ApertureHeading data-cv-section="references" title="References" accent={accent} className="mt-6" /><RefList data-cv-section="references" items={model.references} /></>)}
         </main>
         <SideColumn>
           <div><ApertureHeading title="Education" accent={accent} /><EducationList items={model.education} /></div>
           <div><ApertureHeading title="Expertise" accent={accent} /><SkillList skills={model.skills} accent={accent} /></div>
-          {model.languages.length > 0 && (<div><ApertureHeading title="Languages" accent={accent} /><LanguageStars items={model.languages} accent={accent} /></div>)}
-          {model.certifications.length > 0 && (<div><ApertureHeading title="Certifications" accent={accent} /><CertList items={model.certifications} /></div>)}
+          {model.languages.length > 0 && (<div data-cv-section="languages"><ApertureHeading title="Languages" accent={accent} /><LanguageStars items={model.languages} accent={accent} /></div>)}
+          {model.certifications.length > 0 && (<div data-cv-section="certifications"><ApertureHeading title="Certifications" accent={accent} /><CertList items={model.certifications} /></div>)}
         </SideColumn>
       </div>
     </Page>
@@ -1804,13 +1814,13 @@ function VistaResume({ model }: { model: PreviewModel }) {
           <main>
             <ApertureHeading title="Experience" accent={accent} />
             <ExperienceList items={model.experience} accent={accent} />
-            {model.projects.length > 0 && (<><ApertureHeading title="Projects" accent={accent} className="mt-6" /><ProjectList items={model.projects} accent={accent} /></>)}
+            {model.projects.length > 0 && (<><ApertureHeading data-cv-section="projects" title="Projects" accent={accent} className="mt-6" /><ProjectList data-cv-section="projects" items={model.projects} accent={accent} /></>)}
           </main>
           <SideColumn>
             <div><ApertureHeading title="Education" accent={accent} /><EducationList items={model.education} /></div>
             <div><ApertureHeading title="Skills" accent={accent} /><SkillChips skills={model.skills} accent={accent} /></div>
-            {model.languages.length > 0 && (<div><ApertureHeading title="Languages" accent={accent} /><LanguageStars items={model.languages} accent={accent} /></div>)}
-            {model.certifications.length > 0 && (<div><ApertureHeading title="Certifications" accent={accent} /><CertList items={model.certifications} /></div>)}
+            {model.languages.length > 0 && (<div data-cv-section="languages"><ApertureHeading title="Languages" accent={accent} /><LanguageStars items={model.languages} accent={accent} /></div>)}
+            {model.certifications.length > 0 && (<div data-cv-section="certifications"><ApertureHeading title="Certifications" accent={accent} /><CertList items={model.certifications} /></div>)}
           </SideColumn>
         </div>
       </div>
@@ -1898,7 +1908,7 @@ function VertexResume({ model }: { model: PreviewModel }) {
           <div><PanelHeading title="About Me" color="#fff" /><p className="text-[10.5px] leading-relaxed text-white/75">{model.summary}</p></div>
           <div><PanelHeading title="Language" color="#fff" /><LanguageBars items={model.languages} accent="#fff" track="rgba(255,255,255,.25)" /></div>
           {model.certifications.length > 0 && (
-            <div><PanelHeading title="Certifications" color="#fff" />
+            <div data-cv-section="certifications"><PanelHeading title="Certifications" color="#fff" />
               <div className="space-y-2.5">
                 {model.certifications.map((c) => (
                   <div key={c.id} className="text-[10.5px] leading-relaxed">
@@ -1911,7 +1921,7 @@ function VertexResume({ model }: { model: PreviewModel }) {
             </div>
           )}
           {model.references.length > 0 && (
-            <div><PanelHeading title="References" color="#fff" />
+            <div data-cv-section="references"><PanelHeading title="References" color="#fff" />
               <div className="space-y-2.5">
                 {model.references.map((r) => (
                   <div key={r.id} className="text-[10.5px] leading-relaxed">
@@ -1956,9 +1966,9 @@ function MeridianResume({ model }: { model: PreviewModel }) {
             </div>
           </div>
           <div><PanelHeading title="Skills" color={accent} /><SkillBars skills={model.skills} accent={accent} /></div>
-          {model.languages.length > 0 && <div><PanelHeading title="Languages" color={accent} /><LanguageStars items={model.languages} accent={accent} dark /></div>}
+          {model.languages.length > 0 && <div data-cv-section="languages"><PanelHeading title="Languages" color={accent} /><LanguageStars items={model.languages} accent={accent} dark /></div>}
           {model.certifications.length > 0 && (
-            <div><PanelHeading title="Certifications" color={accent} />
+            <div data-cv-section="certifications"><PanelHeading title="Certifications" color={accent} />
               <div className="space-y-2.5">
                 {model.certifications.map((c) => (
                   <div key={c.id} className="text-[10.5px] leading-relaxed">
@@ -1977,7 +1987,7 @@ function MeridianResume({ model }: { model: PreviewModel }) {
         <p className="mt-3.5 text-[12px] font-semibold uppercase tracking-[0.32em]" style={{ color: accent }}>{model.title}</p>
         <div className="mt-9"><PanelHeading title="About Me" color={secondary} /><Paragraph>{model.summary}</Paragraph></div>
         <div className="mt-10 flex-1"><PanelHeading title="Experience" color={secondary} /><TimelineRail items={model.experience} accent={accent} secondary={secondary} /></div>
-        {model.references.length > 0 && <div className="mt-10"><PanelHeading title="References" color={secondary} /><RefList items={model.references} /></div>}
+        {model.references.length > 0 && <div data-cv-section="references" className="mt-10"><PanelHeading title="References" color={secondary} /><RefList items={model.references} /></div>}
       </div>
     </Page>
   )
@@ -2003,12 +2013,12 @@ function CrestResume({ model }: { model: PreviewModel }) {
         <aside className="flex flex-col gap-6">
           <div><PanelHeading title="Education" color={accent} /><EducationList items={model.education} /></div>
           <div><PanelHeading title="Skills" color={accent} /><SkillBars skills={model.skills.slice(0, 7)} accent={accent} track="#e5e7eb" labelClass="text-gray-700" /></div>
-          {model.languages.length > 0 && <div><PanelHeading title="Languages" color={accent} /><LanguageStars items={model.languages} accent={accent} /></div>}
+          {model.languages.length > 0 && <div data-cv-section="languages"><PanelHeading title="Languages" color={accent} /><LanguageStars items={model.languages} accent={accent} /></div>}
         </aside>
         <main className="flex flex-col gap-6">
           <div><PanelHeading title="Profile" color={accent} /><Paragraph>{model.summary}</Paragraph></div>
           <div><PanelHeading title="Experience" color={accent} /><TimelineRail items={model.experience} accent={accent} secondary={secondary} /></div>
-          {model.references.length > 0 && <div><PanelHeading title="References" color={accent} /><RefList items={model.references} /></div>}
+          {model.references.length > 0 && <div data-cv-section="references"><PanelHeading title="References" color={accent} /><RefList items={model.references} /></div>}
         </main>
       </div>
     </Page>
@@ -2032,9 +2042,9 @@ function ObsidianResume({ model }: { model: PreviewModel }) {
             </div>
           </div>
           <div><PanelHeading title="Skills" color={accent} /><SkillBars skills={model.skills} accent="#ffffff" track="rgba(255,255,255,.22)" /></div>
-          {model.languages.length > 0 && <div><PanelHeading title="Languages" color={accent} /><ul className="space-y-1.5 text-[10.5px] text-white/75">{model.languages.map((l, i) => <li key={i}>• {l.name}</li>)}</ul></div>}
+          {model.languages.length > 0 && <div data-cv-section="languages"><PanelHeading title="Languages" color={accent} /><ul className="space-y-1.5 text-[10.5px] text-white/75">{model.languages.map((l, i) => <li key={i}>• {l.name}</li>)}</ul></div>}
           {model.certifications.length > 0 && (
-            <div><PanelHeading title="Certifications" color={accent} />
+            <div data-cv-section="certifications"><PanelHeading title="Certifications" color={accent} />
               <div className="space-y-2.5">
                 {model.certifications.map((c) => (
                   <div key={c.id} className="text-[10.5px] leading-relaxed">
@@ -2055,7 +2065,7 @@ function ObsidianResume({ model }: { model: PreviewModel }) {
           {model.phone && <span>{model.phone}</span>}{model.email && <span>{model.email}</span>}{model.location && <span>{model.location}</span>}
         </div>
         <div className="mt-7"><PanelHeading title="Experience" color="#111113" /><TimelineRail items={model.experience} accent={accent} secondary="#111113" /></div>
-        {model.references.length > 0 && <div className="mt-7"><PanelHeading title="References" color="#111113" /><RefList items={model.references} /></div>}
+        {model.references.length > 0 && <div data-cv-section="references" className="mt-7"><PanelHeading title="References" color="#111113" /><RefList items={model.references} /></div>}
       </div>
     </Page>
   )
@@ -2081,14 +2091,14 @@ function SolsticeResume({ model }: { model: PreviewModel }) {
           <div className="mt-6 flex flex-1 flex-col gap-5">
             <div><PanelHeading title="Education" color={INK} /><EducationList items={model.education} /></div>
             <div><PanelHeading title="Skills" color={INK} /><SkillBars skills={model.skills.slice(0, 6)} accent={accent} track="#e5e7eb" labelClass="text-gray-700" /></div>
-            {model.languages.length > 0 && <div><PanelHeading title="Languages" color={INK} /><LanguageStars items={model.languages} accent={accent} /></div>}
+            {model.languages.length > 0 && <div data-cv-section="languages"><PanelHeading title="Languages" color={INK} /><LanguageStars items={model.languages} accent={accent} /></div>}
           </div>
         </div>
         <div className="flex flex-col gap-6 px-9 py-8">
           <div><PanelHeading title="About Me" color={INK} /><Paragraph>{model.summary}</Paragraph></div>
           <div><PanelHeading title="Experience" color={INK} /><TimelineRail items={model.experience} accent={accent} secondary={INK} /></div>
-          {model.certifications.length > 0 && <div><PanelHeading title="Certifications" color={INK} /><CertList items={model.certifications} /></div>}
-          {model.references.length > 0 && <div><PanelHeading title="References" color={INK} /><RefList items={model.references} /></div>}
+          {model.certifications.length > 0 && <div data-cv-section="certifications"><PanelHeading title="Certifications" color={INK} /><CertList items={model.certifications} /></div>}
+          {model.references.length > 0 && <div data-cv-section="references"><PanelHeading title="References" color={INK} /><RefList items={model.references} /></div>}
         </div>
       </div>
     </Page>
@@ -2156,19 +2166,19 @@ function LedgerResume({ model }: { model: PreviewModel }) {
           </LedgerRow>
 
           {model.certifications.length > 0 && (
-            <LedgerRow label="Certifications" accent={accent}>
+            <LedgerRow data-cv-section="certifications" label="Certifications" accent={accent}>
               <CertList items={model.certifications} />
             </LedgerRow>
           )}
 
           {model.languages.length > 0 && (
-            <LedgerRow label="Languages" accent={accent}>
+            <LedgerRow data-cv-section="languages" label="Languages" accent={accent}>
               <LanguageStars items={model.languages} accent={accent} />
             </LedgerRow>
           )}
 
           {model.references.length > 0 && (
-            <LedgerRow label="References" accent={accent}>
+            <LedgerRow data-cv-section="references" label="References" accent={accent}>
               <RefList items={model.references} />
             </LedgerRow>
           )}
@@ -2178,9 +2188,9 @@ function LedgerResume({ model }: { model: PreviewModel }) {
   )
 }
 
-function LedgerRow({ label, accent, children }: { label: string; accent: string; children: React.ReactNode }) {
+function LedgerRow({ label, accent, children, 'data-cv-section': sectionTag }: { label: string; accent: string; children: React.ReactNode; 'data-cv-section'?: string }) {
   return (
-    <section className="grid grid-cols-[110px_1fr] gap-7 border-t pt-5" style={{ borderColor: `${accent}33` }}>
+    <section data-cv-section={sectionTag} className="grid grid-cols-[110px_1fr] gap-7 border-t pt-5" style={{ borderColor: `${accent}33` }}>
       <h2 className="text-[9.5px] font-bold uppercase leading-relaxed tracking-[0.2em]" style={{ color: accent }}>
         {label}
       </h2>
@@ -2236,8 +2246,8 @@ function GazetteResume({ model }: { model: PreviewModel }) {
 
           {model.projects.length > 0 && (
             <>
-              <GazetteHeading title="Projects" accent={accent} secondary={secondary} className="mt-6" />
-              <ProjectList items={model.projects} accent={accent} />
+              <GazetteHeading data-cv-section="projects" title="Projects" accent={accent} secondary={secondary} className="mt-6" />
+              <ProjectList data-cv-section="projects" items={model.projects} accent={accent} />
             </>
           )}
         </div>
@@ -2254,14 +2264,14 @@ function GazetteResume({ model }: { model: PreviewModel }) {
           </div>
 
           {model.languages.length > 0 && (
-            <div>
+            <div data-cv-section="languages">
               <GazetteHeading title="Languages" accent={accent} secondary={secondary} />
               <LanguageStars items={model.languages} accent={accent} />
             </div>
           )}
 
           {model.certifications.length > 0 && (
-            <div>
+            <div data-cv-section="certifications">
               <GazetteHeading title="Certifications" accent={accent} secondary={secondary} />
               <CertList items={model.certifications} />
             </div>
@@ -2276,15 +2286,13 @@ function GazetteHeading({
   title,
   accent,
   secondary,
-  className,
-}: {
+  className, 'data-cv-section': sectionTag }: {
   title: string
   accent: string
   secondary: string
-  className?: string
-}) {
+  className?: string; 'data-cv-section'?: string }) {
   return (
-    <h2 className={cn('mb-3', className)}>
+    <h2 data-cv-section={sectionTag} className={cn('mb-3', className)}>
       <span className="block h-px w-full" style={{ backgroundColor: `${secondary}40` }} />
       <span className="mt-2 block text-[10px] font-bold uppercase tracking-[0.28em]" style={{ color: accent }}>
         {title}
@@ -2334,7 +2342,7 @@ function CapsuleResume({ model }: { model: PreviewModel }) {
             </div>
           </div>
           {model.languages.length > 0 && (
-            <div>
+            <div data-cv-section="languages">
               <CapsuleHeading title="languages" accent={accent} />
               <LanguageStars items={model.languages} accent={accent} />
             </div>
@@ -2358,13 +2366,13 @@ function CapsuleResume({ model }: { model: PreviewModel }) {
             <ExperienceList items={model.experience} accent={accent} />
           </div>
           {model.certifications.length > 0 && (
-            <div>
+            <div data-cv-section="certifications">
               <CapsuleHeading title="awards" accent={accent} />
               <CertList items={model.certifications} />
             </div>
           )}
           {model.references.length > 0 && (
-            <div>
+            <div data-cv-section="references">
               <CapsuleHeading title="references" accent={accent} />
               <RefList items={model.references} />
             </div>
@@ -2420,13 +2428,13 @@ function MarqueeResume({ model }: { model: PreviewModel }) {
           </div>
         </div>
         {model.languages.length > 0 && (
-          <div>
+          <div data-cv-section="languages">
             <PillLabel title="Languages" accent={accent} />
             <LanguageStars items={model.languages} accent={accent} dark />
           </div>
         )}
         {model.certifications.length > 0 && (
-          <div>
+          <div data-cv-section="certifications">
             <PillLabel title="Certificates" accent={accent} />
             <div className="space-y-3 text-[11px] leading-relaxed">
               {model.certifications.map((cert) => (
@@ -2440,7 +2448,7 @@ function MarqueeResume({ model }: { model: PreviewModel }) {
           </div>
         )}
         {model.references.length > 0 && (
-          <div>
+          <div data-cv-section="references">
             <PillLabel title="References" accent={accent} />
             <div className="space-y-3">
               {model.references.map((ref) => (
@@ -2552,8 +2560,8 @@ function BureauResume({ model }: { model: PreviewModel }) {
 
         {model.languages.length > 0 && (
           <>
-            <BureauRailHeading title="Language" />
-            <ul className="space-y-[5px] text-[10px] text-gray-700">
+            <BureauRailHeading data-cv-section="languages" title="Language" />
+            <ul data-cv-section="languages" className="space-y-[5px] text-[10px] text-gray-700">
               {model.languages.map((lang) => (
                 <li key={lang.id} className="flex gap-2">
                   <span className="mt-[5px] h-[3px] w-[3px] shrink-0 rounded-full" style={{ backgroundColor: accent }} />
@@ -2566,8 +2574,8 @@ function BureauResume({ model }: { model: PreviewModel }) {
         )}
         {model.certifications.length > 0 && (
           <>
-            <BureauRailHeading title="Certificates" />
-            <div className="space-y-3">
+            <BureauRailHeading data-cv-section="certifications" title="Certificates" />
+            <div data-cv-section="certifications" className="space-y-3">
               {model.certifications.map((cert) => (
                 <div key={cert.id} className="text-[10px] leading-relaxed">
                   <p className="font-bold" style={{ color: accent }}>{cert.name}</p>
@@ -2607,8 +2615,8 @@ function BureauResume({ model }: { model: PreviewModel }) {
 }
 
 /** Plain bold caps label. The rail deliberately has no rules — the tint separates it. */
-function BureauRailHeading({ title }: { title: string }) {
-  return <h2 className="mb-2.5 mt-6 text-[12px] font-bold uppercase tracking-[0.06em] text-[#2c3440]">{title}</h2>
+function BureauRailHeading({ title, 'data-cv-section': sectionTag }: { title: string; 'data-cv-section'?: string }) {
+  return <h2 data-cv-section={sectionTag} className="mb-2.5 mt-6 text-[12px] font-bold uppercase tracking-[0.06em] text-[#2c3440]">{title}</h2>
 }
 
 /** Filled disc holding the icon, label beside it, rule beneath the pair. */
@@ -2673,7 +2681,7 @@ function TerminalResume({ model }: { model: PreviewModel }) {
           </div>
         </TerminalBlock>
         {model.languages.length > 0 && (
-          <TerminalBlock label="languages" accent={accent}>
+          <TerminalBlock data-cv-section="languages" label="languages" accent={accent}>
             <div className="space-y-1 text-[9.5px] text-white/70">
               {model.languages.map((l) => (
                 <p key={l.id}>{l.name} <span className="text-white/40">({l.proficiency})</span></p>
@@ -2682,7 +2690,7 @@ function TerminalResume({ model }: { model: PreviewModel }) {
           </TerminalBlock>
         )}
         {model.references.length > 0 && (
-          <TerminalBlock label="references" accent={accent}>
+          <TerminalBlock data-cv-section="references" label="references" accent={accent}>
             <div className="space-y-2 text-[9.5px]">
               {model.references.map((r) => (
                 <div key={r.id}>
@@ -2730,7 +2738,7 @@ function TerminalResume({ model }: { model: PreviewModel }) {
           </div>
         </TerminalBlock>
         {model.certifications.length > 0 && (
-          <TerminalBlock label="certifications" accent={accent}>
+          <TerminalBlock data-cv-section="certifications" label="certifications" accent={accent}>
             <div className="space-y-1.5 text-[9.5px]">
               {model.certifications.map((c) => (
                 <p key={c.id} className="text-white/70">
@@ -2747,9 +2755,9 @@ function TerminalResume({ model }: { model: PreviewModel }) {
 }
 
 /** Bordered block with its label notched into the top edge. */
-function TerminalBlock({ label, accent, children }: { label: string; accent: string; children: React.ReactNode }) {
+function TerminalBlock({ label, accent, children, 'data-cv-section': sectionTag }: { label: string; accent: string; children: React.ReactNode; 'data-cv-section'?: string }) {
   return (
-    <section className="rounded-md border border-white/12 px-3.5 pb-3 pt-2.5">
+    <section data-cv-section={sectionTag} className="rounded-md border border-white/12 px-3.5 pb-3 pt-2.5">
       <h2 className="mb-2 text-[9px] font-bold lowercase tracking-[0.18em]" style={{ color: accent }}>
         [{label}]
       </h2>
@@ -2843,13 +2851,13 @@ function GaugeResume({ model }: { model: PreviewModel }) {
           <p className="text-[10.5px] leading-[1.75] text-white/70">{model.summary}</p>
         </div>
         {model.languages.length > 0 && (
-          <div>
+          <div data-cv-section="languages">
             <GaugeHeading title="Language" accent={accent} icon={LanguagesIcon} />
             <LanguageBars items={model.languages} accent={accent} />
           </div>
         )}
         {model.certifications.length > 0 && (
-          <div>
+          <div data-cv-section="certifications">
             <GaugeHeading title="Certifications" accent={accent} icon={Award} />
             <div className="space-y-2.5 text-[10.5px] leading-relaxed">
               {model.certifications.map((c) => (
@@ -2863,7 +2871,7 @@ function GaugeResume({ model }: { model: PreviewModel }) {
           </div>
         )}
         {model.references.length > 0 && (
-          <div>
+          <div data-cv-section="references">
             <GaugeHeading title="References" accent={accent} icon={Users} />
             <div className="space-y-2.5 text-[10.5px] leading-relaxed">
               {model.references.map((r) => (
@@ -2981,7 +2989,7 @@ function TaggedResume({ model }: { model: PreviewModel }) {
             </div>
           </div>
           {model.certifications.length > 0 && (
-            <div>
+            <div data-cv-section="certifications">
               <TaggedHeading title="Certification" />
               <div className="space-y-2.5">
                 {model.certifications.map((c) => (
@@ -2995,7 +3003,7 @@ function TaggedResume({ model }: { model: PreviewModel }) {
             </div>
           )}
           {model.languages.length > 0 && (
-            <div>
+            <div data-cv-section="languages">
               <TaggedHeading title="Languages" />
               <div className="space-y-1 text-[10px]">
                 {model.languages.map((l) => (
@@ -3025,8 +3033,8 @@ function TaggedResume({ model }: { model: PreviewModel }) {
 
           {model.projects.length > 0 && (
             <>
-              <TaggedHeading title="Featured Projects" className="mt-6" />
-              <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+              <TaggedHeading data-cv-section="projects" title="Featured Projects" className="mt-6" />
+              <div data-cv-section="projects" className="grid grid-cols-2 gap-x-6 gap-y-3">
                 {model.projects.map((pr) => (
                   <div key={pr.id}>
                     <p className="text-[10.5px] font-bold" style={{ color: accent }}>{pr.name}</p>
@@ -3050,9 +3058,9 @@ function TaggedResume({ model }: { model: PreviewModel }) {
   )
 }
 
-function TaggedHeading({ title, className }: { title: string; className?: string }) {
+function TaggedHeading({ title, className, 'data-cv-section': sectionTag }: { title: string; className?: string; 'data-cv-section'?: string }) {
   return (
-    <h2 className={cn('mb-2.5 text-[11px] font-bold uppercase tracking-[0.14em] text-gray-500', className)}>{title}</h2>
+    <h2 data-cv-section={sectionTag} className={cn('mb-2.5 text-[11px] font-bold uppercase tracking-[0.14em] text-gray-500', className)}>{title}</h2>
   )
 }
 
@@ -3108,7 +3116,7 @@ function PlacardResume({ model }: { model: PreviewModel }) {
             </ul>
           </div>
           {model.languages.length > 0 ? (
-            <div>
+            <div data-cv-section="languages">
               <PlacardBar title="Languages" accent={accent} />
               <div className="space-y-1 text-[10px] text-gray-700">
                 {model.languages.map((l) => (
@@ -3120,7 +3128,7 @@ function PlacardResume({ model }: { model: PreviewModel }) {
             </div>
           ) : null}
           {model.references.length > 0 ? (
-            <div>
+            <div data-cv-section="references">
               <PlacardBar title="References" accent={accent} />
               <div className="space-y-2 text-[10.5px] leading-relaxed">
                 {model.references.map((r) => (
@@ -3164,7 +3172,7 @@ function PlacardResume({ model }: { model: PreviewModel }) {
             </div>
           </div>
           {model.certifications.length > 0 ? (
-            <div>
+            <div data-cv-section="certifications">
               <PlacardHead title="Certifications" icon={Award} accent={accent} />
               <div className="space-y-1.5 text-[9.5px]">
                 {model.certifications.map((c) => (
@@ -3229,7 +3237,7 @@ function RegentResume({ model }: { model: PreviewModel }) {
           <SkillBars skills={model.skills} accent={accent} />
         </div>
         {model.languages.length > 0 ? (
-          <div>
+          <div data-cv-section="languages">
             <RegentHeading title="Language" accent={accent} />
             <ul className="space-y-1 text-[10px] text-white/75">
               {model.languages.map((l) => (
@@ -3259,8 +3267,8 @@ function RegentResume({ model }: { model: PreviewModel }) {
           <TimelineRail items={model.experience} accent={accent} secondary={INK} />
           {model.references.length > 0 ? (
             <>
-              <h2 className="mb-3 mt-6 text-[12.5px] font-bold uppercase tracking-[0.2em]">References</h2>
-              <div className="grid grid-cols-2 gap-5">
+              <h2 data-cv-section="references" className="mb-3 mt-6 text-[12.5px] font-bold uppercase tracking-[0.2em]">References</h2>
+              <div data-cv-section="references" className="grid grid-cols-2 gap-5">
                 {model.references.map((r) => (
                   <div key={r.id} className="text-[9.5px] leading-relaxed">
                     <p className="text-[10.5px] font-bold">{r.name}</p>
@@ -3334,7 +3342,7 @@ function SignatureResume({ model }: { model: PreviewModel }) {
           </div>
         </div>
         {model.languages.length > 0 ? (
-          <div>
+          <div data-cv-section="languages">
             <SignatureHeading title="Languages" accent={accent} />
             <ul className="space-y-1.5 text-[9.5px] text-gray-700">
               {model.languages.map((l) => (
@@ -3370,13 +3378,13 @@ function SignatureResume({ model }: { model: PreviewModel }) {
             </div>
           </div>
           {model.certifications.length > 0 ? (
-            <div>
+            <div data-cv-section="certifications">
               <SignatureBand title="Certifications" accent={accent} />
               <CertList items={model.certifications} />
             </div>
           ) : null}
           {model.references.length > 0 ? (
-            <div>
+            <div data-cv-section="references">
               <SignatureBand title="References" accent={accent} />
               <div className="grid grid-cols-2 gap-5">
                 {model.references.map((r) => (
@@ -3467,7 +3475,7 @@ function CornerResume({ model }: { model: PreviewModel }) {
             </ul>
           </div>
           {model.languages.length > 0 ? (
-            <div>
+            <div data-cv-section="languages">
               <CornerHeading title="Language" accent={accent} />
               <ul className="space-y-1.5 text-[10px] text-gray-700">
                 {model.languages.map((l) => (
@@ -3497,8 +3505,8 @@ function CornerResume({ model }: { model: PreviewModel }) {
           </div>
           {model.references.length > 0 ? (
             <>
-              <CornerHeading title="References" accent={accent} className="mt-6" />
-              <div className="grid grid-cols-2 gap-5">
+              <CornerHeading data-cv-section="references" title="References" accent={accent} className="mt-6" />
+              <div data-cv-section="references" className="grid grid-cols-2 gap-5">
                 {model.references.map((r) => (
                   <div key={r.id} className="text-[9.5px] leading-relaxed">
                     <p className="font-bold">{r.name}</p>
@@ -3516,9 +3524,9 @@ function CornerResume({ model }: { model: PreviewModel }) {
   )
 }
 
-function CornerHeading({ title, accent, className }: { title: string; accent: string; className?: string }) {
+function CornerHeading({ title, accent, className, 'data-cv-section': sectionTag }: { title: string; accent: string; className?: string; 'data-cv-section'?: string }) {
   return (
-    <h2 className={cn('mb-2.5 text-[11.5px] font-bold uppercase tracking-[0.16em]', className)}>
+    <h2 data-cv-section={sectionTag} className={cn('mb-2.5 text-[11.5px] font-bold uppercase tracking-[0.16em]', className)}>
       {title}
       <span className="mt-1.5 block h-px w-full" style={{ backgroundColor: `${accent}4d` }} />
     </h2>
@@ -3572,7 +3580,7 @@ function DossierResume({ model }: { model: PreviewModel }) {
           </ul>
         </div>
         {model.languages.length > 0 ? (
-          <div>
+          <div data-cv-section="languages">
             <DossierHeading title="Languages" accent={accent} />
             <ul className="space-y-1 text-[10px] text-white/75">
               {model.languages.map((l) => (
@@ -3582,7 +3590,7 @@ function DossierResume({ model }: { model: PreviewModel }) {
           </div>
         ) : null}
         {model.certifications.length > 0 ? (
-          <div>
+          <div data-cv-section="certifications">
             <DossierHeading title="Certification" accent={accent} />
             <ul className="space-y-1 text-[10px] text-white/75">
               {model.certifications.map((c) => (
@@ -3617,7 +3625,7 @@ function DossierResume({ model }: { model: PreviewModel }) {
             </div>
           </div>
           {model.projects.length > 0 ? (
-            <div>
+            <div data-cv-section="projects">
               <DossierMainHeading title="Projects" secondary={secondary} />
               <div className="space-y-2.5">
                 {model.projects.map((pr) => (
@@ -3631,7 +3639,7 @@ function DossierResume({ model }: { model: PreviewModel }) {
             </div>
           ) : null}
           {model.references.length > 0 ? (
-            <div>
+            <div data-cv-section="references">
               <DossierMainHeading title="References" secondary={secondary} />
               <div className="grid grid-cols-2 gap-5">
                 {model.references.map((r) => (
@@ -3701,7 +3709,7 @@ function PillarResume({ model }: { model: PreviewModel }) {
           </div>
         </div>
         {model.references.length > 0 ? (
-          <div className="mt-6">
+          <div data-cv-section="references" className="mt-6">
             <PillarHeading title="Reference" />
             <div className="grid grid-cols-2 gap-5">
               {model.references.map((r) => (
@@ -3751,7 +3759,7 @@ function PillarResume({ model }: { model: PreviewModel }) {
           </ul>
         </div>
         {model.certifications.length > 0 ? (
-          <div>
+          <div data-cv-section="certifications">
             <PillarPanelHeading title="Certificates" accent={accent} />
             <div className="space-y-2.5 text-[11px] leading-relaxed">
               {model.certifications.map((c) => (
@@ -3765,7 +3773,7 @@ function PillarResume({ model }: { model: PreviewModel }) {
           </div>
         ) : null}
         {model.languages.length > 0 ? (
-          <div>
+          <div data-cv-section="languages">
             <PillarPanelHeading title="Languages" accent={accent} />
             <ul className="space-y-1.5 text-[10px] text-white/75">
               {model.languages.map((l) => (
@@ -3831,7 +3839,7 @@ function BulletinResume({ model }: { model: PreviewModel }) {
             </ul>
           </div>
           {model.languages.length > 0 ? (
-            <div>
+            <div data-cv-section="languages">
               <BulletinBar title="Languages" secondary={secondary} />
               <div className="space-y-1.5 text-[10px]">
                 {model.languages.map((l) => (
@@ -3850,7 +3858,7 @@ function BulletinResume({ model }: { model: PreviewModel }) {
             </ul>
           </div>
           {model.certifications.length > 0 ? (
-            <div>
+            <div data-cv-section="certifications">
               <BulletinBar title="Certificates" secondary={secondary} />
               <ul className="space-y-1 text-[10px] text-gray-700">
                 {model.certifications.map((c) => (
@@ -3957,7 +3965,7 @@ function QuillResume({ model }: { model: PreviewModel }) {
           </div>
         </div>
         {model.languages.length > 0 ? (
-          <div>
+          <div data-cv-section="languages">
             <QuillHeading title="Languages" />
             <ul className="space-y-1.5 text-[10px] text-gray-700">
               {model.languages.map((l) => (
@@ -3970,7 +3978,7 @@ function QuillResume({ model }: { model: PreviewModel }) {
           </div>
         ) : null}
         {model.references.length > 0 ? (
-          <div>
+          <div data-cv-section="references">
             <QuillHeading title="References" />
             <div className="space-y-2.5 text-[10px] leading-relaxed">
               {model.references.map((r) => (
@@ -4009,7 +4017,7 @@ function QuillResume({ model }: { model: PreviewModel }) {
           </div>
         </div>
         {model.certifications.length > 0 ? (
-          <div className="mt-6">
+          <div data-cv-section="certifications" className="mt-6">
             <QuillRule title="Certifications" accent={accent} />
             <CertList items={model.certifications} />
           </div>
@@ -4071,7 +4079,7 @@ function RosetteResume({ model }: { model: PreviewModel }) {
             </ul>
           </div>
           {model.languages.length > 0 ? (
-            <div>
+            <div data-cv-section="languages">
               <RosetteHeading title="Languages" accent={accent} />
               <ul className="space-y-1.5 text-[10px] text-gray-700">
                 {model.languages.map((l) => (
@@ -4084,7 +4092,7 @@ function RosetteResume({ model }: { model: PreviewModel }) {
             </div>
           ) : null}
           {model.references.length > 0 ? (
-            <div>
+            <div data-cv-section="references">
               <RosetteHeading title="References" accent={accent} />
               <div className="space-y-2.5 text-[10px] leading-relaxed">
                 {model.references.map((r) => (
@@ -4175,8 +4183,8 @@ function BloomResume({ model }: { model: PreviewModel }) {
           </ul>
           {model.languages.length > 0 ? (
             <>
-              <BloomHeading title="Language" accent={accent} className="mt-3" />
-              <ul className="space-y-1.5 text-[9.5px] text-white/80">
+              <BloomHeading data-cv-section="languages" title="Language" accent={accent} className="mt-3" />
+              <ul data-cv-section="languages" className="space-y-1.5 text-[9.5px] text-white/80">
                 {model.languages.map((l) => (
                   <li key={l.id} className="flex gap-2"><span style={{ color: accent }}>&bull;</span>{l.name}</li>
                 ))}
@@ -4227,8 +4235,8 @@ function BloomResume({ model }: { model: PreviewModel }) {
           </div>
           {model.references.length > 0 ? (
             <>
-              <BloomLozenge title="References" secondary={secondary} className="mt-5" />
-              <div className="grid grid-cols-2 gap-4">
+              <BloomLozenge data-cv-section="references" title="References" secondary={secondary} className="mt-5" />
+              <div data-cv-section="references" className="grid grid-cols-2 gap-4">
                 {model.references.map((r) => (
                   <div key={r.id} className="text-[9.5px] leading-relaxed">
                     <p className="font-bold">{r.name}</p>
@@ -4253,17 +4261,17 @@ function BloomPill({ text, secondary }: { text: string; secondary: string }) {
   )
 }
 
-function BloomHeading({ title, accent, className }: { title: string; accent: string; className?: string }) {
+function BloomHeading({ title, accent, className, 'data-cv-section': sectionTag }: { title: string; accent: string; className?: string; 'data-cv-section'?: string }) {
   return (
-    <h2 className={cn('mb-2 text-[11px] font-bold', className)} style={{ color: accent, fontFamily: SERIF }}>
+    <h2 data-cv-section={sectionTag} className={cn('mb-2 text-[11px] font-bold', className)} style={{ color: accent, fontFamily: SERIF }}>
       {title}
     </h2>
   )
 }
 
-function BloomLozenge({ title, secondary, className }: { title: string; secondary: string; className?: string }) {
+function BloomLozenge({ title, secondary, className, 'data-cv-section': sectionTag }: { title: string; secondary: string; className?: string; 'data-cv-section'?: string }) {
   return (
-    <h2 className={cn('mb-3 inline-block rounded-full px-5 py-1.5 text-[11px] font-bold text-white', className)} style={{ backgroundColor: secondary, fontFamily: SERIF }}>
+    <h2 data-cv-section={sectionTag} className={cn('mb-3 inline-block rounded-full px-5 py-1.5 text-[11px] font-bold text-white', className)} style={{ backgroundColor: secondary, fontFamily: SERIF }}>
       {title}
     </h2>
   )
@@ -4307,7 +4315,7 @@ function ColumnResume({ model }: { model: PreviewModel }) {
           </ul>
         </div>
         {model.languages.length > 0 ? (
-          <div>
+          <div data-cv-section="languages">
             <ColumnHeading title="Language" accent={accent} />
             <ul className="space-y-1.5 text-[10px] text-white/75">
               {model.languages.map((l) => <li key={l.id}>{l.name}</li>)}
@@ -4315,7 +4323,7 @@ function ColumnResume({ model }: { model: PreviewModel }) {
           </div>
         ) : null}
         {model.references.length > 0 ? (
-          <div>
+          <div data-cv-section="references">
             <ColumnHeading title="References" accent={accent} />
             <div className="space-y-2.5 text-[10.5px] leading-relaxed text-white/75">
               {model.references.map((r) => (
@@ -4329,7 +4337,7 @@ function ColumnResume({ model }: { model: PreviewModel }) {
           </div>
         ) : null}
         {model.certifications.length > 0 ? (
-          <div>
+          <div data-cv-section="certifications">
             <ColumnHeading title="Certificates" accent={accent} />
             <ul className="space-y-1.5 text-[10px] text-white/75">
               {model.certifications.map((c) => (
@@ -4366,7 +4374,7 @@ function ColumnResume({ model }: { model: PreviewModel }) {
           </div>
         </div>
         {model.references.length > 0 ? (
-          <div className="mt-6">
+          <div data-cv-section="references" className="mt-6">
             <ColumnMainHeading title="Reference" />
             <div className="grid grid-cols-2 gap-5">
               {model.references.map((r) => (
@@ -4442,7 +4450,7 @@ function AlcoveResume({ model }: { model: PreviewModel }) {
           </ul>
         </div>
         {model.certifications.length > 0 ? (
-          <div>
+          <div data-cv-section="certifications">
             <AlcoveHeading title="Certificates" />
             <div className="space-y-2.5 text-[10.5px] leading-relaxed">
               {model.certifications.map((c) => (
@@ -4456,7 +4464,7 @@ function AlcoveResume({ model }: { model: PreviewModel }) {
           </div>
         ) : null}
         {model.languages.length > 0 ? (
-          <div>
+          <div data-cv-section="languages">
             <AlcoveHeading title="Language" />
             <ul className="space-y-1.5 text-[10px] text-gray-700">
               {model.languages.map((l) => (
@@ -4485,8 +4493,8 @@ function AlcoveResume({ model }: { model: PreviewModel }) {
         </div>
         {model.references.length > 0 ? (
           <>
-            <AlcoveMainHeading title="References" className="mt-6" />
-            <div className="grid grid-cols-2 gap-5">
+            <AlcoveMainHeading data-cv-section="references" title="References" className="mt-6" />
+            <div data-cv-section="references" className="grid grid-cols-2 gap-5">
               {model.references.map((r) => (
                 <div key={r.id} className="text-[9.5px] leading-relaxed">
                   <p className="font-bold">{r.name}</p>
@@ -4507,8 +4515,8 @@ function AlcoveHeading({ title }: { title: string }) {
   return <h2 className="mb-2 text-[11.5px] font-bold uppercase tracking-[0.1em]">{title}</h2>
 }
 
-function AlcoveMainHeading({ title, className }: { title: string; className?: string }) {
-  return <h2 className={cn('mb-2.5 text-[13px] font-bold uppercase tracking-[0.1em]', className)}>{title}</h2>
+function AlcoveMainHeading({ title, className, 'data-cv-section': sectionTag }: { title: string; className?: string; 'data-cv-section'?: string }) {
+  return <h2 data-cv-section={sectionTag} className={cn('mb-2.5 text-[13px] font-bold uppercase tracking-[0.1em]', className)}>{title}</h2>
 }
 
 // ---------------------------------------------------------------------------
@@ -4549,7 +4557,7 @@ function TabletResume({ model }: { model: PreviewModel }) {
           <SkillBars skills={model.skills} accent={accent} track="#d6d3d0" labelClass="text-gray-800" />
         </div>
         {model.languages.length > 0 ? (
-          <div>
+          <div data-cv-section="languages">
             <TabletHeading title="Language" />
             <ul className="space-y-1.5 text-[10px] text-gray-700">
               {model.languages.map((l) => (
@@ -4562,7 +4570,7 @@ function TabletResume({ model }: { model: PreviewModel }) {
           </div>
         ) : null}
         {model.certifications.length > 0 ? (
-          <div>
+          <div data-cv-section="certifications">
             <TabletHeading title="Certificates" />
             <div className="space-y-2 text-[10px] leading-relaxed">
               {model.certifications.map((c) => (
@@ -4600,7 +4608,7 @@ function TabletResume({ model }: { model: PreviewModel }) {
           </div>
         </div>
         {model.references.length > 0 ? (
-          <div className="mt-6">
+          <div data-cv-section="references" className="mt-6">
             <TabletMainHeading title="References" />
             <div className="grid grid-cols-2 gap-5">
               {model.references.map((r) => (
@@ -4671,7 +4679,7 @@ function GutterResume({ model }: { model: PreviewModel }) {
           </ul>
         </div>
         {model.certifications.length > 0 ? (
-          <div>
+          <div data-cv-section="certifications">
             <GutterRailHeading title="Certifications" />
             <div className="space-y-2.5 text-[10.5px] leading-relaxed">
               {model.certifications.map((c) => (
@@ -4685,7 +4693,7 @@ function GutterResume({ model }: { model: PreviewModel }) {
           </div>
         ) : null}
         {model.languages.length > 0 ? (
-          <div>
+          <div data-cv-section="languages">
             <GutterRailHeading title="Languages" />
             <LanguageBars items={model.languages} accent={accent} />
           </div>
@@ -4719,7 +4727,7 @@ function GutterResume({ model }: { model: PreviewModel }) {
           </div>
         </div>
         {model.references.length > 0 ? (
-          <div className="mt-6">
+          <div data-cv-section="references" className="mt-6">
             <GutterHead title="References" icon={Users} accent={accent} />
             <div className="grid grid-cols-2 gap-5">
               {model.references.map((r) => (
@@ -4824,7 +4832,7 @@ function BillboardResume({ model }: { model: PreviewModel }) {
           </div>
         </div>
         {model.certifications.length > 0 ? (
-          <div className="mt-5">
+          <div data-cv-section="certifications" className="mt-5">
             <BillboardHeading title="Certifications" />
             <div className="space-y-1.5 text-[10px] leading-relaxed">
               {model.certifications.map((c) => (
@@ -4914,7 +4922,7 @@ function VerdantResume({ model }: { model: PreviewModel }) {
             <SkillBars skills={model.skills} accent={accent} />
           </div>
           {model.languages.length > 0 ? (
-            <div>
+            <div data-cv-section="languages">
               <VerdantHeading title="Languages" accent={accent} />
               <ul className="space-y-1.5 text-[10px] text-white/75">
                 {model.languages.map((l) => (
@@ -4988,7 +4996,7 @@ function EnvoyResume({ model }: { model: PreviewModel }) {
             </div>
           </div>
           {model.languages.length > 0 ? (
-            <div>
+            <div data-cv-section="languages">
               <EnvoyHeading title="Languages" accent={accent} />
               <ul className="space-y-1.5 text-[9.5px] text-gray-700">
                 {model.languages.map((l) => (
@@ -5025,7 +5033,7 @@ function EnvoyResume({ model }: { model: PreviewModel }) {
             </ul>
           </div>
           {model.certifications.length > 0 ? (
-            <div>
+            <div data-cv-section="certifications">
               <EnvoyHeading title="Certifications" accent={accent} />
               <div className="space-y-2 text-[9.5px] leading-relaxed">
                 {model.certifications.map((c) => (
@@ -5039,7 +5047,7 @@ function EnvoyResume({ model }: { model: PreviewModel }) {
             </div>
           ) : null}
           {model.references.length > 0 ? (
-            <div>
+            <div data-cv-section="references">
               <EnvoyHeading title="References" accent={accent} />
               <div className="space-y-2 text-[9.5px] leading-relaxed">
                 {model.references.map((r) => (
@@ -5141,13 +5149,13 @@ function RibbonResume({ model }: { model: PreviewModel }) {
             </div>
           </section>
           {model.certifications.length > 0 ? (
-            <section>
+            <section data-cv-section="certifications">
               <RibbonHeading n="05" title="Certifications" accent={accent} />
               <CertList items={model.certifications} />
             </section>
           ) : null}
           {model.languages.length > 0 ? (
-            <section>
+            <section data-cv-section="languages">
               <RibbonHeading n="06" title="Languages" accent={accent} />
               <LanguageStars items={model.languages} accent={accent} />
             </section>
@@ -5229,7 +5237,7 @@ function LatticeResume({ model }: { model: PreviewModel }) {
             </ul>
           </LatticeCard>
           {model.languages.length > 0 ? (
-            <LatticeCard title="Languages" accent={accent}>
+            <LatticeCard data-cv-section="languages" title="Languages" accent={accent}>
               <ul className="space-y-1 text-[9.5px] text-gray-700">
                 {model.languages.map((l) => (
                   <li key={l.id}>{l.name} <span className="text-gray-500">({l.proficiency})</span></li>
@@ -5238,7 +5246,7 @@ function LatticeResume({ model }: { model: PreviewModel }) {
             </LatticeCard>
           ) : null}
           {model.certifications.length > 0 ? (
-            <LatticeCard title="Certifications" accent={accent}>
+            <LatticeCard data-cv-section="certifications" title="Certifications" accent={accent}>
               <div className="space-y-2 text-[9.5px] leading-relaxed">
                 {model.certifications.map((c) => (
                   <div key={c.id}>
@@ -5256,9 +5264,9 @@ function LatticeResume({ model }: { model: PreviewModel }) {
   )
 }
 
-function LatticeCard({ title, accent, children }: { title: string; accent: string; children: React.ReactNode }) {
+function LatticeCard({ title, accent, children, 'data-cv-section': sectionTag }: { title: string; accent: string; children: React.ReactNode; 'data-cv-section'?: string }) {
   return (
-    <section className="rounded-xl border border-gray-200 bg-white px-5 py-4">
+    <section data-cv-section={sectionTag} className="rounded-xl border border-gray-200 bg-white px-5 py-4">
       <h2 className="mb-2.5 text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: accent }}>
         {title}
       </h2>

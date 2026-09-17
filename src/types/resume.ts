@@ -156,6 +156,16 @@ export interface ResumeData {
   volunteer: VolunteerExperience[]
   references: Reference[]
   sections: ResumeSection[]
+  /**
+   * Optional sections the user has removed from the CV.
+   *
+   * Deliberately separate from ResumeSection.visible: that flag already ships
+   * as false for certifications, languages and references, and those defaults
+   * are sitting in every existing browser's saved data -- honouring it now
+   * would silently strip three sections from everyone's CV. Absent on older
+   * saved data, which reads as "nothing removed".
+   */
+  hiddenSections: SectionType[]
   style: ResumeStyle
 }
 
@@ -223,5 +233,6 @@ export const defaultResumeData: ResumeData = {
   volunteer: [],
   references: [],
   sections: defaultSections,
+  hiddenSections: [],
   style: defaultResumeStyle,
 }

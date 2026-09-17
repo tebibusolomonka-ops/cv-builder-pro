@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { Award, BookOpen, Globe2, Plus, Trash2, UserRound } from 'lucide-react'
+import { Award, BookOpen, Globe2, Plus, RotateCcw, Trash2, UserRound } from 'lucide-react'
 import { Button, Input } from '@/components/ui'
 import { useResumeStore } from '@/store/useResumeStore'
 import { Language } from '@/types/resume'
@@ -18,6 +18,12 @@ const panels: { id: Panel; label: string; icon: React.ReactNode }[] = [
 
 export function AdditionalSectionsForm() {
   const { uses, templateName } = useTemplateFields()
+  const hiddenSections = useResumeStore((state) => state.data.hiddenSections)
+  const restoreSection = useResumeStore((state) => state.restoreSection)
+  // Removing a section from the preview is meant to be undoable, so anything
+  // taken off the page is listed here with a way back. Without this the X on
+  // the preview would be a one-way door.
+  const removed = panels.filter((panel) => (hiddenSections ?? []).includes(panel.id))
   // Only 13 of 51 layouts print projects and 33 print references, so offering
   // every panel to everyone invites work that the CV then throws away.
   const available = useMemo(() => panels.filter((panel) => uses(panel.id)), [uses])
@@ -51,6 +57,28 @@ export function AdditionalSectionsForm() {
           </button>
         ))}
       </div>
+
+      {removed.length > 0 ? (
+        <div className="rounded-xl border border-dark-700 bg-surface-elevated p-4">
+          <p className="mb-3 text-sm text-dark-300">
+            Removed from your CV. Nothing you typed was deleted &mdash; bring a section back and it
+            returns with its content.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {removed.map((panel) => (
+              <button
+                key={panel.id}
+                type="button"
+                onClick={() => restoreSection(panel.id)}
+                className="flex items-center gap-2 rounded-lg border border-dark-600 px-3 py-1.5 text-sm text-dark-200 transition-colors hover:border-primary-500 hover:text-white"
+              >
+                <RotateCcw size={14} />
+                Bring back {panel.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
 
       {activePanel === 'languages' && <LanguagesEditor />}
       {activePanel === 'certifications' && <CertificationsEditor />}
