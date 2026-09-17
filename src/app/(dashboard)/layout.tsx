@@ -21,7 +21,7 @@ import { Dropdown } from '@/components/ui'
 const navLinks = [
   { label: 'Workspace', href: '/dashboard', icon: LayoutDashboard },
   { label: 'Current CV', href: '/resume/1/edit', icon: FileText },
-  { label: 'New CV', href: '/resume/new', icon: FilePlus },
+  { label: 'New CV', href: '/resume/new/edit', icon: FilePlus },
   { label: 'Applications', href: '/applications', icon: Briefcase },
   { label: 'Settings', href: '/settings', icon: Settings },
 ]
