@@ -35,98 +35,8 @@ type PreviewModel = {
 
 // Sample resume data
 
-const sampleExperience: WorkExperience[] = [
-  {
-    id: 'sample-exp-1',
-    title: 'Senior Frontend Developer',
-    jobTitle: 'Senior Frontend Developer',
-    company: 'Safaricom Ethiopia',
-    location: 'Addis Ababa',
-    startDate: '2021-03',
-    endDate: 'Present',
-    current: true,
-    description:
-      'Lead frontend architecture for a customer-facing telecom dashboard serving 3M+ subscribers across Ethiopia.\nMigrated a five-year-old codebase to React and TypeScript, cutting bundle size by 60% and first paint by 1.8s.\nMentor a team of five engineers, run weekly accessibility audits and own the performance budget.\nIntroduced a shared component library now used by four product teams, halving new-feature build time.\nPartner with design and product to ship a bilingual Amharic/English interface used daily by 40,000 agents.',
-    achievements: [],
-  },
-  {
-    id: 'sample-exp-2',
-    title: 'Full-Stack Developer',
-    jobTitle: 'Full-Stack Developer',
-    company: 'iCog Labs',
-    location: 'Addis Ababa',
-    startDate: '2018-06',
-    endDate: '2021-02',
-    current: false,
-    description:
-      'Built real-time collaboration tools for research teams using React, WebSockets and a Python service layer.\nDeployed and maintained containerised applications on AWS with Docker, Kubernetes and GitHub Actions.\nIntroduced an automated test suite that cut production regressions by 40% within two quarters.\nRedesigned the annotation workflow, reducing dataset labelling from three days to seven hours.',
-    achievements: [],
-  },
-  {
-    id: 'sample-exp-3',
-    title: 'Junior Web Developer',
-    jobTitle: 'Junior Web Developer',
-    company: 'MIDROC Technology Group',
-    location: 'Addis Ababa',
-    startDate: '2016-09',
-    endDate: '2018-05',
-    current: false,
-    description:
-      'Developed and maintained internal portals used daily by the HR, logistics and finance departments.\nAutomated weekly reporting pipelines, saving the operations team more than ten hours every week.\nRebuilt intranet search, cutting average lookup time from 40 seconds to under 5.\nDocumented the deployment process and trained two junior developers who now own the portal.',
-    achievements: [],
-  },
-  {
-    id: 'sample-exp-4',
-    title: 'Web Development Intern',
-    jobTitle: 'Web Development Intern',
-    company: 'Ethio Telecom',
-    location: 'Addis Ababa',
-    startDate: '2015-07',
-    endDate: '2016-08',
-    current: false,
-    description:
-      'Supported the digital services team on customer self-service portals used by 200,000 subscribers.\nBuilt reusable form components later adopted across four internal products.\nWrote the onboarding guide still used to bring new interns up to speed.',
-    achievements: [],
-  },
-]
 
-const sampleEducation: Education[] = [
-  {
-    id: 'sample-edu-1',
-    degree: 'Master of Science',
-    fieldOfStudy: 'Computer Science',
-    school: 'Addis Ababa University',
-    location: 'Addis Ababa',
-    startDate: '',
-    endDate: '2020',
-    current: false,
-    gpa: '',
-    description: '',
-  },
-  {
-    id: 'sample-edu-2',
-    degree: 'Bachelor of Science',
-    fieldOfStudy: 'Software Engineering',
-    school: 'Addis Ababa Institute of Technology',
-    location: 'Addis Ababa',
-    startDate: '',
-    endDate: '2016',
-    current: false,
-    gpa: '',
-    description: '',
-  },
-]
 
-const sampleSkills: Skill[] = [
-  { id: 'sample-skill-1', name: 'React / Next.js', level: 'expert' },
-  { id: 'sample-skill-2', name: 'TypeScript', level: 'advanced' },
-  { id: 'sample-skill-3', name: 'Node.js', level: 'advanced' },
-  { id: 'sample-skill-4', name: 'Cloud Architecture', level: 'intermediate' },
-  { id: 'sample-skill-5', name: 'UI / UX Design', level: 'intermediate' },
-  { id: 'sample-skill-6', name: 'Team Leadership', level: 'advanced' },
-  { id: 'sample-skill-7', name: 'Testing / CI', level: 'advanced' },
-  { id: 'sample-skill-8', name: 'Accessibility', level: 'intermediate' },
-]
 
 const sampleLanguages: Language[] = [
   { id: 'sample-lang-1', name: 'Amharic', proficiency: 'native' },
@@ -134,16 +44,7 @@ const sampleLanguages: Language[] = [
   { id: 'sample-lang-3', name: 'Afaan Oromoo', proficiency: 'conversational' },
 ]
 
-const sampleCertifications: Certification[] = [
-  { id: 'sample-cert-1', name: 'AWS Certified Solutions Architect', issuer: 'Amazon Web Services', date: '2023', expiryDate: '', url: '' },
-  { id: 'sample-cert-2', name: 'Professional Scrum Master I', issuer: 'Scrum.org', date: '2022', expiryDate: '', url: '' },
-  { id: 'sample-cert-3', name: 'Google UX Design Certificate', issuer: 'Coursera', date: '2021', expiryDate: '', url: '' },
-]
 
-const sampleReferences: Reference[] = [
-  { id: 'sample-ref-1', name: 'Meseret Alemu', title: 'Engineering Manager', company: 'Safaricom Ethiopia', email: '', phone: '', relationship: '' },
-  { id: 'sample-ref-2', name: 'Daniel Kebede', title: 'Chief Technology Officer', company: 'iCog Labs', email: '', phone: '', relationship: '' },
-]
 
 const SAMPLE_PERSONA = {
   name: 'Samuel Tesfaye',
@@ -256,30 +157,41 @@ function usePreviewModel(templateIdOverride?: string, forceSample = false): Prev
     }
   }
 
-  const name = info.fullName || [info.firstName, info.lastName].filter(Boolean).join(' ') || SAMPLE_PERSONA.name
+  // The placeholder shown while a section is still empty comes from the same
+  // two lookups the gallery uses, so the card you clicked and the editor you
+  // land on are the same CV. Picking a template off the home page used to open
+  // an editor showing a frontend developer no matter which trade the card had
+  // advertised.
+  const persona = { ...SAMPLE_PERSONA, ...personFor(template.id) }
+  const profession = professionFor(template.id)
+
+  const name = info.fullName || [info.firstName, info.lastName].filter(Boolean).join(' ') || persona.name
   const location = info.location || [info.city, info.state, info.country].filter(Boolean).join(', ')
+  // The purpose-made crops belong to the sample portraits, so they only apply
+  // while the sample portrait is the one on screen.
+  const ownPhoto = Boolean(info.profilePhoto)
 
   return {
     template,
     name,
-    title: info.title || SAMPLE_PERSONA.title,
-    location: location || SAMPLE_PERSONA.location,
-    email: info.email || SAMPLE_PERSONA.email,
-    phone: info.phone || SAMPLE_PERSONA.phone,
-    website: info.website || info.portfolio || SAMPLE_PERSONA.website,
-    linkedin: info.linkedin || SAMPLE_PERSONA.linkedin,
+    title: info.title || profession.title,
+    location: location || persona.location,
+    email: info.email || persona.email,
+    phone: info.phone || persona.phone,
+    website: info.website || info.portfolio || persona.website,
+    linkedin: info.linkedin || persona.linkedin,
     github: info.github,
-    photo: info.profilePhoto,
-    photoWide: '',
-    photoTall: '',
-    summary: data.summary || SAMPLE_PERSONA.summary,
-    experience: orSample(data.workExperience, sampleExperience),
-    education: orSample(data.education, sampleEducation),
-    skills: orSample(data.skills, sampleSkills),
-    projects: unlessHidden('projects', filled(data.projects)),
-    certifications: unlessHidden('certifications', orSample(data.certifications, sampleCertifications)),
+    photo: info.profilePhoto || persona.photo,
+    photoWide: ownPhoto ? '' : persona.photoWide,
+    photoTall: ownPhoto ? '' : persona.photoTall,
+    summary: data.summary || profession.summary,
+    experience: orSample(data.workExperience, profession.experience),
+    education: orSample(data.education, profession.education),
+    skills: orSample(data.skills, profession.skills),
+    projects: unlessHidden('projects', orSample(data.projects, profession.projects)),
+    certifications: unlessHidden('certifications', orSample(data.certifications, profession.certifications)),
     languages: unlessHidden('languages', orSample(data.languages, sampleLanguages)),
-    references: unlessHidden('references', orSample(data.references, sampleReferences)),
+    references: unlessHidden('references', orSample(data.references, profession.references)),
   }
 }
 
