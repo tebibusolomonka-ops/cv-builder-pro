@@ -743,6 +743,7 @@ function CertList({ items }: { items: Certification[] }) {
           <strong>{item.name}</strong>
           {item.issuer ? ` — ${item.issuer}` : ''}
           {item.date ? `, ${item.date}` : ''}
+          {item.url ? <span className="block break-all text-gray-500">{item.url}</span> : null}
         </p>
       ))}
     </div>
@@ -756,6 +757,7 @@ function RefList({ items }: { items: Reference[] }) {
         <div key={item.id} className="text-[10.5px] leading-snug text-gray-700">
           <p className="font-bold">{item.name}</p>
           <p className="text-gray-500">{[item.title, item.company].filter(Boolean).join(', ')}</p>
+          {item.email && <p className="break-all text-gray-500">{item.email}</p>}
         </div>
       ))}
     </div>
@@ -769,6 +771,7 @@ function ProjectList({ items, accent }: { items: Project[]; accent: string }) {
       {items.map((item) => (
         <div key={item.id}>
           <h3 className="text-[11.5px] font-bold" style={{ color: accent }}>{item.name}</h3>
+          {item.url && <p className="break-all text-[10px] text-gray-500">{item.url}</p>}
           <Paragraph>{item.description}</Paragraph>
         </div>
       ))}
@@ -853,7 +856,7 @@ function ModernResume({ model }: { model: PreviewModel }) {
             {model.education.map((e) => (
               <div key={e.id} className="text-[10.5px] leading-relaxed">
                 <p className="font-bold">{[e.degree, e.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</p>
-                <p className="text-white/70">{e.school || 'University Name'}</p>
+                <p className="text-white/70">{[e.school || 'University Name', e.location].filter(Boolean).join(' · ')}</p>
                 <p className="text-white/50">{[e.startDate, e.endDate].filter(Boolean).join(' - ')}</p>
               </div>
             ))}
@@ -864,7 +867,13 @@ function ModernResume({ model }: { model: PreviewModel }) {
         {model.certifications.length > 0 && (
           <SideSection title="Certifications" accent={accent} dark>
             <div className="space-y-2.5 text-[11px] leading-relaxed text-white/80">
-              {model.certifications.map((c) => <p key={c.id}><strong className="text-white/95">{c.name}</strong>{c.date ? ` · ${c.date}` : ''}</p>)}
+              {model.certifications.map((c) => (
+                <p key={c.id}>
+                  <strong className="text-white/95">{c.name}</strong>
+                  {c.date ? ` · ${c.date}` : ''}
+                  {c.url ? <span className="block break-all text-white/60">{c.url}</span> : null}
+                </p>
+              ))}
             </div>
           </SideSection>
         )}
@@ -1321,7 +1330,7 @@ function CompactResume({ model }: { model: PreviewModel }) {
           {model.experience.map((exp) => (
             <div key={exp.id}>
               <div className="flex items-baseline justify-between gap-4">
-                <h3 className="text-[12px] font-bold">{exp.title || exp.jobTitle || 'Job Title'} <span className="font-normal italic text-gray-500">· {exp.company || 'Company'}</span></h3>
+                <h3 className="text-[12px] font-bold">{exp.title || exp.jobTitle || 'Job Title'} <span className="font-normal italic text-gray-500">· {[exp.company || 'Company', exp.location].filter(Boolean).join(' · ')}</span></h3>
                 <p className="shrink-0 text-[10px] font-semibold" style={{ color: accent }}>{expDates(exp)}</p>
               </div>
               <BulletLines text={exp.description} accent={accent} />
@@ -1826,7 +1835,7 @@ function VertexResume({ model }: { model: PreviewModel }) {
           {model.education.map((e) => (
             <div key={e.id} className="flex gap-3">
               <span className="mt-[3px] shrink-0 rounded-sm px-1.5 py-0.5 text-[8.5px] font-bold text-black" style={{ backgroundColor: accent }}>{[e.startDate, e.endDate].filter(Boolean).join('–') || '—'}</span>
-              <div><p className="text-[11px] font-bold uppercase">{e.school || 'University'}</p><p className="text-[9.5px] text-white/55">{e.degree || 'Degree'}</p></div>
+              <div><p className="text-[11px] font-bold uppercase">{[e.school || 'University', e.location].filter(Boolean).join(' · ')}</p><p className="text-[9.5px] text-white/55">{e.degree || 'Degree'}</p></div>
             </div>
           ))}
         </div></div>
@@ -1838,7 +1847,7 @@ function VertexResume({ model }: { model: PreviewModel }) {
                 <p className="text-[11px] font-bold">{x.title || x.jobTitle || 'Job Title'}</p>
                 <p className="shrink-0 text-[8.5px] font-semibold" style={{ color: accent }}>{expDates(x)}</p>
               </div>
-              <p className="text-[9.5px] italic text-white/50">{x.company || 'Company'}</p>
+              <p className="text-[9.5px] italic text-white/50">{[x.company || 'Company', x.location].filter(Boolean).join(' · ')}</p>
               <ul className="mt-1 space-y-0.5">
                 {(x.description || '').split('\n').filter(Boolean).map((line, i) => (
                   <li key={i} className="text-[9px] leading-relaxed text-white/60">— {line}</li>
@@ -1867,6 +1876,7 @@ function VertexResume({ model }: { model: PreviewModel }) {
                   <div key={c.id} className="text-[10.5px] leading-relaxed">
                     <p className="font-semibold text-white/90">{c.name}</p>
                     <p className="text-white/55">{[c.issuer, c.date].filter(Boolean).join(' · ')}</p>
+                    {c.url && <p className="text-white/55 break-all">{c.url}</p>}
                   </div>
                 ))}
               </div>
@@ -1879,6 +1889,7 @@ function VertexResume({ model }: { model: PreviewModel }) {
                   <div key={r.id} className="text-[10.5px] leading-relaxed">
                     <p className="font-semibold text-white/90">{r.name}</p>
                     <p className="text-white/55">{[r.title, r.company].filter(Boolean).join(', ')}</p>
+                    {r.email && <p className="text-white/55 break-all">{r.email}</p>}
                   </div>
                 ))}
               </div>
@@ -1912,7 +1923,7 @@ function MeridianResume({ model }: { model: PreviewModel }) {
           <div><PanelHeading title="Education" color={accent} />
             <div className="space-y-3">
               {model.education.map((e) => (
-                <div key={e.id}><p className="text-[11px] font-bold leading-snug">{e.degree || 'Degree'}</p><p className="text-[10px] text-white/60">{e.school}</p><p className="text-[9.5px] text-white/45">{[e.startDate, e.endDate].filter(Boolean).join(' – ')}</p></div>
+                <div key={e.id}><p className="text-[11px] font-bold leading-snug">{e.degree || 'Degree'}</p><p className="text-[10px] text-white/60">{[e.school, e.location].filter(Boolean).join(' · ')}</p><p className="text-[9.5px] text-white/45">{[e.startDate, e.endDate].filter(Boolean).join(' – ')}</p></div>
               ))}
             </div>
           </div>
@@ -1925,6 +1936,7 @@ function MeridianResume({ model }: { model: PreviewModel }) {
                   <div key={c.id} className="text-[10.5px] leading-relaxed">
                     <p className="font-semibold">{c.name}</p>
                     <p className="text-white/55">{[c.issuer, c.date].filter(Boolean).join(' · ')}</p>
+                    {c.url && <p className="text-white/55 break-all">{c.url}</p>}
                   </div>
                 ))}
               </div>
@@ -1987,7 +1999,7 @@ function ObsidianResume({ model }: { model: PreviewModel }) {
           <div><PanelHeading title="Education" color={accent} />
             <div className="space-y-2.5">
               {model.education.map((e) => (
-                <div key={e.id}><p className="text-[11px] font-bold leading-snug">{e.degree || 'Degree'}</p><p className="text-[10px] text-white/55">{e.school}</p></div>
+                <div key={e.id}><p className="text-[11px] font-bold leading-snug">{e.degree || 'Degree'}</p><p className="text-[10px] text-white/55">{[e.school, e.location].filter(Boolean).join(' · ')}</p></div>
               ))}
             </div>
           </div>
@@ -2000,6 +2012,7 @@ function ObsidianResume({ model }: { model: PreviewModel }) {
                   <div key={c.id} className="text-[10.5px] leading-relaxed">
                     <p className="font-semibold">{c.name}</p>
                     <p className="text-white/55">{[c.issuer, c.date].filter(Boolean).join(' · ')}</p>
+                    {c.url && <p className="text-white/55 break-all">{c.url}</p>}
                   </div>
                 ))}
               </div>
@@ -2186,7 +2199,7 @@ function GazetteResume({ model }: { model: PreviewModel }) {
                   {exp.title || exp.jobTitle || 'Job Title'}
                 </h3>
                 <p className="mt-0.5 text-[10px] uppercase tracking-[0.1em] text-gray-500">
-                  {exp.company || 'Company'} &middot; {expDates(exp)}
+                  {[exp.company || 'Company', exp.location].filter(Boolean).join(' · ')} &middot; {expDates(exp)}
                 </p>
                 <BulletLines text={exp.description} accent={accent} />
               </div>
@@ -2372,7 +2385,7 @@ function MarqueeResume({ model }: { model: PreviewModel }) {
             {model.education.map((edu) => (
               <div key={edu.id}>
                 <p className="font-semibold text-white">{[edu.degree, edu.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</p>
-                <p className="text-white/60">{edu.school || 'University Name'}</p>
+                <p className="text-white/60">{[edu.school || 'University Name', edu.location].filter(Boolean).join(' · ')}</p>
                 <p className="text-white/45">{[edu.startDate, edu.endDate].filter(Boolean).join(' - ')}</p>
               </div>
             ))}
@@ -2392,6 +2405,7 @@ function MarqueeResume({ model }: { model: PreviewModel }) {
                 <div key={cert.id} className="leading-relaxed">
                   <p className="font-semibold text-white">{cert.name}</p>
                   <p className="text-white/60">{[cert.issuer, cert.date].filter(Boolean).join(' · ')}</p>
+                  {cert.url && <p className="text-white/60 break-all">{cert.url}</p>}
                 </div>
               ))}
             </div>
@@ -2405,6 +2419,7 @@ function MarqueeResume({ model }: { model: PreviewModel }) {
                 <div key={ref.id} className="text-[11px] leading-relaxed">
                   <p className="font-semibold text-white">{ref.name}</p>
                   <p className="text-white/60">{[ref.title, ref.company].filter(Boolean).join(", ")}</p>
+                  {ref.email && <p className="text-white/60 break-all">{ref.email}</p>}
                 </div>
               ))}
             </div>
@@ -2490,7 +2505,7 @@ function BureauResume({ model }: { model: PreviewModel }) {
         <div className="space-y-4">
           {model.education.map((edu) => (
             <div key={edu.id} className="text-[10px] leading-relaxed">
-              <p className="font-bold" style={{ color: accent }}>{edu.school || 'University Name'}</p>
+              <p className="font-bold" style={{ color: accent }}>{[edu.school || 'University Name', edu.location].filter(Boolean).join(' · ')}</p>
               <p className="text-gray-700">{[edu.degree, edu.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</p>
               <p className="text-gray-500">{[edu.startDate, edu.endDate].filter(Boolean).join(' - ')}</p>
             </div>
@@ -2529,6 +2544,7 @@ function BureauResume({ model }: { model: PreviewModel }) {
                 <div key={cert.id} className="text-[10px] leading-relaxed">
                   <p className="font-bold" style={{ color: accent }}>{cert.name}</p>
                   <p className="text-gray-600">{[cert.issuer, cert.date].filter(Boolean).join(' · ')}</p>
+                  {cert.url && <p className="text-gray-600 break-all">{cert.url}</p>}
                 </div>
               ))}
             </div>
@@ -2550,7 +2566,7 @@ function BureauResume({ model }: { model: PreviewModel }) {
           {model.experience.map((exp) => (
             <div key={exp.id}>
               <h3 className="text-[11px] font-bold" style={{ color: '#1f2733' }}>
-                {[exp.title || exp.jobTitle || 'Job Title', exp.company].filter(Boolean).join(', ')}
+                {[exp.title || exp.jobTitle || 'Job Title', exp.company, exp.location].filter(Boolean).join(', ')}
               </h3>
               <p className="mt-0.5 text-[9px] text-gray-500">{expDates(exp)}</p>
               <BulletLines text={exp.description} accent={accent} />
@@ -2622,7 +2638,7 @@ function TerminalResume({ model }: { model: PreviewModel }) {
           <div className="space-y-2.5 text-[9.5px]">
             {model.education.map((e) => (
               <div key={e.id}>
-                <p className="text-white/85">{e.school || 'University'}</p>
+                <p className="text-white/85">{[e.school || 'University', e.location].filter(Boolean).join(' · ')}</p>
                 <p className="text-white/50">{[e.degree, e.endDate].filter(Boolean).join(' · ')}</p>
               </div>
             ))}
@@ -2644,6 +2660,7 @@ function TerminalResume({ model }: { model: PreviewModel }) {
                 <div key={r.id}>
                   <p className="text-white/85">{r.name}</p>
                   <p className="text-white/50">{[r.title, r.company].filter(Boolean).join(', ')}</p>
+                  {r.email && <p className="text-white/50 break-all">{r.email}</p>}
                 </div>
               ))}
             </div>
@@ -2671,7 +2688,7 @@ function TerminalResume({ model }: { model: PreviewModel }) {
                     {expDates(exp)}
                   </span>
                 </div>
-                <p className="mt-0.5 text-[9.5px] text-white/45">{exp.company || 'Company'}</p>
+                <p className="mt-0.5 text-[9.5px] text-white/45">{[exp.company || 'Company', exp.location].filter(Boolean).join(' · ')}</p>
                 <ul className="mt-1.5 space-y-1">
                   {exp.description.split('\n').filter(Boolean).map((line, i) => (
                     <li key={i} className="flex gap-2 text-[9px] leading-relaxed text-white/60">
@@ -2690,6 +2707,7 @@ function TerminalResume({ model }: { model: PreviewModel }) {
               {model.certifications.map((c) => (
                 <p key={c.id} className="text-white/70">
                   {c.name} <span className="text-white/40">— {[c.issuer, c.date].filter(Boolean).join(', ')}</span>
+                  {c.url && <p className="text-white/40 break-all">{c.url}</p>}
                 </p>
               ))}
             </div>
@@ -2749,7 +2767,7 @@ function GaugeResume({ model }: { model: PreviewModel }) {
                   {[e.startDate, e.endDate].filter(Boolean).join('–') || '—'}
                 </span>
                 <div>
-                  <p className="text-[10.5px] font-bold uppercase">{e.school || 'University'}</p>
+                  <p className="text-[10.5px] font-bold uppercase">{[e.school || 'University', e.location].filter(Boolean).join(' · ')}</p>
                   <p className="text-[9.5px] text-white/55">{[e.degree, e.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</p>
                 </div>
               </div>
@@ -2766,7 +2784,7 @@ function GaugeResume({ model }: { model: PreviewModel }) {
                   <p className="text-[11px] font-bold">{exp.title || exp.jobTitle || 'Job Title'}</p>
                   <p className="shrink-0 text-[8.5px] font-semibold" style={{ color: accent }}>{expDates(exp)}</p>
                 </div>
-                <p className="text-[9.5px] italic text-white/45">{exp.company || 'Company'}</p>
+                <p className="text-[9.5px] italic text-white/45">{[exp.company || 'Company', exp.location].filter(Boolean).join(' · ')}</p>
                 <ul className="mt-1 space-y-[3px]">
                   {exp.description.split('\n').filter(Boolean).map((line, i) => (
                     <li key={i} className="text-[9px] leading-relaxed text-white/60">— {line.replace(/^[-•*]\s*/, '')}</li>
@@ -2810,6 +2828,7 @@ function GaugeResume({ model }: { model: PreviewModel }) {
                 <div key={c.id}>
                   <p className="font-semibold text-white/90">{c.name}</p>
                   <p className="text-white/50">{[c.issuer, c.date].filter(Boolean).join(' · ')}</p>
+                  {c.url && <p className="text-white/50 break-all">{c.url}</p>}
                 </div>
               ))}
             </div>
@@ -2823,6 +2842,7 @@ function GaugeResume({ model }: { model: PreviewModel }) {
                 <div key={r.id}>
                   <p className="font-semibold text-white/90">{r.name}</p>
                   <p className="text-white/50">{[r.title, r.company].filter(Boolean).join(', ')}</p>
+                  {r.email && <p className="text-white/50 break-all">{r.email}</p>}
                 </div>
               ))}
             </div>
@@ -2926,7 +2946,7 @@ function TaggedResume({ model }: { model: PreviewModel }) {
               {model.education.map((e) => (
                 <div key={e.id} className="text-[10px] leading-relaxed">
                   <p className="font-bold">{[e.degree, e.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</p>
-                  <p className="text-gray-600">{e.school || 'University Name'}</p>
+                  <p className="text-gray-600">{[e.school || 'University Name', e.location].filter(Boolean).join(' · ')}</p>
                   <p className="text-gray-400">{[e.startDate, e.endDate].filter(Boolean).join(' – ')}</p>
                 </div>
               ))}
@@ -2940,6 +2960,7 @@ function TaggedResume({ model }: { model: PreviewModel }) {
                   <div key={c.id} className="text-[10px] leading-relaxed">
                     <p className="font-bold">{c.name}</p>
                     <p className="text-gray-500">{[c.issuer, c.date].filter(Boolean).join(' · ')}</p>
+                    {c.url && <p className="text-gray-500 break-all">{c.url}</p>}
                   </div>
                 ))}
               </div>
@@ -2981,6 +3002,7 @@ function TaggedResume({ model }: { model: PreviewModel }) {
                 {model.projects.map((pr) => (
                   <div key={pr.id}>
                     <p className="text-[10.5px] font-bold" style={{ color: accent }}>{pr.name}</p>
+                    {pr.url && <p className="text-[10.5px] font-bold break-all">{pr.url}</p>}
                     {pr.technologies.length > 0 && (
                       <div className="mt-1 flex flex-wrap gap-1">
                         {pr.technologies.map((t) => (
@@ -3038,7 +3060,7 @@ function PlacardResume({ model }: { model: PreviewModel }) {
                 <li key={e.id} className="flex gap-2">
                   <span className="mt-[6px] h-[3px] w-[3px] shrink-0 rounded-full" style={{ backgroundColor: accent }} />
                   <span>
-                    <span className="font-bold">{e.school || 'University'}</span>
+                    <span className="font-bold">{[e.school || 'University', e.location].filter(Boolean).join(' · ')}</span>
                     <br />
                     <span className="text-gray-600">{[e.degree, e.endDate].filter(Boolean).join(', ')}</span>
                   </span>
@@ -3077,6 +3099,7 @@ function PlacardResume({ model }: { model: PreviewModel }) {
                   <div key={r.id}>
                     <p className="font-bold">{r.name}</p>
                     <p className="text-gray-600">{[r.title, r.company].filter(Boolean).join(', ')}</p>
+                    {r.email && <p className="text-gray-600 break-all">{r.email}</p>}
                   </div>
                 ))}
               </div>
@@ -3101,7 +3124,7 @@ function PlacardResume({ model }: { model: PreviewModel }) {
                       <p className="text-[10.5px] font-bold text-white">{exp.title || exp.jobTitle || 'Job Title'}</p>
                       <p className="shrink-0 text-[8.5px]" style={{ color: accent }}>{expDates(exp)}</p>
                     </div>
-                    <p className="text-[9px] text-white/50">{exp.company}</p>
+                    <p className="text-[9px] text-white/50">{[exp.company, exp.location].filter(Boolean).join(' · ')}</p>
                     <ul className="mt-1 space-y-[3px]">
                       {exp.description.split('\n').filter(Boolean).map((line, i) => (
                         <li key={i} className="text-[9px] leading-relaxed text-white/65">{line.replace(/^[-*]\s*/, '')}</li>
@@ -3119,6 +3142,7 @@ function PlacardResume({ model }: { model: PreviewModel }) {
                 {model.certifications.map((c) => (
                   <p key={c.id} className="text-white/75">
                     <span className="font-semibold text-white">{c.name}</span> - {[c.issuer, c.date].filter(Boolean).join(', ')}
+                    {c.url && <p className="font-semibold text-white break-all">{c.url}</p>}
                   </p>
                 ))}
               </div>
@@ -3166,7 +3190,7 @@ function RegentResume({ model }: { model: PreviewModel }) {
             {model.education.map((e) => (
               <div key={e.id}>
                 <p className="font-bold">{[e.degree, e.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</p>
-                <p className="text-white/60">{e.school}</p>
+                <p className="text-white/60">{[e.school, e.location].filter(Boolean).join(' · ')}</p>
                 <p className="text-white/45">{[e.startDate, e.endDate].filter(Boolean).join(' - ')}</p>
               </div>
             ))}
@@ -3274,7 +3298,7 @@ function SignatureResume({ model }: { model: PreviewModel }) {
           <div className="space-y-2.5 text-[10.5px] leading-relaxed">
             {model.education.map((e) => (
               <div key={e.id}>
-                <p className="font-bold">{e.school || 'University'}</p>
+                <p className="font-bold">{[e.school || 'University', e.location].filter(Boolean).join(' · ')}</p>
                 <p className="text-gray-600">{[e.degree, e.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</p>
                 <p className="text-gray-400">{[e.startDate, e.endDate].filter(Boolean).join(' - ')}</p>
               </div>
@@ -3310,7 +3334,7 @@ function SignatureResume({ model }: { model: PreviewModel }) {
               {model.experience.map((exp) => (
                 <div key={exp.id}>
                   <p className="text-[11px] font-bold uppercase tracking-wide">{exp.title || exp.jobTitle || 'Job Title'}</p>
-                  <p className="text-[10px] font-semibold" style={{ color: accent }}>{exp.company}</p>
+                  <p className="text-[10px] font-semibold" style={{ color: accent }}>{[exp.company, exp.location].filter(Boolean).join(' · ')}</p>
                   <p className="text-[9px] text-gray-400">{expDates(exp)}</p>
                   <BulletLines text={exp.description} accent={accent} />
                 </div>
@@ -3397,7 +3421,7 @@ function CornerResume({ model }: { model: PreviewModel }) {
               {model.education.map((e) => (
                 <div key={e.id}>
                   <p className="font-bold">{[e.degree, e.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</p>
-                  <p className="text-gray-600">{e.school}</p>
+                  <p className="text-gray-600">{[e.school, e.location].filter(Boolean).join(' · ')}</p>
                   <p className="text-gray-400">{[e.startDate, e.endDate].filter(Boolean).join(' - ')}</p>
                 </div>
               ))}
@@ -3497,7 +3521,7 @@ function DossierResume({ model }: { model: PreviewModel }) {
           <div className="space-y-2.5 text-[10px] leading-relaxed">
             {model.education.map((e) => (
               <div key={e.id}>
-                <p className="font-bold">{e.school || 'University'}</p>
+                <p className="font-bold">{[e.school || 'University', e.location].filter(Boolean).join(' · ')}</p>
                 <p className="text-white/65">{[e.degree, e.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</p>
                 <p className="text-white/45">{[e.startDate, e.endDate].filter(Boolean).join(' - ')}</p>
               </div>
@@ -3534,7 +3558,13 @@ function DossierResume({ model }: { model: PreviewModel }) {
             <DossierHeading title="Certification" accent={accent} />
             <ul className="space-y-1 text-[10px] text-white/75">
               {model.certifications.map((c) => (
-                <li key={c.id} className="flex gap-2"><span style={{ color: accent }}>&bull;</span>{c.name}</li>
+                <li key={c.id} className="flex gap-2">
+                  <span style={{ color: accent }}>&bull;</span>
+                  <span className="min-w-0">
+                    {[c.name, c.issuer, c.date].filter(Boolean).join(' — ')}
+                    {c.url ? <span className="block break-all text-white/55">{c.url}</span> : null}
+                  </span>
+                </li>
               ))}
             </ul>
           </div>
@@ -3551,7 +3581,7 @@ function DossierResume({ model }: { model: PreviewModel }) {
             <div className="space-y-3.5">
               {model.experience.map((exp) => (
                 <div key={exp.id}>
-                  <p className="text-[11px] font-bold">{[exp.title || exp.jobTitle || 'Job Title', exp.company].filter(Boolean).join(', ')}</p>
+                  <p className="text-[11px] font-bold">{[exp.title || exp.jobTitle || 'Job Title', exp.company, exp.location].filter(Boolean).join(', ')}</p>
                   <p className="mt-0.5 text-[9px] text-gray-500">{expDates(exp)}</p>
                   <BulletLines text={exp.description} accent={accent} />
                 </div>
@@ -3565,6 +3595,7 @@ function DossierResume({ model }: { model: PreviewModel }) {
                 {model.projects.map((pr) => (
                   <div key={pr.id}>
                     <p className="text-[10.5px] font-bold">{pr.name}</p>
+                    {pr.url && <p className="text-[10.5px] font-bold break-all">{pr.url}</p>}
                     <p className="text-[9.5px] leading-relaxed text-gray-600">{pr.description}</p>
                   </div>
                 ))}
@@ -3632,7 +3663,7 @@ function PillarResume({ model }: { model: PreviewModel }) {
               <div key={exp.id} className="relative">
                 <span className="absolute -left-5 top-[5px] h-[7px] w-[7px] rounded-full" style={{ backgroundColor: secondary }} />
                 <div className="flex items-baseline justify-between gap-3">
-                  <p className="text-[11px] font-bold">{exp.company || 'Company'}</p>
+                  <p className="text-[11px] font-bold">{[exp.company || 'Company', exp.location].filter(Boolean).join(' · ')}</p>
                   <p className="shrink-0 text-[9px] font-semibold uppercase tracking-wide text-gray-400">{expDates(exp)}</p>
                 </div>
                 <p className="text-[10px] font-semibold" style={{ color: accent }}>{exp.title || exp.jobTitle || 'Job Title'}</p>
@@ -3649,6 +3680,7 @@ function PillarResume({ model }: { model: PreviewModel }) {
                 <div key={r.id} className="text-[9.5px] leading-relaxed">
                   <p className="text-[10.5px] font-bold">{r.name}</p>
                   <p className="text-gray-500">{[r.title, r.company].filter(Boolean).join(' / ')}</p>
+                  {r.email && <p className="text-gray-500 break-all">{r.email}</p>}
                   {r.phone ? <p className="text-gray-600">Phone: {r.phone}</p> : null}
                 </div>
               ))}
@@ -3676,7 +3708,7 @@ function PillarResume({ model }: { model: PreviewModel }) {
             {model.education.map((e) => (
               <div key={e.id}>
                 <p className="font-semibold" style={{ color: accent }}>{[e.startDate, e.endDate].filter(Boolean).join(' - ')}</p>
-                <p className="font-bold uppercase">{e.school || 'University'}</p>
+                <p className="font-bold uppercase">{[e.school || 'University', e.location].filter(Boolean).join(' · ')}</p>
                 <p className="text-white/60">{[e.degree, e.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</p>
               </div>
             ))}
@@ -3698,6 +3730,7 @@ function PillarResume({ model }: { model: PreviewModel }) {
                 <div key={c.id}>
                   <p className="font-semibold">{c.name}</p>
                   <p className="text-white/55">{[c.issuer, c.date].filter(Boolean).join(' - ')}</p>
+                  {c.url && <p className="text-white/55 break-all">{c.url}</p>}
                 </div>
               ))}
             </div>
@@ -3792,7 +3825,12 @@ function BulletinResume({ model }: { model: PreviewModel }) {
             <div>
               <BulletinBar title="Certificates" secondary={secondary} />
               <ul className="space-y-1 text-[10px] text-gray-700">
-                {model.certifications.map((c) => <li key={c.id}>- {c.name}</li>)}
+                {model.certifications.map((c) => (
+                  <li key={c.id}>
+                    - {[c.name, c.issuer, c.date].filter(Boolean).join(' — ')}
+                    {c.url ? <span className="block break-all text-gray-500">{c.url}</span> : null}
+                  </li>
+                ))}
               </ul>
             </div>
           ) : null}
@@ -3809,7 +3847,7 @@ function BulletinResume({ model }: { model: PreviewModel }) {
               {model.experience.map((exp) => (
                 <div key={exp.id}>
                   <p className="text-[11px] font-bold">{exp.title || exp.jobTitle || 'Job Title'}</p>
-                  <p className="text-[9.5px] text-gray-500">{[exp.company, expDates(exp)].filter(Boolean).join(' | ')}</p>
+                  <p className="text-[9.5px] text-gray-500">{[exp.company, exp.location, expDates(exp)].filter(Boolean).join(' | ')}</p>
                   <ul className="mt-1 space-y-[3px]">
                     {exp.description.split('\n').filter(Boolean).map((line, i) => (
                       <li key={i} className="text-[9px] leading-relaxed text-gray-600">- {line.replace(/^[-*]\s*/, '')}</li>
@@ -3824,7 +3862,7 @@ function BulletinResume({ model }: { model: PreviewModel }) {
             <div className="space-y-2">
               {model.education.map((e) => (
                 <div key={e.id} className="text-[10px] leading-relaxed">
-                  <p className="font-bold">{e.school || 'University'}</p>
+                  <p className="font-bold">{[e.school || 'University', e.location].filter(Boolean).join(' · ')}</p>
                   <p className="text-gray-600">{[[e.degree, e.fieldOfStudy].filter(Boolean).join(' in '), [e.startDate, e.endDate].filter(Boolean).join(' - ')].filter(Boolean).join(' | ')}</p>
                 </div>
               ))}
@@ -3883,7 +3921,7 @@ function QuillResume({ model }: { model: PreviewModel }) {
           <div className="space-y-2.5 text-[11px] leading-relaxed">
             {model.education.map((e) => (
               <div key={e.id}>
-                <p className="font-bold">{e.school || 'University'}</p>
+                <p className="font-bold">{[e.school || 'University', e.location].filter(Boolean).join(' · ')}</p>
                 <p className="text-gray-600">{[e.degree, e.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</p>
                 <p className="text-gray-400">{[e.startDate, e.endDate].filter(Boolean).join(' - ')}</p>
               </div>
@@ -3911,6 +3949,7 @@ function QuillResume({ model }: { model: PreviewModel }) {
                 <div key={r.id}>
                   <p className="font-bold">{r.name}</p>
                   <p className="text-gray-600">{[r.title, r.company].filter(Boolean).join(' | ')}</p>
+                  {r.email && <p className="text-gray-600 break-all">{r.email}</p>}
                   {r.phone ? <p className="text-gray-500">{r.phone}</p> : null}
                 </div>
               ))}
@@ -3935,7 +3974,7 @@ function QuillResume({ model }: { model: PreviewModel }) {
                   <p className="text-[11px] font-extrabold uppercase tracking-wide">{exp.title || exp.jobTitle || 'Job Title'}</p>
                   <p className="shrink-0 pr-4 text-[9px] font-bold text-gray-400">{expDates(exp)}</p>
                 </div>
-                <p className="text-[9.5px] italic text-gray-500">{exp.company}</p>
+                <p className="text-[9.5px] italic text-gray-500">{[exp.company, exp.location].filter(Boolean).join(' · ')}</p>
                 <BulletLines text={exp.description} accent={accent} />
               </div>
             ))}
@@ -4024,6 +4063,7 @@ function RosetteResume({ model }: { model: PreviewModel }) {
                   <div key={r.id}>
                     <p className="font-bold">{r.name}</p>
                     <p className="text-gray-600">{[r.title, r.company].filter(Boolean).join(' | ')}</p>
+                    {r.email && <p className="text-gray-600 break-all">{r.email}</p>}
                     {r.phone ? <p className="text-gray-500">{r.phone}</p> : null}
                   </div>
                 ))}
@@ -4042,7 +4082,7 @@ function RosetteResume({ model }: { model: PreviewModel }) {
                   <p className="text-[11px] font-extrabold uppercase tracking-wide">{exp.title || exp.jobTitle || 'Job Title'}</p>
                   <p className="shrink-0 pr-4 text-[9px] font-bold text-gray-400">{expDates(exp)}</p>
                 </div>
-                <p className="text-[9.5px]" style={{ color: accent }}>{exp.company}</p>
+                <p className="text-[9.5px]" style={{ color: accent }}>{[exp.company, exp.location].filter(Boolean).join(' · ')}</p>
                 <BulletLines text={exp.description} accent={accent} />
               </div>
             ))}
@@ -4051,7 +4091,7 @@ function RosetteResume({ model }: { model: PreviewModel }) {
           <div className="space-y-2.5">
             {model.education.map((e) => (
               <div key={e.id} className="text-[10px] leading-relaxed">
-                <p className="font-extrabold uppercase">{e.school || 'University'}</p>
+                <p className="font-extrabold uppercase">{[e.school || 'University', e.location].filter(Boolean).join(' · ')}</p>
                 <p className="text-gray-600">{[e.degree, e.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</p>
                 <p className="text-gray-400">{[e.startDate, e.endDate].filter(Boolean).join(' - ')}</p>
               </div>
@@ -4093,6 +4133,7 @@ function BloomResume({ model }: { model: PreviewModel }) {
               <div key={c.id}>
                 <p className="font-bold">{c.name}</p>
                 <p className="text-white/60">{[c.issuer, c.date].filter(Boolean).join(', ')}</p>
+                {c.url && <p className="text-white/60 break-all">{c.url}</p>}
               </div>
             ))}
           </div>
@@ -4129,7 +4170,7 @@ function BloomResume({ model }: { model: PreviewModel }) {
             {model.experience.map((exp) => (
               <div key={exp.id}>
                 <div className="flex items-baseline justify-between gap-3">
-                  <p className="text-[11px] font-bold">{[exp.title || exp.jobTitle || 'Job Title', exp.company].filter(Boolean).join(' - ')}</p>
+                  <p className="text-[11px] font-bold">{[exp.title || exp.jobTitle || 'Job Title', exp.company, exp.location].filter(Boolean).join(' - ')}</p>
                   <p className="shrink-0 text-[8.5px] text-gray-400">{expDates(exp)}</p>
                 </div>
                 <ul className="mt-1 space-y-[3px]">
@@ -4151,7 +4192,7 @@ function BloomResume({ model }: { model: PreviewModel }) {
                 <span>
                   <span className="font-bold">{[e.degree, e.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</span>
                   <br />
-                  <span className="text-gray-600">{[e.school, [e.startDate, e.endDate].filter(Boolean).join(' - ')].filter(Boolean).join(' - ')}</span>
+                  <span className="text-gray-600">{[e.school, e.location, [e.startDate, e.endDate].filter(Boolean).join(' - ')].filter(Boolean).join(' - ')}</span>
                 </span>
               </div>
             ))}
@@ -4164,6 +4205,7 @@ function BloomResume({ model }: { model: PreviewModel }) {
                   <div key={r.id} className="text-[9.5px] leading-relaxed">
                     <p className="font-bold">{r.name}</p>
                     <p className="text-gray-600">{[r.title, r.company].filter(Boolean).join(', ')}</p>
+                    {r.email && <p className="text-gray-600 break-all">{r.email}</p>}
                   </div>
                 ))}
               </div>
@@ -4224,7 +4266,7 @@ function ColumnResume({ model }: { model: PreviewModel }) {
             {model.education.map((e) => (
               <div key={e.id}>
                 <p className="font-bold">{[e.degree, e.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</p>
-                <p className="text-white/65">{e.school}</p>
+                <p className="text-white/65">{[e.school, e.location].filter(Boolean).join(' · ')}</p>
                 <p className="text-white/45">{[e.startDate, e.endDate].filter(Boolean).join(' - ')}</p>
               </div>
             ))}
@@ -4252,6 +4294,7 @@ function ColumnResume({ model }: { model: PreviewModel }) {
                 <div key={r.id}>
                   <p className="font-bold text-white">{r.name}</p>
                   <p>{[r.title, r.company].filter(Boolean).join(', ')}</p>
+                  {r.email && <p className="text-gray-500 break-all">{r.email}</p>}
                 </div>
               ))}
             </div>
@@ -4261,7 +4304,12 @@ function ColumnResume({ model }: { model: PreviewModel }) {
           <div>
             <ColumnHeading title="Certificates" accent={accent} />
             <ul className="space-y-1.5 text-[10px] text-white/75">
-              {model.certifications.map((c) => <li key={c.id}>{c.name}</li>)}
+              {model.certifications.map((c) => (
+                <li key={c.id}>
+                  {[c.name, c.issuer, c.date].filter(Boolean).join(' — ')}
+                  {c.url ? <span className="block break-all text-white/55">{c.url}</span> : null}
+                </li>
+              ))}
             </ul>
           </div>
         ) : null}
@@ -4283,7 +4331,7 @@ function ColumnResume({ model }: { model: PreviewModel }) {
                   <p className="text-[11px] font-bold">{exp.title || exp.jobTitle || 'Job Title'}</p>
                   <p className="shrink-0 text-[9px] text-gray-400">{expDates(exp)}</p>
                 </div>
-                <p className="text-[9.5px] text-gray-500">{exp.company}</p>
+                <p className="text-[9.5px] text-gray-500">{[exp.company, exp.location].filter(Boolean).join(' · ')}</p>
                 <BulletLines text={exp.description} accent={accent} />
               </div>
             ))}
@@ -4347,7 +4395,7 @@ function AlcoveResume({ model }: { model: PreviewModel }) {
           <div className="space-y-3 text-[10.5px] leading-relaxed">
             {model.education.map((e) => (
               <div key={e.id}>
-                <p className="font-semibold">{e.school || 'University'}</p>
+                <p className="font-semibold">{[e.school || 'University', e.location].filter(Boolean).join(' · ')}</p>
                 <p className="text-gray-600">{[e.degree, e.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</p>
                 <p className="text-gray-400">{[e.startDate, e.endDate].filter(Boolean).join(' - ')}</p>
               </div>
@@ -4373,6 +4421,7 @@ function AlcoveResume({ model }: { model: PreviewModel }) {
                 <div key={c.id}>
                   <p className="font-semibold">{c.name}</p>
                   <p className="text-gray-500">{[c.issuer, c.date].filter(Boolean).join(' - ')}</p>
+                  {c.url && <p className="text-gray-500 break-all">{c.url}</p>}
                 </div>
               ))}
             </div>
@@ -4401,7 +4450,7 @@ function AlcoveResume({ model }: { model: PreviewModel }) {
           {model.experience.map((exp) => (
             <div key={exp.id}>
               <p className="text-[9.5px] text-gray-400">({expDates(exp)})</p>
-              <p className="text-[11px] font-bold">{[exp.title || exp.jobTitle || 'Job Title', exp.company].filter(Boolean).join(' | ')}</p>
+              <p className="text-[11px] font-bold">{[exp.title || exp.jobTitle || 'Job Title', exp.company, exp.location].filter(Boolean).join(' | ')}</p>
               <BulletLines text={exp.description} accent={accent} />
             </div>
           ))}
@@ -4461,7 +4510,7 @@ function TabletResume({ model }: { model: PreviewModel }) {
             {model.education.map((e) => (
               <div key={e.id}>
                 <p className="font-bold">{[e.degree, e.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</p>
-                <p className="text-gray-600">{e.school}</p>
+                <p className="text-gray-600">{[e.school, e.location].filter(Boolean).join(' · ')}</p>
                 <p className="text-gray-400">{[e.startDate, e.endDate].filter(Boolean).join(' - ')}</p>
               </div>
             ))}
@@ -4492,6 +4541,7 @@ function TabletResume({ model }: { model: PreviewModel }) {
                 <div key={c.id}>
                   <p className="font-semibold">{c.name}</p>
                   <p className="text-gray-500">{[c.issuer, c.date].filter(Boolean).join(' - ')}</p>
+                  {c.url && <p className="text-gray-500 break-all">{c.url}</p>}
                 </div>
               ))}
             </div>
@@ -4577,7 +4627,7 @@ function GutterResume({ model }: { model: PreviewModel }) {
           <div className="space-y-3 text-[11px] leading-relaxed">
             {model.education.map((e) => (
               <div key={e.id}>
-                <p className="font-bold">{e.school || 'University'}</p>
+                <p className="font-bold">{[e.school || 'University', e.location].filter(Boolean).join(' · ')}</p>
                 <p className="text-white/65">{[e.degree, e.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</p>
                 <p className="text-white/45">{[e.startDate, e.endDate].filter(Boolean).join(' - ')}</p>
               </div>
@@ -4600,6 +4650,7 @@ function GutterResume({ model }: { model: PreviewModel }) {
                 <div key={c.id}>
                   <p className="font-semibold">{c.name}</p>
                   <p className="text-white/55">{[c.issuer, c.date].filter(Boolean).join(' - ')}</p>
+                  {c.url && <p className="text-white/55 break-all">{c.url}</p>}
                 </div>
               ))}
             </div>
@@ -4631,7 +4682,7 @@ function GutterResume({ model }: { model: PreviewModel }) {
                   ))}
                 </p>
                 <div className="border-l border-gray-200 pl-4">
-                  <p className="text-[11px] font-bold">{exp.company || 'Company'}</p>
+                  <p className="text-[11px] font-bold">{[exp.company || 'Company', exp.location].filter(Boolean).join(' · ')}</p>
                   <p className="text-[9.5px] text-gray-500">{exp.title || exp.jobTitle || 'Job Title'}</p>
                   <BulletLines text={exp.description} accent={accent} />
                 </div>
@@ -4723,7 +4774,7 @@ function BillboardResume({ model }: { model: PreviewModel }) {
             {model.experience.map((exp) => (
               <div key={exp.id}>
                 <div className="flex items-baseline justify-between gap-3">
-                  <p className="text-[11px] font-bold">{exp.company || 'Company'}</p>
+                  <p className="text-[11px] font-bold">{[exp.company || 'Company', exp.location].filter(Boolean).join(' · ')}</p>
                   <p className="shrink-0 text-[9px] text-gray-400">{expDates(exp)}</p>
                 </div>
                 <p className="text-[9.5px] italic text-gray-500">{exp.title || exp.jobTitle || 'Job Title'}</p>
@@ -4737,7 +4788,7 @@ function BillboardResume({ model }: { model: PreviewModel }) {
           <div className="space-y-2">
             {model.education.map((e) => (
               <div key={e.id} className="text-[10px] leading-relaxed">
-                <p className="font-bold">{e.school || 'University'}</p>
+                <p className="font-bold">{[e.school || 'University', e.location].filter(Boolean).join(' · ')}</p>
                 <p className="italic text-gray-600">{[e.degree, e.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</p>
                 <p className="text-gray-400">{[e.startDate, e.endDate].filter(Boolean).join(' - ')}</p>
               </div>
@@ -4752,6 +4803,7 @@ function BillboardResume({ model }: { model: PreviewModel }) {
                 <div key={c.id}>
                   <p className="font-bold">{c.name}</p>
                   <p className="text-gray-500">{[c.issuer, c.date].filter(Boolean).join(' - ')}</p>
+                  {c.url && <p className="text-gray-500 break-all">{c.url}</p>}
                 </div>
               ))}
             </div>
@@ -4802,6 +4854,7 @@ function VerdantResume({ model }: { model: PreviewModel }) {
                 </span>
                 <div className="min-w-0">
                   <p className="text-[11px] font-bold">{exp.title || exp.jobTitle || 'Job Title'}</p>
+                  <p className="text-[9px] text-white/60">{[exp.company, exp.location].filter(Boolean).join(' · ')}</p>
                   <p className="text-[9px] font-semibold" style={{ color: accent }}>{expDates(exp)}</p>
                   <p className="mt-1 text-[9px] leading-relaxed text-white/65">
                     {exp.description.split('\n').filter(Boolean).map((l) => l.replace(/^[-*]\s*/, '')).join(' ')}
@@ -4820,7 +4873,7 @@ function VerdantResume({ model }: { model: PreviewModel }) {
                 <li key={e.id} className="flex gap-2">
                   <span className="mt-[6px] h-[4px] w-[4px] shrink-0 rounded-full" style={{ backgroundColor: accent }} />
                   <span>
-                    <span className="font-semibold">{e.school || 'University'}</span>
+                    <span className="font-semibold">{[e.school || 'University', e.location].filter(Boolean).join(' · ')}</span>
                     <br />
                     <span className="text-white/55">{[e.startDate, e.endDate].filter(Boolean).join(' - ')}</span>
                   </span>
@@ -4899,7 +4952,7 @@ function EnvoyResume({ model }: { model: PreviewModel }) {
             <div className="space-y-2.5 text-[9.5px] leading-relaxed">
               {model.education.map((e) => (
                 <div key={e.id}>
-                  <p className="font-bold">{e.school || 'University'}</p>
+                  <p className="font-bold">{[e.school || 'University', e.location].filter(Boolean).join(' · ')}</p>
                   <p className="text-gray-600">{[e.degree, e.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</p>
                   <p className="text-gray-400">{[e.startDate, e.endDate].filter(Boolean).join(' - ')}</p>
                 </div>
@@ -4924,7 +4977,7 @@ function EnvoyResume({ model }: { model: PreviewModel }) {
             {model.experience.map((exp) => (
               <div key={exp.id}>
                 <p className="text-[11px] font-bold">{exp.title || exp.jobTitle || 'Job Title'}</p>
-                <p className="text-[9.5px] italic text-gray-500">{[exp.company, expDates(exp)].filter(Boolean).join(' | ')}</p>
+                <p className="text-[9.5px] italic text-gray-500">{[exp.company, exp.location, expDates(exp)].filter(Boolean).join(' | ')}</p>
                 <BulletLines text={exp.description} accent={accent} />
               </div>
             ))}
@@ -4951,6 +5004,7 @@ function EnvoyResume({ model }: { model: PreviewModel }) {
                   <div key={c.id}>
                     <p className="font-bold">{c.name}</p>
                     <p className="text-gray-500">{[c.issuer, c.date].filter(Boolean).join(', ')}</p>
+                    {c.url && <p className="text-gray-500 break-all">{c.url}</p>}
                   </div>
                 ))}
               </div>
@@ -4964,6 +5018,7 @@ function EnvoyResume({ model }: { model: PreviewModel }) {
                   <div key={r.id}>
                     <p className="font-bold">{r.name}</p>
                     <p className="text-gray-500">{[r.title, r.company].filter(Boolean).join(', ')}</p>
+                    {r.email && <p className="text-gray-500 break-all">{r.email}</p>}
                   </div>
                 ))}
               </div>
@@ -5018,7 +5073,7 @@ function RibbonResume({ model }: { model: PreviewModel }) {
                     <p className="text-[11px] font-bold">{exp.title || exp.jobTitle || 'Job Title'}</p>
                     <p className="shrink-0 text-[9px] text-gray-400">{expDates(exp)}</p>
                   </div>
-                  <p className="text-[9.5px] italic text-gray-500">{exp.company}</p>
+                  <p className="text-[9.5px] italic text-gray-500">{[exp.company, exp.location].filter(Boolean).join(' · ')}</p>
                   <BulletLines text={exp.description} accent={accent} />
                 </div>
               ))}
@@ -5030,7 +5085,7 @@ function RibbonResume({ model }: { model: PreviewModel }) {
               {model.education.map((e) => (
                 <div key={e.id} className="text-[10px] leading-relaxed">
                   <p className="font-bold">{[e.degree, e.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</p>
-                  <p className="text-gray-600">{e.school}</p>
+                  <p className="text-gray-600">{[e.school, e.location].filter(Boolean).join(' · ')}</p>
                   <p className="text-gray-400">{[e.startDate, e.endDate].filter(Boolean).join(' - ')}</p>
                 </div>
               ))}
@@ -5116,7 +5171,7 @@ function LatticeResume({ model }: { model: PreviewModel }) {
                   <p className="text-[11px] font-bold">{exp.title || exp.jobTitle || 'Job Title'}</p>
                   <p className="shrink-0 text-[8.5px] text-gray-400">{expDates(exp)}</p>
                 </div>
-                <p className="text-[9.5px] italic text-gray-500">{exp.company}</p>
+                <p className="text-[9.5px] italic text-gray-500">{[exp.company, exp.location].filter(Boolean).join(' · ')}</p>
                 <BulletLines text={exp.description} accent={accent} />
               </div>
             ))}
@@ -5129,7 +5184,7 @@ function LatticeResume({ model }: { model: PreviewModel }) {
               {model.education.map((e) => (
                 <div key={e.id}>
                   <p className="font-bold">{[e.degree, e.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}</p>
-                  <p className="text-gray-600">{e.school}</p>
+                  <p className="text-gray-600">{[e.school, e.location].filter(Boolean).join(' · ')}</p>
                   <p className="text-gray-400">{[e.startDate, e.endDate].filter(Boolean).join(' - ')}</p>
                 </div>
               ))}
@@ -5161,6 +5216,7 @@ function LatticeResume({ model }: { model: PreviewModel }) {
                   <div key={c.id}>
                     <p className="font-bold">{c.name}</p>
                     <p className="text-gray-500">{[c.issuer, c.date].filter(Boolean).join(', ')}</p>
+                    {c.url && <p className="text-gray-500 break-all">{c.url}</p>}
                   </div>
                 ))}
               </div>
