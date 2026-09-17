@@ -315,7 +315,14 @@ export default function WorkspacePage() {
           </Link>
         </div>
 
-        <div className="mt-7 grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
+        {/*
+          grid-cols-1 is load-bearing. Without a column definition below sm the
+          single implicit track is sized to its content, and the content here is
+          a resume page with a hard 794px width -- so on a phone every card in
+          this row laid out 794px wide and ran off the screen. grid-cols-1 is
+          repeat(1, minmax(0, 1fr)), which clamps the track to the container.
+        */}
+        <div className="mt-7 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-5">
           <button
             onClick={() => handleCreate()}
             // The square tile is sized for the five-column desktop grid. On a
