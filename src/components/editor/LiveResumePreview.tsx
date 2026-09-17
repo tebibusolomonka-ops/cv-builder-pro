@@ -263,14 +263,42 @@ function usePreviewModel(templateIdOverride?: string, forceSample = false): Prev
     photoWide: '',
     photoTall: '',
     summary: data.summary || SAMPLE_PERSONA.summary,
-    experience: data.workExperience.length > 0 ? data.workExperience : sampleExperience,
-    education: data.education.length > 0 ? data.education : sampleEducation,
-    skills: data.skills.length > 0 ? data.skills : sampleSkills,
-    projects: data.projects,
-    certifications: data.certifications.length > 0 ? data.certifications : sampleCertifications,
-    languages: data.languages.length > 0 ? data.languages : sampleLanguages,
-    references: data.references.length > 0 ? data.references : sampleReferences,
+    experience: orSample(data.workExperience, sampleExperience),
+    education: orSample(data.education, sampleEducation),
+    skills: orSample(data.skills, sampleSkills),
+    projects: filled(data.projects),
+    certifications: orSample(data.certifications, sampleCertifications),
+    languages: orSample(data.languages, sampleLanguages),
+    references: orSample(data.references, sampleReferences),
   }
+}
+
+/**
+ * Fields that carry a value before the user has typed anything, so an item
+ * holding only these is still an empty item.
+ */
+const DEFAULTED_FIELDS = new Set(['id', 'level', 'proficiency', 'current', 'achievements'])
+
+/**
+ * Drops list items the user has not actually filled in.
+ *
+ * "Add Item" inserts a blank row, and the templates decide whether to print a
+ * section from its array length -- so one untouched blank row put a heading on
+ * the CV with nothing underneath it, and the only way to remove that heading
+ * was to find and delete the row. An item counts only once it holds something.
+ */
+/** The user's own entries, or the sample set while the section is still empty. */
+function orSample<T extends { id: string }>(items: T[], sample: T[]): T[] {
+  const real = filled(items)
+  return real.length > 0 ? real : sample
+}
+
+function filled<T extends { id: string }>(items: T[]): T[] {
+  return items.filter((item) =>
+    Object.entries(item).some(
+      ([key, value]) => !DEFAULTED_FIELDS.has(key) && typeof value === 'string' && value.trim() !== ''
+    )
+  )
 }
 
 const RENDERERS: Record<TemplateLayoutId, (props: { model: PreviewModel }) => React.ReactNode> = {
