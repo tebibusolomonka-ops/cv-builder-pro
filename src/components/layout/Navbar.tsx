@@ -11,11 +11,13 @@ import {
   FileText,
   LayoutDashboard,
   Palette,
+  Globe2,
 } from 'lucide-react'
 
 const navLinks = [
   { label: 'Home', href: '/' },
   { label: 'Templates', href: '/templates', icon: Palette },
+  { label: 'European CV', href: '/european-cv', icon: Globe2 },
   { label: 'Workspace', href: '/dashboard', icon: LayoutDashboard },
 ]
 

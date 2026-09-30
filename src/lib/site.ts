@@ -60,6 +60,7 @@ export function absoluteUrl(path: string): string {
 export const PUBLIC_ROUTES = [
   { path: '/', priority: 1 },
   { path: '/templates', priority: 0.9 },
+  { path: '/european-cv', priority: 0.9 },
   { path: '/privacy', priority: 0.3 },
   { path: '/terms', priority: 0.3 },
 ] as const
