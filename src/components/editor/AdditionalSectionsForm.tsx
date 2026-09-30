@@ -7,7 +7,7 @@ import { useResumeStore } from '@/store/useResumeStore'
 import { CefrGrid, CefrLevel, Language } from '@/types/resume'
 import { useTemplateFields } from './useTemplateFields'
 
-type Panel =
+export type AdditionalPanel =
   | 'languages'
   | 'certifications'
   | 'projects'
@@ -17,7 +17,7 @@ type Panel =
   | 'hobbies'
   | 'organisationalSkills'
 
-const panels: { id: Panel; label: string; icon: React.ReactNode }[] = [
+const panels: { id: AdditionalPanel; label: string; icon: React.ReactNode }[] = [
   { id: 'languages', label: 'Languages', icon: <Globe2 size={16} /> },
   { id: 'certifications', label: 'Certifications', icon: <Award size={16} /> },
   { id: 'projects', label: 'Projects', icon: <BookOpen size={16} /> },
@@ -28,9 +28,9 @@ const panels: { id: Panel; label: string; icon: React.ReactNode }[] = [
   { id: 'organisationalSkills', label: 'Leadership', icon: <Users size={16} /> },
 ]
 
-const removablePanels = new Set<Panel>(['languages', 'certifications', 'projects', 'references'])
+const removablePanels = new Set<AdditionalPanel>(['languages', 'certifications', 'projects', 'references'])
 
-export function AdditionalSectionsForm() {
+export function AdditionalSectionsForm({ requestedPanel }: { requestedPanel?: AdditionalPanel }) {
   const { uses, templateName } = useTemplateFields()
   const hiddenSections = useResumeStore((state) => state.data.hiddenSections)
   const restoreSection = useResumeStore((state) => state.restoreSection)
@@ -43,9 +43,9 @@ export function AdditionalSectionsForm() {
   // Only 13 of 51 layouts print projects and 33 print references, so offering
   // every panel to everyone invites work that the CV then throws away.
   const available = useMemo(() => panels.filter((panel) => uses(panel.id)), [uses])
-  const [requested, setRequested] = useState<Panel | null>(null)
+  const [requested, setRequested] = useState<AdditionalPanel | null>(requestedPanel ?? null)
   const activePanel = available.some((panel) => panel.id === requested)
-    ? (requested as Panel)
+    ? (requested as AdditionalPanel)
     : available[0]?.id
 
   if (available.length === 0) return null

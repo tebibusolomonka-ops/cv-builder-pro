@@ -156,6 +156,8 @@ export type SectionType =
   | 'languages'
   | 'awards'
   | 'volunteer'
+  | 'hobbies'
+  | 'organisationalSkills'
   | 'references'
   | 'custom'
 

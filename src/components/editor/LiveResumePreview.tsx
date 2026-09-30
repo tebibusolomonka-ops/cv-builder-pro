@@ -189,6 +189,21 @@ function usePreviewModel(templateIdOverride?: string, forceSample = false): Prev
   // advertised.
   const persona = { ...SAMPLE_PERSONA, ...personFor(template.id) }
   const profession = professionFor(template.id)
+  const europass = template.baseTemplate === 'europe'
+  const sampleExperience = europass ? profession.experience.slice(0, 1) : profession.experience
+  const sampleEducation = europass ? profession.education.slice(0, 1) : profession.education
+  const sampleSkills = europass ? profession.skills.slice(0, 5) : profession.skills
+  const sampleProjects = europass ? [] : profession.projects
+  const sampleCertifications = europass ? [] : profession.certifications
+  const sampleReferences = europass ? [] : profession.references
+  const europassLanguages = sampleLanguages.slice(0, 2).map((language, index) =>
+    index === 0
+      ? { ...language, motherTongue: true }
+      : {
+          ...language,
+          cefr: { listening: 'B2', reading: 'B2', spokenInteraction: 'B2', spokenProduction: 'B2', writing: 'B2' },
+        }
+  ) as Language[]
 
   const name = info.fullName || [info.firstName, info.lastName].filter(Boolean).join(' ') || persona.name
   const location = info.location || [info.city, info.state, info.country].filter(Boolean).join(', ')
@@ -217,18 +232,18 @@ function usePreviewModel(templateIdOverride?: string, forceSample = false): Prev
     photo: info.profilePhoto || persona.photo,
     photoWide: ownPhoto ? '' : persona.photoWide,
     photoTall: ownPhoto ? '' : persona.photoTall,
-    summary: data.summary || profession.summary,
-    experience: orSample(data.workExperience, profession.experience),
-    education: orSample(data.education, profession.education),
-    skills: orSample(data.skills, profession.skills),
-    projects: unlessHidden('projects', orSample(data.projects, profession.projects)),
-    certifications: unlessHidden('certifications', orSample(data.certifications, profession.certifications)),
-    languages: unlessHidden('languages', orSample(data.languages, sampleLanguages)),
-    references: unlessHidden('references', orSample(data.references, profession.references)),
-    awards: filled(data.awards),
-    volunteer: filled(data.volunteer),
-    hobbies: data.hobbies || '',
-    organisationalSkills: data.organisationalSkills || '',
+    summary: hidden.has('summary') ? '' : data.summary || profession.summary,
+    experience: hidden.has('workExperience') ? [] : orSample(data.workExperience, sampleExperience),
+    education: hidden.has('education') ? [] : orSample(data.education, sampleEducation),
+    skills: hidden.has('skills') ? [] : orSample(data.skills, sampleSkills),
+    projects: unlessHidden('projects', orSample(data.projects, sampleProjects)),
+    certifications: unlessHidden('certifications', orSample(data.certifications, sampleCertifications)),
+    languages: unlessHidden('languages', orSample(data.languages, europass ? europassLanguages : sampleLanguages)),
+    references: unlessHidden('references', orSample(data.references, sampleReferences)),
+    awards: hidden.has('awards') ? [] : filled(data.awards),
+    volunteer: hidden.has('volunteer') ? [] : filled(data.volunteer),
+    hobbies: hidden.has('hobbies') ? '' : data.hobbies || '',
+    organisationalSkills: hidden.has('organisationalSkills') ? '' : data.organisationalSkills || '',
   }
 }
 
@@ -526,23 +541,23 @@ function EuropeResume({ model }: { model: PreviewModel }) {
    * cheapest way to stop a heading being stranded at the foot of a page.
    */
   const blocks: PageBlock[] = []
-  const section = (title: string, entries: React.ReactNode[], keyBase: string) => {
+  const section = (title: string, entries: React.ReactNode[], keyBase: string, kind: string) => {
     if (entries.length === 0) return
     blocks.push({
       key: `${keyBase}-0`,
       node: (
-        <>
+        <section data-cv-section={kind}>
           <EuropeHeading title={title} accent={accent} />
           {entries[0]}
-        </>
+        </section>
       ),
     })
     entries.slice(1).forEach((entry, index) => {
-      blocks.push({ key: `${keyBase}-${index + 1}`, node: entry })
+      blocks.push({ key: `${keyBase}-${index + 1}`, node: <section data-cv-section={kind}>{entry}</section> })
     })
   }
 
-  section('About me', model.summary ? [<Paragraph key="s">{model.summary}</Paragraph>] : [], 'about')
+  section('About me', model.summary ? [<Paragraph key="s">{model.summary}</Paragraph>] : [], 'about', 'summary')
 
   section(
     'Work experience',
@@ -559,7 +574,8 @@ function EuropeResume({ model }: { model: PreviewModel }) {
         <span className="mt-2 block h-px w-full" style={{ backgroundColor: '#e3e6ea' }} />
       </div>
     )),
-    'exp'
+    'exp',
+    'workExperience'
   )
 
   section(
@@ -584,45 +600,55 @@ function EuropeResume({ model }: { model: PreviewModel }) {
         <span className="mt-2 block h-px w-full" style={{ backgroundColor: '#e3e6ea' }} />
       </div>
     )),
-    'edu'
+    'edu',
+    'education'
   )
 
   section(
     'Language skills',
     model.languages.length > 0 ? [<EuropeLanguages key="l" items={model.languages} />] : [],
-    'lang'
+    'lang',
+    'languages'
   )
 
   section(
     'Digital and professional skills',
     model.skills.length > 0 ? [<SkillList key="sk" skills={model.skills} accent={accent} />] : [],
+    'skills',
     'skills'
   )
 
   section(
     'Projects',
     model.projects.length > 0 ? [<ProjectList key="p" items={model.projects} accent={accent} />] : [],
-    'proj'
+    'proj',
+    'projects'
   )
 
   section(
-    'Honours, awards and certificates',
-    [
-      ...model.awards.map((award) => (
+    'Honours and awards',
+    model.awards.map((award) => (
         <div key={award.id} className="pb-3">
           <p className="text-[9px] text-gray-500">{[award.date, award.issuer].filter(Boolean).join('   ')}</p>
           <p className="text-[11px] font-bold" style={{ color: INK }}>{award.title}</p>
           <BulletLines text={award.description} accent={accent} />
         </div>
       )),
-      ...(model.certifications.length > 0 ? [<CertList key="c" items={model.certifications} />] : []),
-    ],
-    'cert'
+    'awards',
+    'awards'
+  )
+
+  section(
+    'Certificates',
+    model.certifications.length > 0 ? [<CertList key="c" items={model.certifications} />] : [],
+    'cert',
+    'certifications'
   )
 
   section(
     'Hobbies and interests',
     model.hobbies ? [<Paragraph key="hobbies">{model.hobbies}</Paragraph>] : [],
+    'hobbies',
     'hobbies'
   )
 
@@ -642,23 +668,26 @@ function EuropeResume({ model }: { model: PreviewModel }) {
         <BulletLines text={item.description} accent={accent} />
       </div>
     )),
+    'volunteer',
     'volunteer'
   )
 
   section(
     'Organisational and leadership skills',
     model.organisationalSkills ? [<Paragraph key="org">{model.organisationalSkills}</Paragraph>] : [],
-    'org'
+    'org',
+    'organisationalSkills'
   )
 
   section(
     'References',
     model.references.length > 0 ? [<RefList key="r" items={model.references} />] : [],
-    'ref'
+    'ref',
+    'references'
   )
 
   const header = (
-    <header className="px-10 pb-5 pt-8" style={{ backgroundColor: '#f1f2f4' }}>
+    <header data-cv-section="personal" className="px-10 pb-5 pt-8" style={{ backgroundColor: '#f1f2f4' }}>
       <div className="flex items-start gap-5">
         {model.photo ? (
           <Portrait model={model} className="h-[86px] w-[86px] shrink-0 rounded-full" />
@@ -666,7 +695,7 @@ function EuropeResume({ model }: { model: PreviewModel }) {
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-4">
             <h1 className="text-[21px] font-bold leading-tight" style={{ color: INK }}>{model.name}</h1>
-            <Image src="/brand/europass.png" alt="Europass" width={682} height={208} className="h-[28px] w-auto shrink-0 object-contain" />
+            <Image src="/brand/europass.png" alt="Europass" width={682} height={208} className="h-[42px] w-auto shrink-0 object-contain" />
           </div>
           {model.title ? (
             <p className="mt-0.5 text-[11px] font-semibold" style={{ color: accent }}>{model.title}</p>

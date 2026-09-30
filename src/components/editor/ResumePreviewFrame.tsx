@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { X } from 'lucide-react'
+import { Pencil, X } from 'lucide-react'
 import { useResumeStore } from '@/store/useResumeStore'
 import type { SectionType } from '@/types/resume'
 
@@ -15,12 +15,23 @@ export const A4_HEIGHT = 1123
  * a CV is, so they get no remove control -- nobody should be one stray click
  * away from deleting their work history.
  */
-const REMOVABLE: Record<string, string> = {
+const SECTION_LABELS: Record<string, string> = {
+  personal: 'Personal information',
+  summary: 'About me',
+  workExperience: 'Work experience',
+  education: 'Education and training',
+  skills: 'Digital and professional skills',
   languages: 'Languages',
   certifications: 'Certifications',
   projects: 'Projects',
+  awards: 'Honours and awards',
+  volunteer: 'Volunteering',
+  hobbies: 'Hobbies and interests',
+  organisationalSkills: 'Organisational and leadership skills',
   references: 'References',
 }
+
+const REMOVABLE = new Set(Object.keys(SECTION_LABELS).filter((kind) => kind !== 'personal'))
 
 type Spot = { kind: string; top: number; left: number; width: number; height: number }
 
@@ -29,7 +40,13 @@ type Spot = { kind: string; top: number; left: number; width: number; height: nu
  * The frame's layout box matches the scaled size, so no dead space
  * or horizontal overflow is left behind by the CSS transform.
  */
-export function ResumePreviewFrame({ children }: { children: React.ReactNode }) {
+export function ResumePreviewFrame({
+  children,
+  onEditSection,
+}: {
+  children: React.ReactNode
+  onEditSection?: (kind: string) => void
+}) {
   const containerRef = useRef<HTMLDivElement>(null)
   const sheetRef = useRef<HTMLDivElement>(null)
   const [scale, setScale] = useState<number | null>(null)
@@ -106,7 +123,7 @@ export function ResumePreviewFrame({ children }: { children: React.ReactNode }) 
       if (target?.closest('[data-cv-overlay]')) return
       const host = target?.closest('[data-cv-section]')
       const kind = host?.getAttribute('data-cv-section')
-      setSpot(kind && kind in REMOVABLE ? locate(kind) : null)
+      setSpot(kind && kind in SECTION_LABELS ? locate(kind) : null)
     },
     [locate]
   )
@@ -117,6 +134,12 @@ export function ResumePreviewFrame({ children }: { children: React.ReactNode }) 
       className="relative w-full max-w-[850px]"
       onMouseMove={handleMove}
       onMouseLeave={() => setSpot(null)}
+      onClick={(event) => {
+        if ((event.target as HTMLElement | null)?.closest('[data-cv-overlay]')) return
+        const host = (event.target as HTMLElement | null)?.closest('[data-cv-section]')
+        const kind = host?.getAttribute('data-cv-section')
+        if (kind && kind in SECTION_LABELS) onEditSection?.(kind)
+      }}
     >
       <div
         className="resume-print-frame mx-auto overflow-hidden rounded-lg bg-white shadow-2xl transition-shadow duration-300 hover:shadow-glow-cyan"
@@ -152,8 +175,18 @@ export function ResumePreviewFrame({ children }: { children: React.ReactNode }) 
           <div className="absolute inset-0 rounded-md ring-2 ring-primary-500/70" />
           <button
             type="button"
-            aria-label={`Remove the ${REMOVABLE[spot.kind]} section`}
-            title={`Remove ${REMOVABLE[spot.kind]}`}
+            aria-label={`Edit ${SECTION_LABELS[spot.kind]}`}
+            title={`Edit ${SECTION_LABELS[spot.kind]}`}
+            onClick={() => onEditSection?.(spot.kind)}
+            className="pointer-events-auto absolute -left-2.5 -top-2.5 flex h-7 w-7 items-center justify-center rounded-full bg-primary-600 text-white shadow-lg shadow-black/30 transition-colors hover:bg-primary-500"
+          >
+            <Pencil size={13} strokeWidth={2.5} />
+          </button>
+          {REMOVABLE.has(spot.kind) ? (
+          <button
+            type="button"
+            aria-label={`Remove the ${SECTION_LABELS[spot.kind]} section`}
+            title={`Remove ${SECTION_LABELS[spot.kind]}`}
             onClick={() => {
               hideSection(spot.kind as SectionType)
               setSpot(null)
@@ -162,6 +195,7 @@ export function ResumePreviewFrame({ children }: { children: React.ReactNode }) 
           >
             <X size={13} strokeWidth={3} />
           </button>
+          ) : null}
         </div>
       ) : null}
     </div>

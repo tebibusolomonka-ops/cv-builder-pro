@@ -11,6 +11,7 @@ import {
   GraduationCap,
   Layers,
   ListChecks,
+  RotateCcw,
   User,
 } from 'lucide-react'
 import { PersonalInfoForm } from '@/components/editor/PersonalInfoForm'
@@ -18,7 +19,7 @@ import { SummaryForm } from '@/components/editor/SummaryForm'
 import { ExperienceForm } from '@/components/editor/ExperienceForm'
 import { EducationForm } from '@/components/editor/EducationForm'
 import { SkillsForm } from '@/components/editor/SkillsForm'
-import { AdditionalSectionsForm } from '@/components/editor/AdditionalSectionsForm'
+import { AdditionalSectionsForm, type AdditionalPanel } from '@/components/editor/AdditionalSectionsForm'
 import { useTemplateFields } from '@/components/editor/useTemplateFields'
 import { LiveResumePreview } from '@/components/editor/LiveResumePreview'
 import { ResumePreviewFrame } from '@/components/editor/ResumePreviewFrame'
@@ -31,8 +32,9 @@ type SectionId = 'personal' | 'summary' | 'experience' | 'education' | 'skills' 
 export default function ResumeEditorPage() {
   const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit')
   const [openSections, setOpenSections] = useState<Set<SectionId>>(new Set(['personal']))
+  const [requestedExtra, setRequestedExtra] = useState<AdditionalPanel>()
   const searchParams = useSearchParams()
-  const { data, setTemplate } = useResumeStore()
+  const { data, setTemplate, restoreSection } = useResumeStore()
   const selectedTemplateId = searchParams.get('template')
   const effectiveTemplateId = selectedTemplateId || data.style.templateId
 
@@ -106,7 +108,7 @@ export default function ResumeEditorPage() {
       hint: 'Languages, projects, certificates, references',
       icon: Layers,
       done: data.languages.length + data.projects.length + data.certifications.length > 0,
-      content: <AdditionalSectionsForm />,
+      content: <AdditionalSectionsForm key={requestedExtra ?? 'default'} requestedPanel={requestedExtra} />,
     },
   ]
 
@@ -138,6 +140,48 @@ export default function ResumeEditorPage() {
   const openOnly = (id: SectionId) => {
     setOpenSections(new Set<SectionId>([id]))
     document.getElementById(`section-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
+  const editPreviewSection = (kind: string) => {
+    const direct: Partial<Record<string, SectionId>> = {
+      personal: 'personal',
+      summary: 'summary',
+      workExperience: 'experience',
+      education: 'education',
+      skills: 'skills',
+    }
+    const additional = new Set<AdditionalPanel>([
+      'languages',
+      'certifications',
+      'projects',
+      'references',
+      'awards',
+      'volunteer',
+      'hobbies',
+      'organisationalSkills',
+    ])
+    if (additional.has(kind as AdditionalPanel)) {
+      setRequestedExtra(kind as AdditionalPanel)
+      openOnly('extras')
+    } else if (direct[kind]) {
+      openOnly(direct[kind]!)
+    }
+    setActiveTab('edit')
+  }
+
+  const hiddenLabels: Partial<Record<(typeof data.hiddenSections)[number], string>> = {
+    summary: 'About me',
+    workExperience: 'Work experience',
+    education: 'Education and training',
+    skills: 'Digital and professional skills',
+    languages: 'Languages',
+    certifications: 'Certificates',
+    projects: 'Projects',
+    awards: 'Honours and awards',
+    volunteer: 'Volunteering',
+    hobbies: 'Hobbies and interests',
+    organisationalSkills: 'Organisational and leadership skills',
+    references: 'References',
   }
 
   return (
@@ -187,6 +231,24 @@ export default function ResumeEditorPage() {
         </div>
 
         <div className="space-y-4 p-6 pb-24">
+          {(data.hiddenSections ?? []).length > 0 ? (
+            <div className="rounded-2xl border border-dark-700 bg-surface-elevated p-4">
+              <p className="text-xs font-semibold uppercase tracking-wider text-dark-400">Removed from the CV</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {(data.hiddenSections ?? []).map((kind) => (
+                  <button
+                    key={kind}
+                    type="button"
+                    onClick={() => restoreSection(kind)}
+                    className="flex items-center gap-2 rounded-lg border border-dark-600 px-3 py-1.5 text-xs text-dark-200 transition-colors hover:border-primary-500 hover:text-white"
+                  >
+                    <RotateCcw size={13} />
+                    Restore {hiddenLabels[kind] ?? kind}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : null}
           {sections.map((section) => {
             const isOpen = openSections.has(section.id)
             return (
@@ -259,7 +321,7 @@ export default function ResumeEditorPage() {
           </div>
         </div>
 
-        <ResumePreviewFrame>
+        <ResumePreviewFrame onEditSection={editPreviewSection}>
           <LiveResumePreview templateId={effectiveTemplateId} />
         </ResumePreviewFrame>
       </div>
