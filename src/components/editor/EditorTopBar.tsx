@@ -8,6 +8,37 @@ import { useResumeStore } from '@/store/useResumeStore'
 import { toast } from 'react-hot-toast'
 import { BackupControls } from './BackupControls'
 
+const EXPORT_LIMIT = 3
+const EXPORT_WINDOW_MS = 10 * 60 * 1000
+const EXPORT_HISTORY_KEY = 'netsa-cv:pdf-export-history:v1'
+
+function reserveExportAttempt() {
+  const now = Date.now()
+  let recent: number[] = []
+
+  try {
+    const stored = JSON.parse(localStorage.getItem(EXPORT_HISTORY_KEY) ?? '[]')
+    if (Array.isArray(stored)) {
+      recent = stored.filter(
+        (value): value is number => typeof value === 'number' && now - value < EXPORT_WINDOW_MS
+      )
+    }
+  } catch {
+    // A damaged or blocked localStorage entry must not break PDF export.
+  }
+
+  if (recent.length >= EXPORT_LIMIT) {
+    return Math.max(1, Math.ceil((EXPORT_WINDOW_MS - (now - recent[0])) / 60_000))
+  }
+
+  try {
+    localStorage.setItem(EXPORT_HISTORY_KEY, JSON.stringify([...recent, now]))
+  } catch {
+    // Continue when storage is unavailable; server export remains functional.
+  }
+  return 0
+}
+
 export function EditorTopBar() {
   const { title, setTitle, markSaved } = useResumeStore()
 
@@ -48,6 +79,14 @@ export function EditorTopBar() {
 
   // Fall back to the print dialog when server-side PDF rendering is unavailable.
   const handleExportPDF = async () => {
+    const retryMinutes = reserveExportAttempt()
+    if (retryMinutes > 0) {
+      toast.error(
+        `You can export 3 PDFs every 10 minutes. Try again in ${retryMinutes} minute${retryMinutes === 1 ? '' : 's'}.`
+      )
+      return
+    }
+
     setIsExporting(true)
     const toastId = toast.loading('Building your PDF…')
     try {
