@@ -3,7 +3,7 @@ import { FileText } from 'lucide-react'
 
 const PRODUCT = [
   { label: 'Templates', href: '/templates' },
-  { label: 'European CV', href: '/european-cv' },
+  { label: 'Europass', href: '/europass' },
   { label: 'CV Builder', href: '/resume/1/edit' },
   { label: 'Your Workspace', href: '/dashboard' },
 ]

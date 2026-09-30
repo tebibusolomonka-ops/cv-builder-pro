@@ -17,7 +17,7 @@ import {
 const navLinks = [
   { label: 'Home', href: '/' },
   { label: 'Templates', href: '/templates', icon: Palette },
-  { label: 'European CV', href: '/european-cv', icon: Globe2 },
+  { label: 'Europass', href: '/europass', icon: Globe2 },
   { label: 'Workspace', href: '/dashboard', icon: LayoutDashboard },
 ]
 

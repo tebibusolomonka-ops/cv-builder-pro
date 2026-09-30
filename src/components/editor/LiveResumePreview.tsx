@@ -664,7 +664,10 @@ function EuropeResume({ model }: { model: PreviewModel }) {
           <Portrait model={model} className="h-[86px] w-[86px] shrink-0 rounded-full" />
         ) : null}
         <div className="min-w-0 flex-1">
-          <h1 className="text-[21px] font-bold leading-tight" style={{ color: INK }}>{model.name}</h1>
+          <div className="flex items-start justify-between gap-4">
+            <h1 className="text-[21px] font-bold leading-tight" style={{ color: INK }}>{model.name}</h1>
+            <Image src="/brand/europass.png" alt="Europass" width={682} height={208} className="h-[28px] w-auto shrink-0 object-contain" />
+          </div>
           {model.title ? (
             <p className="mt-0.5 text-[11px] font-semibold" style={{ color: accent }}>{model.title}</p>
           ) : null}

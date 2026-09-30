@@ -3,6 +3,7 @@
 import { useState, useSyncExternalStore } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Button, Dropdown } from "@/components/ui";
 import {
@@ -329,14 +330,15 @@ export default function WorkspacePage() {
             <div>
               <span className="mb-3 inline-flex items-center gap-2 rounded-full bg-primary-500/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-primary-300">
                 <Globe2 size={14} aria-hidden="true" />
-                European Format
+                Europass
               </span>
               <h4 className="font-display text-xl font-bold text-white sm:text-2xl">
-                Scholarship / European CV
+                Scholarship / Europass CV
               </h4>
               <p className="mt-2 max-w-2xl text-sm leading-relaxed text-dark-300">
                 Start with the fields European applications expect: EQF education level, five-part CEFR language grading, nationality, volunteering, honours, and more.
               </p>
+              <Image src="/brand/europass.png" alt="Europass" width={682} height={208} className="mt-4 h-7 w-auto object-contain" />
             </div>
             <span className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary-600 text-white transition-transform duration-300 group-hover:scale-110 sm:flex">
               <GraduationCap size={23} aria-hidden="true" />

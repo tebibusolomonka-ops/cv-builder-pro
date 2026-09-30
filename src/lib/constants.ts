@@ -132,10 +132,9 @@ const LAYOUT_META: Record<TemplateLayoutId, LayoutMeta> = {
   envoy: { label: 'Envoy', category: 'academic', columns: 2, family: 'ink', description: 'Centred masthead over a true three-column body.' },
   ribbon: { label: 'Ribbon', category: 'modern', columns: 2, family: 'ink', description: 'Sections numbered down a tinted band, so the page reads in order.' },
   lattice: { label: 'Lattice', category: 'modern', columns: 2, family: 'dark', description: 'Every section its own bordered card, tiled across the page.' },
-  // The Europass structure, which EU scholarships, visas and employers ask for
-  // by name. Deliberately not called Europass: that name and the flag wordmark
-  // are EU trademarks, while the layout itself is nobody's property.
-  europe: { label: 'European Format', category: 'professional', columns: 1, family: 'panel', description: 'The European (Europass-style) structure: personal details, graded language table, and EQF levels.' },
+  // Netsacv.com has written permission to use the Europass name and supplied
+  // logo for free scholarship assistance and free student CV preparation.
+  europe: { label: 'Europass', category: 'professional', columns: 1, family: 'panel', description: 'The Europass structure: personal details, graded language table, EQF levels, volunteering, honours, and leadership.' },
 }
 
 interface Hue {

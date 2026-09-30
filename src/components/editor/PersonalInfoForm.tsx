@@ -374,7 +374,7 @@ export function PersonalInfoForm() {
 
       {uses('dateOfBirth') ? (
         <p className="text-xs leading-relaxed text-dark-400">
-          Date of birth, nationality and gender are normal on a European CV and
+          Date of birth, nationality and gender are normal on a Europass CV and
           are what employers there expect. They are optional here: anything you
           leave empty simply does not appear.
         </p>

@@ -127,7 +127,7 @@ const CEFR_FIELDS: { key: keyof CefrGrid; label: string }[] = [
 ]
 
 /**
- * The five-skill grid a European CV grades separately.
+ * The five-skill grid a Europass CV grades separately.
  *
  * Shown only for the template that prints it. Every other layout has one
  * overall proficiency, and asking five questions per language for a CV that
@@ -143,7 +143,7 @@ function CefrEditor({
   return (
     <div className="mt-3 rounded-lg border border-dark-700 bg-surface p-3">
       <p className="mb-2 text-xs text-dark-400">
-        European CVs grade each skill on its own. A1 and A2 are a basic user, B1
+        Europass CVs grade each skill on its own. A1 and A2 are a basic user, B1
         and B2 independent, C1 and C2 proficient.
       </p>
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-5">
@@ -225,7 +225,7 @@ function LanguagesEditor() {
                 This is my mother tongue
               </label>
               {/*
-                A mother tongue is listed by name on a European CV, never
+                A mother tongue is listed by name on a Europass CV, never
                 graded, so the grid would be dead weight here.
               */}
               {language.motherTongue ? null : (

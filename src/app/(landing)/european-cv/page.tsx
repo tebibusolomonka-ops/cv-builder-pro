@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import Link from 'next/link'
 import {
   ArrowRight,
@@ -14,10 +15,10 @@ import { Button } from '@/components/ui'
 import { pageMetadata } from '@/lib/site'
 
 export const metadata: Metadata = pageMetadata({
-  title: 'European CV Builder for Scholarships, Visas and Jobs — Netsa CV',
+  title: 'Free Europass CV Builder for Students — Netsa CV',
   description:
-    'Create a European-format CV with EQF education levels, CEFR language grading, volunteering, honours, and the personal details European applications request.',
-  path: '/european-cv',
+    'Create a free Europass CV with EQF education levels, CEFR language grading, volunteering, honours, and the personal details European applications request.',
+  path: '/europass',
 })
 
 const features = [
@@ -60,20 +61,19 @@ export default function EuropeanCvPage() {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(124,58,237,0.2),transparent_38%),radial-gradient(circle_at_85%_35%,rgba(59,130,246,0.12),transparent_35%)]" />
         <div className="relative mx-auto grid max-w-7xl items-center gap-14 lg:grid-cols-[1.05fr_0.95fr]">
           <div>
-            <span className="inline-flex items-center gap-2 rounded-full border border-primary-400/30 bg-primary-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-primary-300">
-              <GraduationCap size={16} aria-hidden="true" />
-              European Format
-            </span>
+            <div className="inline-flex rounded-2xl border border-white/10 bg-white px-5 py-3 shadow-xl shadow-black/20">
+              <Image src="/brand/europass.png" alt="Europass" width={682} height={208} className="h-12 w-auto object-contain sm:h-14" priority />
+            </div>
             <h1 className="font-display mt-6 max-w-3xl text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl">
-              The CV format built for European opportunities
+              Free Europass CV preparation for students
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-relaxed text-dark-300">
-              Create a detailed European CV for scholarships, university applications, visas, and jobs—without creating an account or forcing your experience into a generic resume template.
+              Create a detailed Europass CV for scholarships, university applications, visas, and jobs—without creating an account or forcing your experience into a generic resume template.
             </p>
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
               <Link href="/resume/new/edit?template=europe-slate">
                 <Button variant="gradient" size="lg" className="w-full sm:w-auto">
-                  Build my European CV
+                  Build my Europass CV
                   <ArrowRight size={18} className="ml-2" aria-hidden="true" />
                 </Button>
               </Link>
@@ -105,7 +105,7 @@ export default function EuropeanCvPage() {
               It asks for the details ordinary CV templates leave out
             </h2>
             <p className="mt-4 text-base leading-relaxed text-dark-300">
-              Choosing European Format changes the editor itself. You only see these extra questions when this format can print them.
+              Choosing Europass changes the editor itself. You only see these extra questions when this format can print them.
             </p>
           </div>
 
@@ -128,11 +128,14 @@ export default function EuropeanCvPage() {
             </p>
             <Link href="/resume/new/edit?template=europe-slate" className="mt-7 inline-block">
               <Button variant="gradient" size="lg">
-                Start European Format
+                Start Europass CV
                 <ArrowRight size={18} className="ml-2" aria-hidden="true" />
               </Button>
             </Link>
           </div>
+          <p className="mt-6 text-center text-xs leading-relaxed text-dark-500">
+            The Europass name and logo remain the property of Europass and are used by Netsacv.com with permission for free student CV preparation and scholarship assistance.
+          </p>
         </div>
       </section>
     </div>
