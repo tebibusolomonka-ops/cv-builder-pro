@@ -7,7 +7,7 @@ import { Award, Briefcase, GraduationCap, Globe, Languages as LanguagesIcon, Mai
 import { FaGithub, FaLinkedin } from 'react-icons/fa'
 import { TemplateDefinition, TemplateLayoutId, TEMPLATES } from '@/lib/constants'
 import { useResumeStore } from '@/store/useResumeStore'
-import { Award as ResumeAward, CefrGrid, CefrLevel, Certification, Education, Language, Project, Reference, Skill, VolunteerExperience, WorkExperience } from '@/types/resume'
+import { Award as ResumeAward, CefrGrid, CefrLevel, Certification, Education, Language, Project, Reference, SectionType, Skill, VolunteerExperience, WorkExperience } from '@/types/resume'
 import { cn } from '@/utils/cn'
 
 type PreviewModel = {
@@ -35,6 +35,7 @@ type PreviewModel = {
   volunteer: VolunteerExperience[]
   hobbies: string
   organisationalSkills: string
+  hiddenSections: SectionType[]
   /** Printed only by the European format; blank everywhere else. */
   dateOfBirth: string
   nationality: string
@@ -179,6 +180,7 @@ function usePreviewModel(templateIdOverride?: string, forceSample = false): Prev
       volunteer: [],
       hobbies: '',
       organisationalSkills: '',
+      hiddenSections: [],
     }
   }
 
@@ -190,9 +192,17 @@ function usePreviewModel(templateIdOverride?: string, forceSample = false): Prev
   const persona = { ...SAMPLE_PERSONA, ...personFor(template.id) }
   const profession = professionFor(template.id)
   const europass = template.baseTemplate === 'europe'
-  const sampleExperience = europass ? profession.experience.slice(0, 1) : profession.experience
+  const sampleExperience = europass
+    ? profession.experience.slice(0, 1).map((item) => ({
+        ...item,
+        description: item.description.split('\n').slice(0, 2).join('\n'),
+      }))
+    : profession.experience
   const sampleEducation = europass ? profession.education.slice(0, 1) : profession.education
-  const sampleSkills = europass ? profession.skills.slice(0, 5) : profession.skills
+  const sampleSkills = europass ? profession.skills.slice(0, 3) : profession.skills
+  const sampleSummary = europass
+    ? `${profession.title} with practical experience, a strong work ethic, and a commitment to continuous learning.`
+    : profession.summary
   const sampleProjects = europass ? [] : profession.projects
   const sampleCertifications = europass ? [] : profession.certifications
   const sampleReferences = europass ? [] : profession.references
@@ -232,7 +242,7 @@ function usePreviewModel(templateIdOverride?: string, forceSample = false): Prev
     photo: info.profilePhoto || persona.photo,
     photoWide: ownPhoto ? '' : persona.photoWide,
     photoTall: ownPhoto ? '' : persona.photoTall,
-    summary: hidden.has('summary') ? '' : data.summary || profession.summary,
+    summary: hidden.has('summary') ? '' : data.summary || sampleSummary,
     experience: hidden.has('workExperience') ? [] : orSample(data.workExperience, sampleExperience),
     education: hidden.has('education') ? [] : orSample(data.education, sampleEducation),
     skills: hidden.has('skills') ? [] : orSample(data.skills, sampleSkills),
@@ -244,6 +254,7 @@ function usePreviewModel(templateIdOverride?: string, forceSample = false): Prev
     volunteer: hidden.has('volunteer') ? [] : filled(data.volunteer),
     hobbies: hidden.has('hobbies') ? '' : data.hobbies || '',
     organisationalSkills: hidden.has('organisationalSkills') ? '' : data.organisationalSkills || '',
+    hiddenSections: data.hiddenSections ?? [],
   }
 }
 
@@ -534,6 +545,10 @@ function EuropeLanguages({ items }: { items: Language[] }) {
 
 function EuropeResume({ model }: { model: PreviewModel }) {
   const { accent } = model.template
+  const hidden = new Set(model.hiddenSections)
+  const emptyPrompt = (label: string) => (
+    <p key={label} className="pb-2 text-[9px] italic text-gray-400">Click this section to add {label}.</p>
+  )
 
   /**
    * One block per entry, so a single job can move to the next sheet on its
@@ -542,6 +557,7 @@ function EuropeResume({ model }: { model: PreviewModel }) {
    */
   const blocks: PageBlock[] = []
   const section = (title: string, entries: React.ReactNode[], keyBase: string, kind: string) => {
+    if (hidden.has(kind as SectionType)) return
     if (entries.length === 0) return
     blocks.push({
       key: `${keyBase}-0`,
@@ -620,41 +636,41 @@ function EuropeResume({ model }: { model: PreviewModel }) {
 
   section(
     'Projects',
-    model.projects.length > 0 ? [<ProjectList key="p" items={model.projects} accent={accent} />] : [],
+    model.projects.length > 0 ? [<ProjectList key="p" items={model.projects} accent={accent} />] : [emptyPrompt('projects')],
     'proj',
     'projects'
   )
 
   section(
     'Honours and awards',
-    model.awards.map((award) => (
+    model.awards.length > 0 ? model.awards.map((award) => (
         <div key={award.id} className="pb-3">
           <p className="text-[9px] text-gray-500">{[award.date, award.issuer].filter(Boolean).join('   ')}</p>
           <p className="text-[11px] font-bold" style={{ color: INK }}>{award.title}</p>
           <BulletLines text={award.description} accent={accent} />
         </div>
-      )),
+      )) : [emptyPrompt('honours and awards')],
     'awards',
     'awards'
   )
 
   section(
     'Certificates',
-    model.certifications.length > 0 ? [<CertList key="c" items={model.certifications} />] : [],
+    model.certifications.length > 0 ? [<CertList key="c" items={model.certifications} />] : [emptyPrompt('certificates')],
     'cert',
     'certifications'
   )
 
   section(
     'Hobbies and interests',
-    model.hobbies ? [<Paragraph key="hobbies">{model.hobbies}</Paragraph>] : [],
+    model.hobbies ? [<Paragraph key="hobbies">{model.hobbies}</Paragraph>] : [emptyPrompt('hobbies and interests')],
     'hobbies',
     'hobbies'
   )
 
   section(
     'Volunteering',
-    model.volunteer.map((item) => (
+    model.volunteer.length > 0 ? model.volunteer.map((item) => (
       <div key={item.id} className="pb-3">
         <p className="text-[9px] text-gray-500">
           {[[item.startDate, item.current ? 'Current' : item.endDate].filter(Boolean).join(' - '), item.location]
@@ -667,21 +683,21 @@ function EuropeResume({ model }: { model: PreviewModel }) {
         </p>
         <BulletLines text={item.description} accent={accent} />
       </div>
-    )),
+    )) : [emptyPrompt('volunteering')],
     'volunteer',
     'volunteer'
   )
 
   section(
     'Organisational and leadership skills',
-    model.organisationalSkills ? [<Paragraph key="org">{model.organisationalSkills}</Paragraph>] : [],
+    model.organisationalSkills ? [<Paragraph key="org">{model.organisationalSkills}</Paragraph>] : [emptyPrompt('organisational and leadership skills')],
     'org',
     'organisationalSkills'
   )
 
   section(
     'References',
-    model.references.length > 0 ? [<RefList key="r" items={model.references} />] : [],
+    model.references.length > 0 ? [<RefList key="r" items={model.references} />] : [emptyPrompt('references')],
     'ref',
     'references'
   )
