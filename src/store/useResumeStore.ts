@@ -15,6 +15,7 @@ import {
   Reference,
   ResumeSection,
   SectionType,
+  PersonalFieldKey,
   defaultResumeData,
 } from '@/types/resume'
 import { MAX_UNDO_HISTORY } from '@/lib/constants'
@@ -33,6 +34,8 @@ interface ResumeState {
 
   // Actions - Personal Info
   setPersonalInfo: (info: Partial<PersonalInfo>) => void
+  hidePersonalField: (field: PersonalFieldKey) => void
+  restorePersonalField: (field: PersonalFieldKey) => void
   setSummary: (summary: string) => void
 
   // Actions - Work Experience
@@ -139,6 +142,28 @@ export const useResumeStore = create<ResumeState>()(
           data: {
             ...state.data,
             personalInfo: { ...state.data.personalInfo, ...info },
+          },
+        })),
+
+      hidePersonalField: (field) =>
+        set((state) => ({
+          ...pushHistory(state),
+          data: {
+            ...state.data,
+            hiddenPersonalFields: [
+              ...new Set([...(state.data.hiddenPersonalFields ?? []), field]),
+            ],
+          },
+        })),
+
+      restorePersonalField: (field) =>
+        set((state) => ({
+          ...pushHistory(state),
+          data: {
+            ...state.data,
+            hiddenPersonalFields: (state.data.hiddenPersonalFields ?? []).filter(
+              (hidden) => hidden !== field
+            ),
           },
         })),
 

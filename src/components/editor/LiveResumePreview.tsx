@@ -7,7 +7,7 @@ import { Award, Briefcase, GraduationCap, Globe, Languages as LanguagesIcon, Mai
 import { FaGithub, FaLinkedin } from 'react-icons/fa'
 import { TemplateDefinition, TemplateLayoutId, TEMPLATES } from '@/lib/constants'
 import { useResumeStore } from '@/store/useResumeStore'
-import { Award as ResumeAward, CefrGrid, CefrLevel, Certification, Education, Language, Project, Reference, SectionType, Skill, VolunteerExperience, WorkExperience } from '@/types/resume'
+import { Award as ResumeAward, CefrGrid, CefrLevel, Certification, Education, Language, PersonalFieldKey, Project, Reference, SectionType, Skill, VolunteerExperience, WorkExperience } from '@/types/resume'
 import { cn } from '@/utils/cn'
 
 type PreviewModel = {
@@ -143,6 +143,7 @@ export type RemovableSection = (typeof REMOVABLE_SECTIONS)[number]
 function usePreviewModel(templateIdOverride?: string, forceSample = false): PreviewModel {
   const { data } = useResumeStore()
   const hidden = new Set(data.hiddenSections ?? [])
+  const hiddenPersonal = new Set(data.hiddenPersonalFields ?? [])
   // A removed section is handed over empty. Every template already gates its
   // sections on a non-empty array, so this takes it off all 51 without any of
   // them needing to know the feature exists.
@@ -220,28 +221,30 @@ function usePreviewModel(templateIdOverride?: string, forceSample = false): Prev
   // The purpose-made crops belong to the sample portraits, so they only apply
   // while the sample portrait is the one on screen.
   const ownPhoto = Boolean(info.profilePhoto)
+  const personal = (field: PersonalFieldKey, value: string) =>
+    hiddenPersonal.has(field) ? '' : value
 
   return {
     template,
     name,
     title: info.title || profession.title,
-    location: location || persona.location,
-    email: info.email || persona.email,
-    phone: info.phone || persona.phone,
-    website: info.website || info.portfolio || persona.website,
-    linkedin: info.linkedin || persona.linkedin,
-    github: info.github,
-    dateOfBirth: info.dateOfBirth || '',
-    nationality: info.nationality || '',
-    gender: info.gender || '',
-    drivingLicence: info.drivingLicence || '',
-    passportNumber: info.passportNumber || '',
-    placeOfBirth: info.placeOfBirth || '',
-    whatsapp: info.whatsapp || '',
-    instagram: info.instagram || '',
-    photo: info.profilePhoto || persona.photo,
-    photoWide: ownPhoto ? '' : persona.photoWide,
-    photoTall: ownPhoto ? '' : persona.photoTall,
+    location: personal('location', location || persona.location),
+    email: personal('email', info.email || persona.email),
+    phone: personal('phone', info.phone || persona.phone),
+    website: personal('website', info.website || info.portfolio || persona.website),
+    linkedin: personal('linkedin', info.linkedin || persona.linkedin),
+    github: personal('github', info.github),
+    dateOfBirth: personal('dateOfBirth', info.dateOfBirth || ''),
+    nationality: personal('nationality', info.nationality || ''),
+    gender: personal('gender', info.gender || ''),
+    drivingLicence: personal('drivingLicence', info.drivingLicence || ''),
+    passportNumber: personal('passportNumber', info.passportNumber || ''),
+    placeOfBirth: personal('placeOfBirth', info.placeOfBirth || ''),
+    whatsapp: personal('whatsapp', info.whatsapp || ''),
+    instagram: personal('instagram', info.instagram || ''),
+    photo: personal('profilePhoto', info.profilePhoto || persona.photo),
+    photoWide: hiddenPersonal.has('profilePhoto') || ownPhoto ? '' : persona.photoWide,
+    photoTall: hiddenPersonal.has('profilePhoto') || ownPhoto ? '' : persona.photoTall,
     summary: hidden.has('summary') ? '' : data.summary || sampleSummary,
     experience: hidden.has('workExperience') ? [] : orSample(data.workExperience, sampleExperience),
     education: hidden.has('education') ? [] : orSample(data.education, sampleEducation),

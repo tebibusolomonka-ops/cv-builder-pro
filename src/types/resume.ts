@@ -161,6 +161,24 @@ export type SectionType =
   | 'references'
   | 'custom'
 
+/** Personal details a user can keep saved while omitting them from the CV. */
+export type PersonalFieldKey =
+  | 'profilePhoto'
+  | 'email'
+  | 'phone'
+  | 'location'
+  | 'website'
+  | 'linkedin'
+  | 'github'
+  | 'dateOfBirth'
+  | 'nationality'
+  | 'gender'
+  | 'drivingLicence'
+  | 'passportNumber'
+  | 'placeOfBirth'
+  | 'whatsapp'
+  | 'instagram'
+
 export interface ResumeStyle {
   templateId: string
   primaryColor: string
@@ -204,6 +222,8 @@ export interface ResumeData {
    * saved data, which reads as "nothing removed".
    */
   hiddenSections: SectionType[]
+  /** Personal details removed from the page without discarding their values. */
+  hiddenPersonalFields?: PersonalFieldKey[]
   style: ResumeStyle
 }
 
@@ -274,5 +294,6 @@ export const defaultResumeData: ResumeData = {
   references: [],
   sections: defaultSections,
   hiddenSections: [],
+  hiddenPersonalFields: [],
   style: defaultResumeStyle,
 }

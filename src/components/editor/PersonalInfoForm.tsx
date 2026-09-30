@@ -3,10 +3,12 @@
 import { useResumeStore } from '@/store/useResumeStore'
 import { useTemplateFields } from './useTemplateFields'
 import { Input } from '@/components/ui'
-import { User, Mail, Phone, MapPin, Link as LinkIcon, CalendarDays, Car, Flag, UserRound, BookUser, MapPinned, MessageCircle } from 'lucide-react'
+import { User, Mail, Phone, MapPin, Link as LinkIcon, CalendarDays, Car, Flag, UserRound, BookUser, MapPinned, MessageCircle, EyeOff, RotateCcw } from 'lucide-react'
 import { FaGithub, FaInstagram, FaLinkedin } from 'react-icons/fa'
 import { toast } from 'react-hot-toast'
 import NextImage from 'next/image'
+import type { PersonalFieldKey } from '@/types/resume'
+import type { ReactNode } from 'react'
 
 const MAX_SOURCE_IMAGE_BYTES = 10 * 1024 * 1024
 const MAX_SOURCE_IMAGE_PIXELS = 40_000_000
@@ -148,9 +150,57 @@ async function prepareProfilePhoto(file: File) {
   throw new Error('The image could not be compressed enough. Choose a simpler photo.')
 }
 
+const PERSONAL_FIELD_LABELS: Record<PersonalFieldKey, string> = {
+  profilePhoto: 'Profile photo',
+  email: 'Email address',
+  phone: 'Phone number',
+  location: 'Location',
+  website: 'Website / portfolio',
+  linkedin: 'LinkedIn',
+  github: 'GitHub',
+  dateOfBirth: 'Date of birth',
+  nationality: 'Nationality',
+  gender: 'Gender',
+  drivingLicence: 'Driving licence',
+  passportNumber: 'Passport number',
+  placeOfBirth: 'Place of birth',
+  whatsapp: 'WhatsApp',
+  instagram: 'Instagram',
+}
+
+function RemovablePersonalField({
+  field,
+  hidden,
+  onRemove,
+  children,
+}: {
+  field: PersonalFieldKey
+  hidden: Set<PersonalFieldKey>
+  onRemove: (field: PersonalFieldKey) => void
+  children: ReactNode
+}) {
+  if (hidden.has(field)) return null
+
+  return (
+    <div className="space-y-1.5">
+      {children}
+      <button
+        type="button"
+        onClick={() => onRemove(field)}
+        className="inline-flex items-center gap-1 text-xs text-dark-400 transition-colors hover:text-primary-300"
+        aria-label={`Remove ${PERSONAL_FIELD_LABELS[field]} from CV`}
+      >
+        <EyeOff size={13} />
+        Remove from CV
+      </button>
+    </div>
+  )
+}
+
 export function PersonalInfoForm() {
-  const { data, setPersonalInfo } = useResumeStore()
+  const { data, setPersonalInfo, hidePersonalField, restorePersonalField } = useResumeStore()
   const info = data.personalInfo
+  const hiddenPersonalFields = new Set(data.hiddenPersonalFields ?? [])
   // Ask only for what the chosen template prints. Name, title, email, phone and
   // location are on every layout, so they are never conditional.
   const { uses } = useTemplateFields()
@@ -179,7 +229,7 @@ export function PersonalInfoForm() {
 
   return (
     <div className="space-y-6">
-      {uses('photo') ? (
+      {uses('photo') && !hiddenPersonalFields.has('profilePhoto') ? (
       <div className="flex items-center gap-4 p-4 bg-dark-800/50 border border-dark-700 rounded-xl">
         <div className="w-16 h-16 rounded-full bg-dark-700 border-2 border-dark-600 flex items-center justify-center overflow-hidden shrink-0">
           {info.profilePhoto ? (
@@ -212,6 +262,13 @@ export function PersonalInfoForm() {
               hover:file:bg-primary-500/20 file:cursor-pointer cursor-pointer"
           />
           <p className="mt-1 text-xs text-dark-400">JPEG, PNG, or WebP up to 10 MB. Photos are resized before saving.</p>
+          <button
+            type="button"
+            onClick={() => hidePersonalField('profilePhoto')}
+            className="mt-2 inline-flex items-center gap-1 text-xs text-dark-400 transition-colors hover:text-primary-300"
+          >
+            <EyeOff size={13} /> Remove photo from CV
+          </button>
         </div>
       </div>
       ) : null}
@@ -231,7 +288,7 @@ export function PersonalInfoForm() {
           onChange={handleChange}
           placeholder="e.g. Senior Software Engineer"
         />
-        <Input
+        <RemovablePersonalField field="email" hidden={hiddenPersonalFields} onRemove={hidePersonalField}><Input
           label="Email Address"
           name="email"
           type="email"
@@ -239,8 +296,8 @@ export function PersonalInfoForm() {
           onChange={handleChange}
           placeholder="e.g. john@example.com"
           leftIcon={<Mail size={18} />}
-        />
-        <Input
+        /></RemovablePersonalField>
+        <RemovablePersonalField field="phone" hidden={hiddenPersonalFields} onRemove={hidePersonalField}><Input
           label="Phone Number"
           name="phone"
           type="tel"
@@ -248,17 +305,17 @@ export function PersonalInfoForm() {
           onChange={handleChange}
           placeholder="e.g. +1 234 567 890"
           leftIcon={<Phone size={18} />}
-        />
-        <Input
+        /></RemovablePersonalField>
+        <RemovablePersonalField field="location" hidden={hiddenPersonalFields} onRemove={hidePersonalField}><Input
           label="Location"
           name="location"
           value={info.location}
           onChange={handleChange}
           placeholder="e.g. San Francisco, CA"
           leftIcon={<MapPin size={18} />}
-        />
+        /></RemovablePersonalField>
         {uses('website') ? (
-        <Input
+        <RemovablePersonalField field="website" hidden={hiddenPersonalFields} onRemove={hidePersonalField}><Input
           label="Website / Portfolio"
           name="website"
           type="url"
@@ -266,10 +323,10 @@ export function PersonalInfoForm() {
           onChange={handleChange}
           placeholder="e.g. https://johndoe.com"
           leftIcon={<LinkIcon size={18} />}
-        />
+        /></RemovablePersonalField>
         ) : null}
         {uses('linkedin') ? (
-        <Input
+        <RemovablePersonalField field="linkedin" hidden={hiddenPersonalFields} onRemove={hidePersonalField}><Input
           label="LinkedIn URL"
           name="linkedin"
           type="url"
@@ -277,10 +334,10 @@ export function PersonalInfoForm() {
           onChange={handleChange}
           placeholder="e.g. linkedin.com/in/johndoe"
           leftIcon={<FaLinkedin size={18} />}
-        />
+        /></RemovablePersonalField>
         ) : null}
         {uses('github') ? (
-        <Input
+        <RemovablePersonalField field="github" hidden={hiddenPersonalFields} onRemove={hidePersonalField}><Input
           label="GitHub URL"
           name="github"
           type="url"
@@ -288,89 +345,108 @@ export function PersonalInfoForm() {
           onChange={handleChange}
           placeholder="e.g. github.com/johndoe"
           leftIcon={<FaGithub size={18} />}
-        />
+        /></RemovablePersonalField>
         ) : null}
         {uses('dateOfBirth') ? (
-          <Input
+          <RemovablePersonalField field="dateOfBirth" hidden={hiddenPersonalFields} onRemove={hidePersonalField}><Input
             label="Date of birth"
             name="dateOfBirth"
             value={info.dateOfBirth ?? ''}
             onChange={handleChange}
             placeholder="e.g. 28/07/1991"
             leftIcon={<CalendarDays size={18} />}
-          />
+          /></RemovablePersonalField>
         ) : null}
         {uses('nationality') ? (
-          <Input
+          <RemovablePersonalField field="nationality" hidden={hiddenPersonalFields} onRemove={hidePersonalField}><Input
             label="Nationality"
             name="nationality"
             value={info.nationality ?? ''}
             onChange={handleChange}
             placeholder="e.g. Ethiopian"
             leftIcon={<Flag size={18} />}
-          />
+          /></RemovablePersonalField>
         ) : null}
         {uses('gender') ? (
-          <Input
+          <RemovablePersonalField field="gender" hidden={hiddenPersonalFields} onRemove={hidePersonalField}><Input
             label="Gender"
             name="gender"
             value={info.gender ?? ''}
             onChange={handleChange}
             placeholder="Leave empty to keep it off your CV"
             leftIcon={<UserRound size={18} />}
-          />
+          /></RemovablePersonalField>
         ) : null}
         {uses('drivingLicence') ? (
-          <Input
+          <RemovablePersonalField field="drivingLicence" hidden={hiddenPersonalFields} onRemove={hidePersonalField}><Input
             label="Driving licence"
             name="drivingLicence"
             value={info.drivingLicence ?? ''}
             onChange={handleChange}
             placeholder="e.g. B"
             leftIcon={<Car size={18} />}
-          />
+          /></RemovablePersonalField>
         ) : null}
         {uses('passportNumber') ? (
-          <Input
+          <RemovablePersonalField field="passportNumber" hidden={hiddenPersonalFields} onRemove={hidePersonalField}><Input
             label="Passport number"
             name="passportNumber"
             value={info.passportNumber ?? ''}
             onChange={handleChange}
             placeholder="Optional"
             leftIcon={<BookUser size={18} />}
-          />
+          /></RemovablePersonalField>
         ) : null}
         {uses('placeOfBirth') ? (
-          <Input
+          <RemovablePersonalField field="placeOfBirth" hidden={hiddenPersonalFields} onRemove={hidePersonalField}><Input
             label="Place of birth"
             name="placeOfBirth"
             value={info.placeOfBirth ?? ''}
             onChange={handleChange}
             placeholder="e.g. Robe, Ethiopia"
             leftIcon={<MapPinned size={18} />}
-          />
+          /></RemovablePersonalField>
         ) : null}
         {uses('whatsapp') ? (
-          <Input
+          <RemovablePersonalField field="whatsapp" hidden={hiddenPersonalFields} onRemove={hidePersonalField}><Input
             label="WhatsApp"
             name="whatsapp"
             value={info.whatsapp ?? ''}
             onChange={handleChange}
             placeholder="e.g. +251 911 234 567"
             leftIcon={<MessageCircle size={18} />}
-          />
+          /></RemovablePersonalField>
         ) : null}
         {uses('instagram') ? (
-          <Input
+          <RemovablePersonalField field="instagram" hidden={hiddenPersonalFields} onRemove={hidePersonalField}><Input
             label="Instagram"
             name="instagram"
             value={info.instagram ?? ''}
             onChange={handleChange}
             placeholder="instagram.com/your-name"
             leftIcon={<FaInstagram size={18} />}
-          />
+          /></RemovablePersonalField>
         ) : null}
       </div>
+
+      {hiddenPersonalFields.size > 0 ? (
+        <div className="rounded-xl border border-dashed border-dark-600 bg-dark-800/35 p-4">
+          <p className="text-sm font-medium text-dark-200">Removed from this CV</p>
+          <p className="mt-1 text-xs text-dark-400">Your saved values are kept. Restore any detail with one click.</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {[...hiddenPersonalFields].map((field) => (
+              <button
+                key={field}
+                type="button"
+                onClick={() => restorePersonalField(field)}
+                className="inline-flex items-center gap-1.5 rounded-full border border-dark-600 px-3 py-1.5 text-xs text-dark-200 transition-colors hover:border-primary-400 hover:text-primary-300"
+              >
+                <RotateCcw size={13} /> Restore {PERSONAL_FIELD_LABELS[field]}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
 
       {uses('dateOfBirth') ? (
         <p className="text-xs leading-relaxed text-dark-400">
