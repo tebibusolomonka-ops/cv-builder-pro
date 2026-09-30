@@ -16,6 +16,14 @@ export interface PersonalInfo {
   portfolio: string
   website: string
   profilePhoto: string
+  /**
+   * Fields the European (Europass-style) format expects and no other layout
+   * prints. Optional so nothing already saved in a browser needs migrating.
+   */
+  dateOfBirth?: string
+  nationality?: string
+  gender?: string
+  drivingLicence?: string
 }
 
 export interface WorkExperience {
@@ -42,6 +50,8 @@ export interface Education {
   current: boolean
   gpa: string
   description: string
+  /** European Qualifications Framework level, e.g. "EQF level 6". */
+  eqfLevel?: string
 }
 
 export interface Skill {
@@ -69,10 +79,29 @@ export interface Certification {
   url: string
 }
 
+/** The Common European Framework scale, A1 (beginner) to C2 (mastery). */
+export type CefrLevel = 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2'
+
+/**
+ * The five skills the European format grades separately. A single overall
+ * "proficiency" cannot express this -- someone can read C2 and speak B1 --
+ * which is why that field stays for the other layouts and this sits beside it.
+ */
+export interface CefrGrid {
+  listening?: CefrLevel
+  reading?: CefrLevel
+  spokenInteraction?: CefrLevel
+  spokenProduction?: CefrLevel
+  writing?: CefrLevel
+}
+
 export interface Language {
   id: string
   name: string
   proficiency: 'basic' | 'conversational' | 'proficient' | 'fluent' | 'native'
+  /** Listed under "Mother tongue(s)" rather than in the graded table. */
+  motherTongue?: boolean
+  cefr?: CefrGrid
 }
 
 export interface Award {

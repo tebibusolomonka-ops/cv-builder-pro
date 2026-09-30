@@ -7,7 +7,7 @@ import { Award, Briefcase, GraduationCap, Globe, Languages as LanguagesIcon, Mai
 import { FaGithub, FaLinkedin } from 'react-icons/fa'
 import { TemplateDefinition, TemplateLayoutId, TEMPLATES } from '@/lib/constants'
 import { useResumeStore } from '@/store/useResumeStore'
-import { Certification, Education, Language, Project, Reference, Skill, WorkExperience } from '@/types/resume'
+import { CefrGrid, CefrLevel, Certification, Education, Language, Project, Reference, Skill, WorkExperience } from '@/types/resume'
 import { cn } from '@/utils/cn'
 
 type PreviewModel = {
@@ -31,6 +31,11 @@ type PreviewModel = {
   certifications: Certification[]
   languages: Language[]
   references: Reference[]
+  /** Printed only by the European format; blank everywhere else. */
+  dateOfBirth: string
+  nationality: string
+  gender: string
+  drivingLicence: string
 }
 
 // Sample resume data
@@ -145,6 +150,10 @@ function usePreviewModel(templateIdOverride?: string, forceSample = false): Prev
       template,
       ...SAMPLE_PERSONA,
       ...personFor(template.id),
+      dateOfBirth: '14/03/1994',
+      nationality: 'Ethiopian',
+      gender: '',
+      drivingLicence: '',
       title: profession.title,
       summary: profession.summary,
       experience: profession.experience,
@@ -181,6 +190,10 @@ function usePreviewModel(templateIdOverride?: string, forceSample = false): Prev
     website: info.website || info.portfolio || persona.website,
     linkedin: info.linkedin || persona.linkedin,
     github: info.github,
+    dateOfBirth: info.dateOfBirth || '',
+    nationality: info.nationality || '',
+    gender: info.gender || '',
+    drivingLicence: info.drivingLicence || '',
     photo: info.profilePhoto || persona.photo,
     photoWide: ownPhoto ? '' : persona.photoWide,
     photoTall: ownPhoto ? '' : persona.photoTall,
@@ -220,6 +233,246 @@ function filled<T extends { id: string }>(items: T[]): T[] {
     Object.entries(item).some(
       ([key, value]) => !DEFAULTED_FIELDS.has(key) && typeof value === 'string' && value.trim() !== ''
     )
+  )
+}
+
+// European format (Europass-style)
+//
+// The structure EU scholarships, visas and employers ask for by name. It is
+// deliberately not called Europass and carries no EU flag: that name and the
+// wordmark are EU trademarks, while the document structure belongs to nobody.
+
+/** The five skills the CEFR grades separately, in the order Europass prints them. */
+const CEFR_SKILLS: { key: keyof CefrGrid; label: string }[] = [
+  { key: 'listening', label: 'Listening' },
+  { key: 'reading', label: 'Reading' },
+  { key: 'spokenInteraction', label: 'Spoken interaction' },
+  { key: 'spokenProduction', label: 'Spoken production' },
+  { key: 'writing', label: 'Writing' },
+]
+
+/**
+ * Used when a language has no CEFR grid yet.
+ *
+ * Every other layout stores one overall proficiency, so a CV written for those
+ * and then switched to this one would show an empty table. Mapping the coarse
+ * value onto the scale keeps the table readable until the real levels are set.
+ */
+const CEFR_FROM_PROFICIENCY: Record<Language['proficiency'], CefrLevel> = {
+  basic: 'A1',
+  conversational: 'A2',
+  proficient: 'B2',
+  fluent: 'C1',
+  native: 'C2',
+}
+
+function EuropeHeading({ title, accent }: { title: string; accent: string }) {
+  return (
+    <div className="mb-2 mt-4 flex items-center gap-2">
+      <span className="h-[7px] w-[7px] shrink-0 rounded-full" style={{ backgroundColor: accent }} />
+      <h2 className="text-[11px] font-bold uppercase tracking-[0.06em]" style={{ color: INK }}>
+        {title}
+      </h2>
+      <span className="h-px flex-1" style={{ backgroundColor: '#c9ced6' }} />
+    </div>
+  )
+}
+
+/** The header band's "label: value" pairs, divided by thin rules. */
+function EuropeFacts({ items }: { items: { label: string; value: string }[] }) {
+  const shown = items.filter((item) => item.value)
+  return (
+    <p className="text-[9.5px] leading-[1.7]" style={{ color: INK }}>
+      {shown.map((item, index) => (
+        <span key={item.label}>
+          <span className="font-bold">{item.label}: </span>
+          <span className="break-all">{item.value}</span>
+          {index < shown.length - 1 ? <span className="px-1.5 text-gray-400">|</span> : null}
+        </span>
+      ))}
+    </p>
+  )
+}
+
+/** Mother tongues listed plainly; every other language graded on the CEFR table. */
+function EuropeLanguages({ items }: { items: Language[] }) {
+  const mother = items.filter((item) => item.motherTongue)
+  const others = items.filter((item) => !item.motherTongue)
+  return (
+    <>
+      {mother.length > 0 ? (
+        <p className="mb-2 text-[10px]" style={{ color: INK }}>
+          <span className="font-bold">Mother tongue(s): </span>
+          <span className="font-bold uppercase">{mother.map((item) => item.name).join(', ')}</span>
+        </p>
+      ) : null}
+      {others.length > 0 ? (
+        <>
+          <p className="mb-1 text-[10px] font-bold" style={{ color: INK }}>Other language(s):</p>
+          <table className="w-full table-fixed border-collapse text-[8.5px]">
+            <thead>
+              <tr>
+                <th className="w-[22%] border border-[#dfe3e8] bg-[#f6f7f8] px-1.5 py-1 text-left font-bold">
+                  Language
+                </th>
+                {CEFR_SKILLS.map((skill) => (
+                  <th
+                    key={skill.key}
+                    className="border border-[#dfe3e8] bg-[#f6f7f8] px-1.5 py-1 text-center font-bold"
+                  >
+                    {skill.label}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {others.map((lang) => (
+                <tr key={lang.id}>
+                  <td className="border border-[#dfe3e8] px-1.5 py-1 font-semibold">{lang.name}</td>
+                  {CEFR_SKILLS.map((skill) => (
+                    <td key={skill.key} className="border border-[#dfe3e8] px-1.5 py-1 text-center">
+                      {lang.cefr?.[skill.key] || CEFR_FROM_PROFICIENCY[lang.proficiency]}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p className="mt-1 text-[7.5px] leading-snug text-gray-500">
+            Levels: A1 and A2 basic user; B1 and B2 independent user; C1 and C2 proficient user
+          </p>
+        </>
+      ) : null}
+    </>
+  )
+}
+
+function EuropeResume({ model }: { model: PreviewModel }) {
+  const { accent } = model.template
+
+  return (
+    <Page className="px-0 py-0" style={{ color: INK }}>
+      <header className="px-10 pb-5 pt-8" style={{ backgroundColor: '#f1f2f4' }}>
+        <div className="flex items-start gap-5">
+          {model.photo ? (
+            <Portrait model={model} className="h-[86px] w-[86px] shrink-0 rounded-full" />
+          ) : null}
+          <div className="min-w-0 flex-1">
+            <h1 className="text-[21px] font-bold leading-tight" style={{ color: INK }}>{model.name}</h1>
+            {model.title ? (
+              <p className="mt-0.5 text-[11px] font-semibold" style={{ color: accent }}>{model.title}</p>
+            ) : null}
+            <span className="mb-2 mt-2 block h-px w-full" style={{ backgroundColor: '#c9ced6' }} />
+            <EuropeFacts
+              items={[
+                { label: 'Date of birth', value: model.dateOfBirth },
+                { label: 'Nationality', value: model.nationality },
+                { label: 'Gender', value: model.gender },
+                { label: 'Phone number', value: model.phone },
+                { label: 'Email address', value: model.email },
+                { label: 'Address', value: model.location },
+                { label: 'Website', value: model.website },
+                { label: 'LinkedIn', value: model.linkedin },
+                { label: 'Driving licence', value: model.drivingLicence },
+              ]}
+            />
+          </div>
+        </div>
+      </header>
+
+      <div className="px-10 pb-8 pt-1">
+        {model.summary ? (
+          <>
+            <EuropeHeading title="About me" accent={accent} />
+            <Paragraph>{model.summary}</Paragraph>
+          </>
+        ) : null}
+
+        {model.experience.length > 0 ? (
+          <>
+            <EuropeHeading title="Work experience" accent={accent} />
+            <div className="space-y-3">
+              {model.experience.map((exp) => (
+                <div key={exp.id}>
+                  <p className="text-[9px] text-gray-500">
+                    {[expDates(exp), exp.location].filter(Boolean).join('   ')}
+                  </p>
+                  <p className="text-[11px] font-bold uppercase" style={{ color: INK }}>
+                    {exp.title || exp.jobTitle || 'Job Title'}{' '}
+                    <span className="font-normal normal-case text-gray-700">{exp.company}</span>
+                  </p>
+                  <BulletLines text={exp.description} accent={accent} />
+                  <span className="mt-2 block h-px w-full" style={{ backgroundColor: '#e3e6ea' }} />
+                </div>
+              ))}
+            </div>
+          </>
+        ) : null}
+
+        {model.education.length > 0 ? (
+          <>
+            <EuropeHeading title="Education and training" accent={accent} />
+            <div className="space-y-3">
+              {model.education.map((edu) => (
+                <div key={edu.id}>
+                  <p className="text-[9px] text-gray-500">
+                    {[[edu.startDate, edu.endDate].filter(Boolean).join(' - '), edu.location]
+                      .filter(Boolean)
+                      .join('   ')}
+                  </p>
+                  <p className="text-[11px] font-bold uppercase" style={{ color: INK }}>
+                    {[edu.degree, edu.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}{' '}
+                    <span className="font-normal normal-case text-gray-700">{edu.school}</span>
+                  </p>
+                  {edu.eqfLevel ? (
+                    <p className="mt-0.5 text-[9px]" style={{ color: INK }}>
+                      <span className="font-bold">Level in EQF</span>{' '}
+                      <span className="text-gray-700">{edu.eqfLevel}</span>
+                    </p>
+                  ) : null}
+                  <span className="mt-2 block h-px w-full" style={{ backgroundColor: '#e3e6ea' }} />
+                </div>
+              ))}
+            </div>
+          </>
+        ) : null}
+
+        {model.languages.length > 0 ? (
+          <>
+            <EuropeHeading title="Language skills" accent={accent} />
+            <EuropeLanguages items={model.languages} />
+          </>
+        ) : null}
+
+        {model.skills.length > 0 ? (
+          <>
+            <EuropeHeading title="Digital and professional skills" accent={accent} />
+            <SkillList skills={model.skills} accent={accent} />
+          </>
+        ) : null}
+
+        {model.projects.length > 0 ? (
+          <>
+            <EuropeHeading title="Projects" accent={accent} />
+            <ProjectList items={model.projects} accent={accent} />
+          </>
+        ) : null}
+
+        {model.certifications.length > 0 ? (
+          <>
+            <EuropeHeading title="Honours, awards and certificates" accent={accent} />
+            <CertList items={model.certifications} />
+          </>
+        ) : null}
+
+        {model.references.length > 0 ? (
+          <>
+            <EuropeHeading title="References" accent={accent} />
+            <RefList items={model.references} />
+          </>
+        ) : null}
+      </div>
+    </Page>
   )
 }
 
@@ -275,6 +528,7 @@ const RENDERERS: Record<TemplateLayoutId, (props: { model: PreviewModel }) => Re
   envoy: EnvoyResume,
   ribbon: RibbonResume,
   lattice: LatticeResume,
+  europe: EuropeResume,
 }
 
 export function LiveResumePreview({ templateId, forceSample = false }: { templateId?: string; forceSample?: boolean }) {

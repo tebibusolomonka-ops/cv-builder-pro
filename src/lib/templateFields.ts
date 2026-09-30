@@ -587,6 +587,19 @@ export const LAYOUT_FIELDS: Record<TemplateLayoutId, ResumeFieldKey[]> = {
     "photo",
     "skills",
     "summary"
+  ],
+  europe: [
+    "certifications",
+    "education",
+    "experience",
+    "languages",
+    "linkedin",
+    "photo",
+    "projects",
+    "references",
+    "skills",
+    "summary",
+    "website"
   ]
 }
 
@@ -948,5 +961,12 @@ export const LAYOUT_SECTION_ORDER: Record<TemplateLayoutId, FormSectionId[]> = {
     "education",
     "skills",
     "extras"
+  ],
+  europe: [
+    "summary",
+    "experience",
+    "education",
+    "extras",
+    "skills"
   ]
 }
