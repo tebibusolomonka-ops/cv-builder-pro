@@ -19,6 +19,7 @@ import {
   Search,
   GraduationCap,
   Globe2,
+  ShieldAlert,
 } from "lucide-react";
 import { TEMPLATES, LAYOUT_LABELS, STARRED_RESUME_KEY } from "@/lib/constants";
 import { TemplateThumbnail } from "@/components/editor/TemplateThumbnail";
@@ -27,6 +28,7 @@ import { useUIStore } from "@/store/useUIStore";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/utils/cn";
 import toast from "react-hot-toast";
+import { BackupControls } from "@/components/editor/BackupControls";
 
 const QUICK_START_IDS = ["premier", "modern-navy", "elegant-burgundy", "ats"];
 
@@ -139,6 +141,22 @@ export default function WorkspacePage() {
           {firstName ? `, ${firstName}` : ""}
         </h1>
       </motion.header>
+
+      <section className="mt-8 flex flex-col gap-4 rounded-xl border border-warning/25 bg-warning/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex gap-3">
+          <ShieldAlert className="mt-0.5 shrink-0 text-warning" size={20} aria-hidden="true" />
+          <div>
+            <h2 className="text-sm font-semibold text-dark-100">Keep a copy before launch day</h2>
+            <p className="mt-1 text-xs leading-relaxed text-dark-400">
+              Your CV exists only in this browser. Download a backup before clearing browser data,
+              changing devices, or reinstalling your browser.
+            </p>
+          </div>
+        </div>
+        <div className="flex shrink-0 gap-2 pl-8 sm:pl-0">
+          <BackupControls />
+        </div>
+      </section>
 
       {matchesSearch ? (
       <motion.section
