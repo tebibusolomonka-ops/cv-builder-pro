@@ -3,7 +3,7 @@
 import { useResumeStore } from '@/store/useResumeStore'
 import { useTemplateFields } from './useTemplateFields'
 import { Input } from '@/components/ui'
-import { User, Mail, Phone, MapPin, Link as LinkIcon } from 'lucide-react'
+import { User, Mail, Phone, MapPin, Link as LinkIcon, CalendarDays, Car, Flag, UserRound } from 'lucide-react'
 import { FaGithub, FaLinkedin } from 'react-icons/fa'
 import { toast } from 'react-hot-toast'
 import NextImage from 'next/image'
@@ -290,7 +290,55 @@ export function PersonalInfoForm() {
           leftIcon={<FaGithub size={18} />}
         />
         ) : null}
+        {uses('dateOfBirth') ? (
+          <Input
+            label="Date of birth"
+            name="dateOfBirth"
+            value={info.dateOfBirth ?? ''}
+            onChange={handleChange}
+            placeholder="e.g. 28/07/1991"
+            leftIcon={<CalendarDays size={18} />}
+          />
+        ) : null}
+        {uses('nationality') ? (
+          <Input
+            label="Nationality"
+            name="nationality"
+            value={info.nationality ?? ''}
+            onChange={handleChange}
+            placeholder="e.g. Ethiopian"
+            leftIcon={<Flag size={18} />}
+          />
+        ) : null}
+        {uses('gender') ? (
+          <Input
+            label="Gender"
+            name="gender"
+            value={info.gender ?? ''}
+            onChange={handleChange}
+            placeholder="Leave empty to keep it off your CV"
+            leftIcon={<UserRound size={18} />}
+          />
+        ) : null}
+        {uses('drivingLicence') ? (
+          <Input
+            label="Driving licence"
+            name="drivingLicence"
+            value={info.drivingLicence ?? ''}
+            onChange={handleChange}
+            placeholder="e.g. B"
+            leftIcon={<Car size={18} />}
+          />
+        ) : null}
       </div>
+
+      {uses('dateOfBirth') ? (
+        <p className="text-xs leading-relaxed text-dark-400">
+          Date of birth, nationality and gender are normal on a European CV and
+          are what employers there expect. They are optional here: anything you
+          leave empty simply does not appear.
+        </p>
+      ) : null}
     </div>
   )
 }

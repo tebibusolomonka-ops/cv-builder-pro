@@ -19,6 +19,12 @@ export type ResumeFieldKey =
   | 'certifications'
   | 'projects'
   | 'references'
+  | 'dateOfBirth'
+  | 'nationality'
+  | 'gender'
+  | 'drivingLicence'
+  | 'eqfLevel'
+  | 'cefr'
 
 /** Form sections, in the order the editor lists them by default. */
 export type FormSectionId = 'summary' | 'experience' | 'education' | 'skills' | 'extras'
@@ -589,11 +595,17 @@ export const LAYOUT_FIELDS: Record<TemplateLayoutId, ResumeFieldKey[]> = {
     "summary"
   ],
   europe: [
+    "cefr",
     "certifications",
+    "dateOfBirth",
+    "drivingLicence",
     "education",
+    "eqfLevel",
     "experience",
+    "gender",
     "languages",
     "linkedin",
+    "nationality",
     "photo",
     "projects",
     "references",

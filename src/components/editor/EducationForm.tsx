@@ -2,7 +2,8 @@
 
 import { useResumeStore } from '@/store/useResumeStore'
 import { Input, Button } from '@/components/ui'
-import { Plus, Trash2, GripVertical, GraduationCap, Calendar, MapPin } from 'lucide-react'
+import { Plus, Trash2, GripVertical, GraduationCap, Calendar, MapPin, Layers } from 'lucide-react'
+import { useTemplateFields } from './useTemplateFields'
 import {
   DndContext,
   closestCenter,
@@ -23,6 +24,7 @@ import { Education } from '@/types/resume'
 
 function SortableEducationItem({ edu, index }: { edu: Education; index: number }) {
   const { updateEducation, removeEducation } = useResumeStore()
+  const { uses } = useTemplateFields()
   
   const {
     attributes,
@@ -105,6 +107,20 @@ function SortableEducationItem({ edu, index }: { edu: Education; index: number }
               placeholder="e.g. 2020"
             />
           </div>
+          {/*
+            The European Qualifications Framework level. Only the European
+            format prints it, so only that template asks for it.
+          */}
+          {uses('eqfLevel') ? (
+            <Input
+              label="Level in EQF"
+              name="eqfLevel"
+              value={edu.eqfLevel ?? ''}
+              onChange={handleChange}
+              placeholder="e.g. EQF level 6 (a bachelor's degree)"
+              leftIcon={<Layers size={18} />}
+            />
+          ) : null}
         </div>
       </div>
     </div>

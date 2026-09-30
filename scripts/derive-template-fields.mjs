@@ -39,6 +39,10 @@ function bodyOf(fnName) {
 // helper that renders it on the renderer's behalf.
 const CONTACT_HELPERS = /<ContactStrip|<ContactChips|contactItems\(/
 const PORTRAIT_HELPERS = /<Portrait\b|<Avatar\b/
+// The CEFR grid is drawn by a helper, so a renderer that shows it never names
+// the field itself -- detected through the helper, the way contact rows and
+// portraits already are.
+const CEFR_HELPERS = /<EuropeLanguages\b|\.cefr\b|motherTongue/
 
 const DIRECT = {
   summary: /model\.summary/,
@@ -52,6 +56,12 @@ const DIRECT = {
   website: /model\.website/,
   linkedin: /model\.linkedin/,
   github: /model\.github/,
+  // Personal details only the European format prints.
+  dateOfBirth: /model\.dateOfBirth/,
+  nationality: /model\.nationality/,
+  gender: /model\.gender/,
+  drivingLicence: /model\.drivingLicence/,
+  eqfLevel: /\.eqfLevel\b/,
 }
 
 // Which model field marks each form section, for ordering.
@@ -72,6 +82,7 @@ for (const [layout, fn] of layoutToFn) {
 
   for (const [key, re] of Object.entries(DIRECT)) if (re.test(body)) used.add(key)
   if (PORTRAIT_HELPERS.test(body)) used.add('photo')
+  if (CEFR_HELPERS.test(body)) used.add('cefr')
   if (CONTACT_HELPERS.test(body)) {
     used.add('website')
     used.add('linkedin')
@@ -154,6 +165,12 @@ export type ResumeFieldKey =
   | 'certifications'
   | 'projects'
   | 'references'
+  | 'dateOfBirth'
+  | 'nationality'
+  | 'gender'
+  | 'drivingLicence'
+  | 'eqfLevel'
+  | 'cefr'
 
 /** Form sections, in the order the editor lists them by default. */
 export type FormSectionId = 'summary' | 'experience' | 'education' | 'skills' | 'extras'

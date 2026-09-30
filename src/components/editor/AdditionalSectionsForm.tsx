@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react'
 import { Award, BookOpen, Globe2, Plus, RotateCcw, Trash2, UserRound } from 'lucide-react'
 import { Button, Input } from '@/components/ui'
 import { useResumeStore } from '@/store/useResumeStore'
-import { Language } from '@/types/resume'
+import { CefrGrid, CefrLevel, Language } from '@/types/resume'
 import { useTemplateFields } from './useTemplateFields'
 
 type Panel = 'languages' | 'certifications' | 'projects' | 'references'
@@ -95,8 +95,69 @@ export function AdditionalSectionsForm() {
   )
 }
 
+/** The CEFR scale, worst to best. */
+const CEFR_LEVELS: CefrLevel[] = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
+
+const CEFR_FIELDS: { key: keyof CefrGrid; label: string }[] = [
+  { key: 'listening', label: 'Listening' },
+  { key: 'reading', label: 'Reading' },
+  { key: 'spokenInteraction', label: 'Spoken interaction' },
+  { key: 'spokenProduction', label: 'Spoken production' },
+  { key: 'writing', label: 'Writing' },
+]
+
+/**
+ * The five-skill grid a European CV grades separately.
+ *
+ * Shown only for the template that prints it. Every other layout has one
+ * overall proficiency, and asking five questions per language for a CV that
+ * prints none of them would be work thrown away.
+ */
+function CefrEditor({
+  value,
+  onChange,
+}: {
+  value: CefrGrid | undefined
+  onChange: (next: CefrGrid) => void
+}) {
+  return (
+    <div className="mt-3 rounded-lg border border-dark-700 bg-surface p-3">
+      <p className="mb-2 text-xs text-dark-400">
+        European CVs grade each skill on its own. A1 and A2 are a basic user, B1
+        and B2 independent, C1 and C2 proficient.
+      </p>
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-5">
+        {CEFR_FIELDS.map((field) => (
+          <div key={field.key} className="space-y-1">
+            <label className="block text-[11px] font-medium text-dark-300">{field.label}</label>
+            <select
+              value={value?.[field.key] ?? ''}
+              onChange={(event) =>
+                onChange({
+                  ...value,
+                  [field.key]: (event.target.value || undefined) as CefrLevel | undefined,
+                })
+              }
+              className="w-full rounded-lg border border-dark-600 bg-surface-elevated px-2 py-1.5 text-sm text-dark-100 focus:border-primary-500 focus:outline-none"
+            >
+              <option value="">--</option>
+              {CEFR_LEVELS.map((level) => (
+                <option key={level} value={level}>
+                  {level}
+                </option>
+              ))}
+            </select>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 function LanguagesEditor() {
   const { data, addLanguage, updateLanguage, removeLanguage } = useResumeStore()
+  const { uses } = useTemplateFields()
+  const graded = uses('cefr')
 
   return (
     <SectionShell
@@ -129,6 +190,32 @@ function LanguagesEditor() {
             </div>
             <RemoveButton onClick={() => removeLanguage(language.id)} />
           </div>
+
+          {graded ? (
+            <>
+              <label className="mt-3 flex items-center gap-2 text-sm text-dark-300">
+                <input
+                  type="checkbox"
+                  checked={Boolean(language.motherTongue)}
+                  onChange={(event) =>
+                    updateLanguage(language.id, { motherTongue: event.target.checked })
+                  }
+                  className="h-4 w-4 rounded border-dark-600 bg-surface-elevated accent-primary-500"
+                />
+                This is my mother tongue
+              </label>
+              {/*
+                A mother tongue is listed by name on a European CV, never
+                graded, so the grid would be dead weight here.
+              */}
+              {language.motherTongue ? null : (
+                <CefrEditor
+                  value={language.cefr}
+                  onChange={(next) => updateLanguage(language.id, { cefr: next })}
+                />
+              )}
+            </>
+          ) : null}
         </div>
       ))}
     </SectionShell>
