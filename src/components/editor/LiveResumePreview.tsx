@@ -236,6 +236,152 @@ function filled<T extends { id: string }>(items: T[]): T[] {
   )
 }
 
+/** Inner padding of a paginated sheet, in CSS pixels at 1:1. */
+const SHEET_PAD_X = 42
+const SHEET_PAD_Y = 34
+
+export type PageBlock = { key: string; node: React.ReactNode }
+
+/**
+ * Flows blocks across as many A4 sheets as they need, at a fixed type size.
+ *
+ * The single-sheet `Page` shrinks the whole document until it fits one side,
+ * which is right for a one-page CV and wrong for this one: a European CV is
+ * routinely two or three pages, and squeezing it to fit would make it
+ * unreadable rather than shorter. So nothing scales here -- content that does
+ * not fit moves to the next sheet.
+ *
+ * Packing is greedy at block granularity, measured off-screen at the real
+ * sheet width so wrapping matches what is finally painted. A block taller than
+ * a whole sheet gets one to itself and is allowed to run over rather than be
+ * clipped: an ugly page beats silently losing someone's work history.
+ */
+function PaginatedSheets({
+  blocks,
+  header,
+  className,
+  style,
+}: {
+  blocks: PageBlock[]
+  header?: React.ReactNode
+  className?: string
+  style?: React.CSSProperties
+}) {
+  const measureRef = useRef<HTMLDivElement>(null)
+  const [pages, setPages] = useState<PageBlock[][]>([blocks])
+  const [ready, setReady] = useState(false)
+  const signature = useRef('')
+
+  // Web fonts change every height, so re-measure once they have landed.
+  const [fontRevision, setFontRevision] = useState(0)
+  useEffect(() => {
+    let cancelled = false
+    void document.fonts.ready.then(() => {
+      if (!cancelled) setFontRevision((revision) => revision + 1)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useIsoLayoutEffect(() => {
+    const el = measureRef.current
+    if (!el) return
+
+    const next = `${fontRevision}\n${el.innerHTML}`
+    if (next === signature.current) return
+    signature.current = next
+
+    // offsetHeight, not getBoundingClientRect: the preview frame scales the
+    // whole resume with a CSS transform, and a client rect reports the scaled
+    // size. Measuring through the transform made every block ~38% shorter
+    // than it really is, so a three-page CV packed onto one sheet.
+    const headerEl = el.querySelector<HTMLElement>('[data-sheet-header]')
+    const headerHeight = headerEl ? headerEl.offsetHeight : 0
+    const items = Array.from(el.querySelectorAll<HTMLElement>('[data-sheet-block]'))
+    if (items.length === 0) return
+
+    const firstSheet = PAGE_H - headerHeight - SHEET_PAD_Y
+    const restSheet = PAGE_H - SHEET_PAD_Y * 2
+
+    const packed: PageBlock[][] = []
+    let current: PageBlock[] = []
+    let used = 0
+    let limit = firstSheet
+
+    items.forEach((item, index) => {
+      const height = item.offsetHeight
+      const fits = used + height <= limit
+      if (!fits && current.length > 0) {
+        packed.push(current)
+        current = []
+        used = 0
+        limit = restSheet
+      }
+      current.push(blocks[index])
+      used += height
+    })
+    if (current.length > 0) packed.push(current)
+
+    setPages(packed)
+    if (fontRevision > 0) setReady(true)
+  })
+
+  return (
+    <>
+      {/*
+        Measured off-screen at the true sheet width. `visibility: hidden` rather
+        than `display: none`, because a display:none subtree has no layout and
+        therefore no heights to read.
+      */}
+      <div
+        ref={measureRef}
+        aria-hidden
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: -99999,
+          width: PAGE_W - SHEET_PAD_X * 2,
+          visibility: 'hidden',
+          pointerEvents: 'none',
+        }}
+      >
+        {header ? <div data-sheet-header>{header}</div> : null}
+        {blocks.map((block) => (
+          <div key={block.key} data-sheet-block>
+            {block.node}
+          </div>
+        ))}
+      </div>
+
+      {pages.map((page, index) => (
+        <article
+          key={index}
+          data-resume-fit-ready={ready ? 'true' : 'false'}
+          className={cn('bg-white font-sans text-[#30343b]', className)}
+          style={{
+            width: PAGE_W,
+            height: PAGE_H,
+            // Each sheet is exactly one A4 at 96dpi, so print pagination falls
+            // out of the stacking without any explicit break rules.
+            breakInside: 'avoid',
+            breakAfter: index < pages.length - 1 ? 'page' : 'auto',
+            overflowWrap: 'break-word',
+            ...style,
+          }}
+        >
+          {index === 0 && header ? header : null}
+          <div style={{ padding: `${index === 0 ? 6 : SHEET_PAD_Y}px ${SHEET_PAD_X}px ${SHEET_PAD_Y}px` }}>
+            {page.map((block) => (
+              <div key={block.key}>{block.node}</div>
+            ))}
+          </div>
+        </article>
+      ))}
+    </>
+  )
+}
+
 // European format (Europass-style)
 //
 // The structure EU scholarships, visas and employers ask for by name. It is
@@ -350,130 +496,134 @@ function EuropeLanguages({ items }: { items: Language[] }) {
 function EuropeResume({ model }: { model: PreviewModel }) {
   const { accent } = model.template
 
-  return (
-    <Page className="px-0 py-0" style={{ color: INK }}>
-      <header className="px-10 pb-5 pt-8" style={{ backgroundColor: '#f1f2f4' }}>
-        <div className="flex items-start gap-5">
-          {model.photo ? (
-            <Portrait model={model} className="h-[86px] w-[86px] shrink-0 rounded-full" />
-          ) : null}
-          <div className="min-w-0 flex-1">
-            <h1 className="text-[21px] font-bold leading-tight" style={{ color: INK }}>{model.name}</h1>
-            {model.title ? (
-              <p className="mt-0.5 text-[11px] font-semibold" style={{ color: accent }}>{model.title}</p>
-            ) : null}
-            <span className="mb-2 mt-2 block h-px w-full" style={{ backgroundColor: '#c9ced6' }} />
-            <EuropeFacts
-              items={[
-                { label: 'Date of birth', value: model.dateOfBirth },
-                { label: 'Nationality', value: model.nationality },
-                { label: 'Gender', value: model.gender },
-                { label: 'Phone number', value: model.phone },
-                { label: 'Email address', value: model.email },
-                { label: 'Address', value: model.location },
-                { label: 'Website', value: model.website },
-                { label: 'LinkedIn', value: model.linkedin },
-                { label: 'Driving licence', value: model.drivingLicence },
-              ]}
-            />
-          </div>
-        </div>
-      </header>
+  /**
+   * One block per entry, so a single job can move to the next sheet on its
+   * own. A section heading is bundled with its first entry, which is the
+   * cheapest way to stop a heading being stranded at the foot of a page.
+   */
+  const blocks: PageBlock[] = []
+  const section = (title: string, entries: React.ReactNode[], keyBase: string) => {
+    if (entries.length === 0) return
+    blocks.push({
+      key: `${keyBase}-0`,
+      node: (
+        <>
+          <EuropeHeading title={title} accent={accent} />
+          {entries[0]}
+        </>
+      ),
+    })
+    entries.slice(1).forEach((entry, index) => {
+      blocks.push({ key: `${keyBase}-${index + 1}`, node: entry })
+    })
+  }
 
-      <div className="px-10 pb-8 pt-1">
-        {model.summary ? (
-          <>
-            <EuropeHeading title="About me" accent={accent} />
-            <Paragraph>{model.summary}</Paragraph>
-          </>
-        ) : null}
+  section('About me', model.summary ? [<Paragraph key="s">{model.summary}</Paragraph>] : [], 'about')
 
-        {model.experience.length > 0 ? (
-          <>
-            <EuropeHeading title="Work experience" accent={accent} />
-            <div className="space-y-3">
-              {model.experience.map((exp) => (
-                <div key={exp.id}>
-                  <p className="text-[9px] text-gray-500">
-                    {[expDates(exp), exp.location].filter(Boolean).join('   ')}
-                  </p>
-                  <p className="text-[11px] font-bold uppercase" style={{ color: INK }}>
-                    {exp.title || exp.jobTitle || 'Job Title'}{' '}
-                    <span className="font-normal normal-case text-gray-700">{exp.company}</span>
-                  </p>
-                  <BulletLines text={exp.description} accent={accent} />
-                  <span className="mt-2 block h-px w-full" style={{ backgroundColor: '#e3e6ea' }} />
-                </div>
-              ))}
-            </div>
-          </>
-        ) : null}
-
-        {model.education.length > 0 ? (
-          <>
-            <EuropeHeading title="Education and training" accent={accent} />
-            <div className="space-y-3">
-              {model.education.map((edu) => (
-                <div key={edu.id}>
-                  <p className="text-[9px] text-gray-500">
-                    {[[edu.startDate, edu.endDate].filter(Boolean).join(' - '), edu.location]
-                      .filter(Boolean)
-                      .join('   ')}
-                  </p>
-                  <p className="text-[11px] font-bold uppercase" style={{ color: INK }}>
-                    {[edu.degree, edu.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}{' '}
-                    <span className="font-normal normal-case text-gray-700">{edu.school}</span>
-                  </p>
-                  {edu.eqfLevel ? (
-                    <p className="mt-0.5 text-[9px]" style={{ color: INK }}>
-                      <span className="font-bold">Level in EQF</span>{' '}
-                      <span className="text-gray-700">{edu.eqfLevel}</span>
-                    </p>
-                  ) : null}
-                  <span className="mt-2 block h-px w-full" style={{ backgroundColor: '#e3e6ea' }} />
-                </div>
-              ))}
-            </div>
-          </>
-        ) : null}
-
-        {model.languages.length > 0 ? (
-          <>
-            <EuropeHeading title="Language skills" accent={accent} />
-            <EuropeLanguages items={model.languages} />
-          </>
-        ) : null}
-
-        {model.skills.length > 0 ? (
-          <>
-            <EuropeHeading title="Digital and professional skills" accent={accent} />
-            <SkillList skills={model.skills} accent={accent} />
-          </>
-        ) : null}
-
-        {model.projects.length > 0 ? (
-          <>
-            <EuropeHeading title="Projects" accent={accent} />
-            <ProjectList items={model.projects} accent={accent} />
-          </>
-        ) : null}
-
-        {model.certifications.length > 0 ? (
-          <>
-            <EuropeHeading title="Honours, awards and certificates" accent={accent} />
-            <CertList items={model.certifications} />
-          </>
-        ) : null}
-
-        {model.references.length > 0 ? (
-          <>
-            <EuropeHeading title="References" accent={accent} />
-            <RefList items={model.references} />
-          </>
-        ) : null}
+  section(
+    'Work experience',
+    model.experience.map((exp) => (
+      <div key={exp.id} className="pb-3">
+        <p className="text-[9px] text-gray-500">
+          {[expDates(exp), exp.location].filter(Boolean).join('   ')}
+        </p>
+        <p className="text-[11px] font-bold uppercase" style={{ color: INK }}>
+          {exp.title || exp.jobTitle || 'Job Title'}{' '}
+          <span className="font-normal normal-case text-gray-700">{exp.company}</span>
+        </p>
+        <BulletLines text={exp.description} accent={accent} />
+        <span className="mt-2 block h-px w-full" style={{ backgroundColor: '#e3e6ea' }} />
       </div>
-    </Page>
+    )),
+    'exp'
   )
+
+  section(
+    'Education and training',
+    model.education.map((edu) => (
+      <div key={edu.id} className="pb-3">
+        <p className="text-[9px] text-gray-500">
+          {[[edu.startDate, edu.endDate].filter(Boolean).join(' - '), edu.location]
+            .filter(Boolean)
+            .join('   ')}
+        </p>
+        <p className="text-[11px] font-bold uppercase" style={{ color: INK }}>
+          {[edu.degree, edu.fieldOfStudy].filter(Boolean).join(' in ') || 'Degree'}{' '}
+          <span className="font-normal normal-case text-gray-700">{edu.school}</span>
+        </p>
+        {edu.eqfLevel ? (
+          <p className="mt-0.5 text-[9px]" style={{ color: INK }}>
+            <span className="font-bold">Level in EQF</span>{' '}
+            <span className="text-gray-700">{edu.eqfLevel}</span>
+          </p>
+        ) : null}
+        <span className="mt-2 block h-px w-full" style={{ backgroundColor: '#e3e6ea' }} />
+      </div>
+    )),
+    'edu'
+  )
+
+  section(
+    'Language skills',
+    model.languages.length > 0 ? [<EuropeLanguages key="l" items={model.languages} />] : [],
+    'lang'
+  )
+
+  section(
+    'Digital and professional skills',
+    model.skills.length > 0 ? [<SkillList key="sk" skills={model.skills} accent={accent} />] : [],
+    'skills'
+  )
+
+  section(
+    'Projects',
+    model.projects.length > 0 ? [<ProjectList key="p" items={model.projects} accent={accent} />] : [],
+    'proj'
+  )
+
+  section(
+    'Honours, awards and certificates',
+    model.certifications.length > 0 ? [<CertList key="c" items={model.certifications} />] : [],
+    'cert'
+  )
+
+  section(
+    'References',
+    model.references.length > 0 ? [<RefList key="r" items={model.references} />] : [],
+    'ref'
+  )
+
+  const header = (
+    <header className="px-10 pb-5 pt-8" style={{ backgroundColor: '#f1f2f4' }}>
+      <div className="flex items-start gap-5">
+        {model.photo ? (
+          <Portrait model={model} className="h-[86px] w-[86px] shrink-0 rounded-full" />
+        ) : null}
+        <div className="min-w-0 flex-1">
+          <h1 className="text-[21px] font-bold leading-tight" style={{ color: INK }}>{model.name}</h1>
+          {model.title ? (
+            <p className="mt-0.5 text-[11px] font-semibold" style={{ color: accent }}>{model.title}</p>
+          ) : null}
+          <span className="mb-2 mt-2 block h-px w-full" style={{ backgroundColor: '#c9ced6' }} />
+          <EuropeFacts
+            items={[
+              { label: 'Date of birth', value: model.dateOfBirth },
+              { label: 'Nationality', value: model.nationality },
+              { label: 'Gender', value: model.gender },
+              { label: 'Phone number', value: model.phone },
+              { label: 'Email address', value: model.email },
+              { label: 'Address', value: model.location },
+              { label: 'Website', value: model.website },
+              { label: 'LinkedIn', value: model.linkedin },
+              { label: 'Driving licence', value: model.drivingLicence },
+            ]}
+          />
+        </div>
+      </div>
+    </header>
+  )
+
+  return <PaginatedSheets blocks={blocks} header={header} style={{ color: INK }} />
 }
 
 const RENDERERS: Record<TemplateLayoutId, (props: { model: PreviewModel }) => React.ReactNode> = {

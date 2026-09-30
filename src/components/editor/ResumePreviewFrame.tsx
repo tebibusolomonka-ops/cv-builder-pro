@@ -31,7 +31,13 @@ type Spot = { kind: string; top: number; left: number; width: number; height: nu
  */
 export function ResumePreviewFrame({ children }: { children: React.ReactNode }) {
   const containerRef = useRef<HTMLDivElement>(null)
+  const sheetRef = useRef<HTMLDivElement>(null)
   const [scale, setScale] = useState<number | null>(null)
+  // A European CV runs to two or three sheets, so the frame can no longer
+  // assume it is wrapping exactly one A4. It measures what was actually
+  // rendered; single-sheet templates simply measure one page and are
+  // unaffected.
+  const [contentHeight, setContentHeight] = useState(A4_HEIGHT)
   const [spot, setSpot] = useState<Spot | null>(null)
   const hideSection = useResumeStore((state) => state.hideSection)
 
@@ -39,6 +45,12 @@ export function ResumePreviewFrame({ children }: { children: React.ReactNode }) 
     const el = containerRef.current
     // Width is 0 while the panel is hidden (mobile edit tab) — keep the last scale
     if (el && el.clientWidth > 0) setScale(Math.min(1, el.clientWidth / A4_WIDTH))
+    // Measured here rather than through a ResizeObserver on the stack: the
+    // commit-time pass below already runs after every render, so it sees the
+    // extra sheets the moment pagination adds them. React bails out when the
+    // value is unchanged, so this cannot loop.
+    const sheet = sheetRef.current
+    if (sheet && sheet.scrollHeight > 0) setContentHeight(sheet.scrollHeight)
   }, [])
 
   useEffect(() => {
@@ -110,14 +122,14 @@ export function ResumePreviewFrame({ children }: { children: React.ReactNode }) 
         className="resume-print-frame mx-auto overflow-hidden rounded-lg bg-white shadow-2xl transition-shadow duration-300 hover:shadow-glow-cyan"
         style={{
           width: scale === null ? '100%' : A4_WIDTH * scale,
-          height: scale === null ? 'auto' : A4_HEIGHT * scale,
+          height: scale === null ? 'auto' : contentHeight * scale,
           visibility: scale === null ? 'hidden' : 'visible',
         }}
       >
         <div
+          ref={sheetRef}
           style={{
             width: A4_WIDTH,
-            height: A4_HEIGHT,
             transform: `scale(${scale ?? 1})`,
             transformOrigin: 'top left',
           }}
