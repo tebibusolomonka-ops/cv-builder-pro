@@ -803,7 +803,27 @@ const RENDERERS: Record<TemplateLayoutId, (props: { model: PreviewModel }) => Re
 export function LiveResumePreview({ templateId, forceSample = false }: { templateId?: string; forceSample?: boolean }) {
   const model = usePreviewModel(templateId, forceSample)
   const Renderer = RENDERERS[model.template.baseTemplate] ?? ModernResume
-  return <Renderer model={model} />
+  const contactMap: Partial<Record<PersonalFieldKey, string[]>> = {
+    phone: [model.phone],
+    email: [model.email],
+    location: [model.location],
+    website: [model.website, cleanUrl(model.website)],
+    linkedin: [model.linkedin, cleanUrl(model.linkedin)],
+    github: [model.github, cleanUrl(model.github)],
+    dateOfBirth: [model.dateOfBirth],
+    nationality: [model.nationality],
+    gender: [model.gender],
+    drivingLicence: [model.drivingLicence],
+    passportNumber: [model.passportNumber],
+    placeOfBirth: [model.placeOfBirth],
+    whatsapp: [model.whatsapp],
+    instagram: [model.instagram, cleanUrl(model.instagram)],
+  }
+  return (
+    <div className="contents" data-cv-contact-map={JSON.stringify(contactMap)}>
+      <Renderer model={model} />
+    </div>
+  )
 }
 
 // Shared layout helpers
@@ -987,6 +1007,7 @@ function Page({ className, style, children }: { className?: string; style?: Reac
 function Avatar({ model, size = 112, ring, className }: { model: PreviewModel; size?: number; ring?: string; className?: string }) {
   return (
     <div
+      data-cv-contact="profilePhoto"
       className={cn('relative shrink-0 overflow-hidden rounded-full', className)}
       style={{ width: size, height: size, border: ring ? `4px solid ${ring}` : undefined }}
     >
@@ -1004,20 +1025,20 @@ function Avatar({ model, size = 112, ring, className }: { model: PreviewModel; s
 
 function contactItems(model: PreviewModel) {
   return [
-    { icon: Phone, text: model.phone },
-    { icon: Mail, text: model.email },
-    { icon: MapPin, text: model.location },
-    { icon: Globe, text: cleanUrl(model.website) },
-    { icon: FaLinkedin, text: cleanUrl(model.linkedin) },
-    { icon: FaGithub, text: cleanUrl(model.github) },
+    { field: 'phone' as const, icon: Phone, text: model.phone },
+    { field: 'email' as const, icon: Mail, text: model.email },
+    { field: 'location' as const, icon: MapPin, text: model.location },
+    { field: 'website' as const, icon: Globe, text: cleanUrl(model.website) },
+    { field: 'linkedin' as const, icon: FaLinkedin, text: cleanUrl(model.linkedin) },
+    { field: 'github' as const, icon: FaGithub, text: cleanUrl(model.github) },
   ].filter((item) => Boolean(item.text))
 }
 
 function ContactChips({ model, chipBg, chipColor, textClass }: { model: PreviewModel; chipBg: string; chipColor: string; textClass: string }) {
   return (
     <div className={cn('space-y-2.5 text-[10px]', textClass)}>
-      {contactItems(model).map(({ icon: Icon, text }) => (
-        <p key={text} className="flex items-center gap-2.5">
+      {contactItems(model).map(({ field, icon: Icon, text }) => (
+        <p key={field} data-cv-contact={field} className="flex items-center gap-2.5">
           <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full" style={{ backgroundColor: chipBg, color: chipColor }}>
             <Icon size={10} />
           </span>
@@ -1031,8 +1052,8 @@ function ContactChips({ model, chipBg, chipColor, textClass }: { model: PreviewM
 function ContactStrip({ model, className }: { model: PreviewModel; className?: string }) {
   return (
     <div className={cn('flex flex-wrap gap-x-5 gap-y-1 text-[10px] text-gray-600', className)}>
-      {contactItems(model).map(({ text }) => (
-        <span key={text}>{text}</span>
+      {contactItems(model).map(({ field, text }) => (
+        <span key={field} data-cv-contact={field}>{text}</span>
       ))}
     </div>
   )

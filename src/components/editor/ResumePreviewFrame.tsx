@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Pencil, X } from 'lucide-react'
 import { useResumeStore } from '@/store/useResumeStore'
-import type { SectionType } from '@/types/resume'
+import type { PersonalFieldKey, SectionType } from '@/types/resume'
 
 export const A4_WIDTH = 794
 export const A4_HEIGHT = 1123
@@ -34,6 +34,25 @@ const SECTION_LABELS: Record<string, string> = {
 const REMOVABLE = new Set(Object.keys(SECTION_LABELS).filter((kind) => kind !== 'personal'))
 
 type Spot = { kind: string; top: number; left: number; width: number; height: number }
+type ContactSpot = { field: PersonalFieldKey; top: number; left: number; width: number; height: number }
+
+const CONTACT_LABELS: Record<PersonalFieldKey, string> = {
+  profilePhoto: 'profile photo',
+  email: 'email address',
+  phone: 'phone number',
+  location: 'location',
+  website: 'website',
+  linkedin: 'LinkedIn',
+  github: 'GitHub',
+  dateOfBirth: 'date of birth',
+  nationality: 'nationality',
+  gender: 'gender',
+  drivingLicence: 'driving licence',
+  passportNumber: 'passport number',
+  placeOfBirth: 'place of birth',
+  whatsapp: 'WhatsApp',
+  instagram: 'Instagram',
+}
 
 /**
  * Older layouts predate data-cv-section tags and use dozens of visual heading
@@ -80,7 +99,9 @@ export function ResumePreviewFrame({
   // unaffected.
   const [contentHeight, setContentHeight] = useState(A4_HEIGHT)
   const [spot, setSpot] = useState<Spot | null>(null)
+  const [contactSpot, setContactSpot] = useState<ContactSpot | null>(null)
   const hideSection = useResumeStore((state) => state.hideSection)
+  const hidePersonalField = useResumeStore((state) => state.hidePersonalField)
 
   const measure = useCallback(() => {
     const el = containerRef.current
@@ -178,16 +199,67 @@ export function ResumePreviewFrame({
     return bestKind
   }, [])
 
+  const locateContact = useCallback((target: HTMLElement | null): ContactSpot | null => {
+    const container = containerRef.current
+    const sheet = sheetRef.current
+    if (!container || !sheet || !target) return null
+
+    const tagged = target.closest<HTMLElement>('[data-cv-contact]')
+    let field = tagged?.dataset.cvContact as PersonalFieldKey | undefined
+    let node = tagged
+
+    // Older layouts do not carry contact tags. Match the exact rendered value
+    // instead, using the preview model embedded on its display:contents root.
+    if (!field) {
+      const mapNode = sheet.querySelector<HTMLElement>('[data-cv-contact-map]')
+      const rawMap = mapNode?.dataset.cvContactMap
+      if (!rawMap) return null
+      const map = JSON.parse(rawMap) as Partial<Record<PersonalFieldKey, string[]>>
+      let candidate: HTMLElement | null = target
+      while (candidate && candidate !== sheet) {
+        const text = candidate.textContent?.trim() ?? ''
+        const match = (Object.entries(map) as [PersonalFieldKey, string[]][]).find(([, values]) =>
+          values.some((value) => value && value.trim() === text)
+        )
+        if (match) {
+          field = match[0]
+          node = candidate
+          break
+        }
+        candidate = candidate.parentElement
+      }
+    }
+
+    if (!field || !node || !(field in CONTACT_LABELS)) return null
+    const rect = node.getBoundingClientRect()
+    const base = container.getBoundingClientRect()
+    if (!rect.width || !rect.height) return null
+    return {
+      field,
+      top: rect.top - base.top,
+      left: rect.left - base.left,
+      width: rect.width,
+      height: rect.height,
+    }
+  }, [])
+
   const handleMove = useCallback(
     (event: React.MouseEvent) => {
       const target = event.target as HTMLElement | null
       // Moving onto the remove button must not count as leaving the section,
       // or the button would vanish before it could be clicked.
       if (target?.closest('[data-cv-overlay]')) return
+      const contact = locateContact(target)
+      if (contact) {
+        setContactSpot(contact)
+        setSpot(null)
+        return
+      }
+      setContactSpot(null)
       const kind = inferKind(target)
       setSpot(kind && kind in SECTION_LABELS ? locate(kind) : null)
     },
-    [inferKind, locate]
+    [inferKind, locate, locateContact]
   )
 
   return (
@@ -195,7 +267,10 @@ export function ResumePreviewFrame({
       ref={containerRef}
       className="relative w-full max-w-[850px]"
       onMouseMove={handleMove}
-      onMouseLeave={() => setSpot(null)}
+      onMouseLeave={() => {
+        setSpot(null)
+        setContactSpot(null)
+      }}
       onClick={(event) => {
         if ((event.target as HTMLElement | null)?.closest('[data-cv-overlay]')) return
         const kind = inferKind(event.target as HTMLElement | null)
@@ -257,6 +332,32 @@ export function ResumePreviewFrame({
             <X size={13} strokeWidth={3} />
           </button>
           ) : null}
+        </div>
+      ) : null}
+      {contactSpot ? (
+        <div
+          data-cv-overlay
+          className="no-print pointer-events-none absolute z-30"
+          style={{
+            top: contactSpot.top - 2,
+            left: contactSpot.left - 2,
+            width: contactSpot.width + 4,
+            height: contactSpot.height + 4,
+          }}
+        >
+          <div className="absolute inset-0 rounded ring-1 ring-primary-500/70" />
+          <button
+            type="button"
+            aria-label={`Remove ${CONTACT_LABELS[contactSpot.field]} from CV`}
+            title={`Remove ${CONTACT_LABELS[contactSpot.field]}`}
+            onClick={() => {
+              hidePersonalField(contactSpot.field)
+              setContactSpot(null)
+            }}
+            className="pointer-events-auto absolute -right-2.5 -top-2.5 flex h-6 w-6 items-center justify-center rounded-full bg-primary-600 text-white shadow-lg shadow-black/30 transition-colors hover:bg-primary-500"
+          >
+            <X size={13} strokeWidth={3} />
+          </button>
         </div>
       ) : null}
     </div>
