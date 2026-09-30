@@ -36,6 +36,30 @@ const REMOVABLE = new Set(Object.keys(SECTION_LABELS).filter((kind) => kind !== 
 type Spot = { kind: string; top: number; left: number; width: number; height: number }
 
 /**
+ * Older layouts predate data-cv-section tags and use dozens of visual heading
+ * components. Recognise their reader-facing titles so every template gets the
+ * same paper-to-editor interaction without coupling the frame to 52 renderers.
+ */
+function kindFromHeading(text: string): string | null {
+  const title = text.trim().toLowerCase().replace(/[^a-z& ]/g, ' ').replace(/\s+/g, ' ')
+  if (!title) return null
+  if (/^contact( info)?$/.test(title)) return 'personal'
+  if (/^(about|about me|profile|professional profile|professional summary|summary|objective)$/.test(title)) return 'summary'
+  if (/(work|professional|career|employment).*experience|experience|employment history|career history|earlier roles/.test(title)) return 'workExperience'
+  if (/education|academic|qualification|training/.test(title)) return 'education'
+  if (/language/.test(title)) return 'languages'
+  if (/certificate|certification/.test(title)) return 'certifications'
+  if (/project/.test(title)) return 'projects'
+  if (/reference/.test(title)) return 'references'
+  if (/honour|honor|award|achievement/.test(title)) return 'awards'
+  if (/volunteer/.test(title)) return 'volunteer'
+  if (/hobbies|interests/.test(title)) return 'hobbies'
+  if (/leadership|organisation|organization|management/.test(title)) return 'organisationalSkills'
+  if (/skill|expertise|competenc|toolkit|capabilit/.test(title)) return 'skills'
+  return null
+}
+
+/**
  * Scales the fixed-size A4 resume page to fit its container width.
  * The frame's layout box matches the scaled size, so no dead space
  * or horizontal overflow is left behind by the CSS transform.
@@ -100,10 +124,17 @@ export function ResumePreviewFrame({
     const container = containerRef.current
     if (!container) return null
     const nodes = container.querySelectorAll(`[data-cv-section="${kind}"]`)
-    if (nodes.length === 0) return null
+    const inferredHeadings = nodes.length === 0
+      ? Array.from(container.querySelectorAll('h1, h2, h3, [role="heading"]')).filter((node) => {
+          if (kind === 'personal' && node.tagName === 'H1') return true
+          return kindFromHeading(node.textContent ?? '') === kind
+        })
+      : []
+    if (nodes.length === 0 && inferredHeadings.length === 0) return null
     const base = container.getBoundingClientRect()
     let top = Infinity, left = Infinity, right = -Infinity, bottom = -Infinity
-    nodes.forEach((node) => {
+    const locatedNodes = nodes.length > 0 ? Array.from(nodes) : inferredHeadings
+    locatedNodes.forEach((node) => {
       const r = node.getBoundingClientRect()
       if (r.width === 0 || r.height === 0) return
       top = Math.min(top, r.top)
@@ -115,17 +146,48 @@ export function ResumePreviewFrame({
     return { kind, top: top - base.top, left: left - base.left, width: right - left, height: bottom - top }
   }, [])
 
+  const inferKind = useCallback((target: HTMLElement | null): string | null => {
+    if (!target) return null
+    const tagged = target.closest('[data-cv-section]')?.getAttribute('data-cv-section')
+    if (tagged && tagged in SECTION_LABELS) return tagged
+
+    const directHeading = target.closest('h1, h2, h3, [role="heading"]')
+    if (directHeading?.tagName === 'H1') return 'personal'
+    const directKind = kindFromHeading(directHeading?.textContent ?? '')
+    if (directKind) return directKind
+
+    // When the pointer is over section content rather than its title, choose
+    // the nearest mapped heading above it in the same horizontal column.
+    const targetRect = target.getBoundingClientRect()
+    const targetX = targetRect.left + targetRect.width / 2
+    const targetY = targetRect.top + targetRect.height / 2
+    let bestKind: string | null = null
+    let bestDistance = Infinity
+    sheetRef.current?.querySelectorAll('h1, h2, h3, [role="heading"]').forEach((heading) => {
+      const kind = heading.tagName === 'H1' ? 'personal' : kindFromHeading(heading.textContent ?? '')
+      if (!kind || !(kind in SECTION_LABELS)) return
+      const rect = heading.getBoundingClientRect()
+      const horizontallyAligned = targetX >= rect.left - 40 && targetX <= rect.right + 260
+      if (!horizontallyAligned || rect.top > targetY + 8) return
+      const distance = targetY - rect.top
+      if (distance < bestDistance) {
+        bestKind = kind
+        bestDistance = distance
+      }
+    })
+    return bestKind
+  }, [])
+
   const handleMove = useCallback(
     (event: React.MouseEvent) => {
       const target = event.target as HTMLElement | null
       // Moving onto the remove button must not count as leaving the section,
       // or the button would vanish before it could be clicked.
       if (target?.closest('[data-cv-overlay]')) return
-      const host = target?.closest('[data-cv-section]')
-      const kind = host?.getAttribute('data-cv-section')
+      const kind = inferKind(target)
       setSpot(kind && kind in SECTION_LABELS ? locate(kind) : null)
     },
-    [locate]
+    [inferKind, locate]
   )
 
   return (
@@ -136,8 +198,7 @@ export function ResumePreviewFrame({
       onMouseLeave={() => setSpot(null)}
       onClick={(event) => {
         if ((event.target as HTMLElement | null)?.closest('[data-cv-overlay]')) return
-        const host = (event.target as HTMLElement | null)?.closest('[data-cv-section]')
-        const kind = host?.getAttribute('data-cv-section')
+        const kind = inferKind(event.target as HTMLElement | null)
         if (kind && kind in SECTION_LABELS) onEditSection?.(kind)
       }}
     >
