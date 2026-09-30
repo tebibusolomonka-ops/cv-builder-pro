@@ -17,6 +17,7 @@ import { useResumeStore } from '@/store/useResumeStore'
 import { useUIStore } from '@/store/useUIStore'
 import { STARRED_RESUME_KEY } from '@/lib/constants'
 import { Dropdown } from '@/components/ui'
+import { WELCOME_NOTIFICATION_READ_KEY, WELCOME_NOTIFICATION_TITLE } from '@/components/WelcomeNotification'
 
 const navLinks = [
   { label: 'Workspace', href: '/dashboard', icon: LayoutDashboard },
@@ -105,6 +106,16 @@ export default function DashboardLayout({
 
             <Dropdown
               align="right"
+              onOpenChange={(isOpen) => {
+                if (!isOpen || unreadCount === 0) return
+                markAllAsRead()
+                if (!notifications.some((item) => item.title === WELCOME_NOTIFICATION_TITLE)) return
+                try {
+                  window.localStorage.setItem(WELCOME_NOTIFICATION_READ_KEY, 'true')
+                } catch {
+                  // The badge still clears for this visit when storage is blocked.
+                }
+              }}
               trigger={
                 <button
                   type="button"
@@ -126,9 +137,14 @@ export default function DashboardLayout({
                 notifications.length > 0
                   ? [
                       ...notifications.slice(0, 3).map(n => ({
-                        label: n.title,
+                        label: (
+                          <span className="block min-w-56 text-left">
+                            <span className="block font-semibold text-dark-100">{n.title}</span>
+                            <span className="mt-1 block text-xs leading-relaxed text-dark-400">{n.message}</span>
+                          </span>
+                        ),
                         value: n.id,
-                        onClick: markAllAsRead,
+                        onClick: () => n.read || markAllAsRead(),
                       })),
                       { label: 'Clear all notifications', value: 'clear', danger: true, divider: true, onClick: markAllAsRead }
                     ]

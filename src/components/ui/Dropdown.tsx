@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/utils/cn'
 
 interface DropdownItem {
-  label: string
+  label: React.ReactNode
   value: string
   icon?: React.ReactNode
   danger?: boolean
@@ -18,9 +18,10 @@ interface DropdownProps {
   items: DropdownItem[]
   align?: 'left' | 'right'
   className?: string
+  onOpenChange?: (isOpen: boolean) => void
 }
 
-export function Dropdown({ trigger, items, align = 'left', className }: DropdownProps) {
+export function Dropdown({ trigger, items, align = 'left', className, onOpenChange }: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLDivElement>(null)
@@ -43,7 +44,16 @@ export function Dropdown({ trigger, items, align = 'left', className }: Dropdown
 
   return (
     <div ref={ref} className={cn('relative inline-block', className)}>
-      <div ref={triggerRef} onClick={() => setIsOpen(!isOpen)}>{trigger}</div>
+      <div
+        ref={triggerRef}
+        onClick={() => {
+          const next = !isOpen
+          setIsOpen(next)
+          onOpenChange?.(next)
+        }}
+      >
+        {trigger}
+      </div>
       <AnimatePresence>
         {isOpen && (
           <motion.div

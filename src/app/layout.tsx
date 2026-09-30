@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { Toaster } from 'react-hot-toast'
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from '@/lib/site'
-import { WelcomeToast } from '@/components/WelcomeToast'
+import { WelcomeNotification } from '@/components/WelcomeNotification'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -70,7 +70,7 @@ export default function RootLayout({
             },
           }}
         />
-        <WelcomeToast />
+        <WelcomeNotification />
       </body>
     </html>
   )
