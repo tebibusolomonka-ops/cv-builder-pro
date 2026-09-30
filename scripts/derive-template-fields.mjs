@@ -65,6 +65,10 @@ const DIRECT = {
   nationality: /model\.nationality/,
   gender: /model\.gender/,
   drivingLicence: /model\.drivingLicence/,
+  passportNumber: /model\.passportNumber/,
+  placeOfBirth: /model\.placeOfBirth/,
+  whatsapp: /model\.whatsapp/,
+  instagram: /model\.instagram/,
   eqfLevel: /\.eqfLevel\b/,
 }
 
@@ -177,6 +181,10 @@ export type ResumeFieldKey =
   | 'nationality'
   | 'gender'
   | 'drivingLicence'
+  | 'passportNumber'
+  | 'placeOfBirth'
+  | 'whatsapp'
+  | 'instagram'
   | 'eqfLevel'
   | 'cefr'
 

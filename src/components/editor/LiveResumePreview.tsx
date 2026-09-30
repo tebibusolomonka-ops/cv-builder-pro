@@ -40,6 +40,10 @@ type PreviewModel = {
   nationality: string
   gender: string
   drivingLicence: string
+  passportNumber: string
+  placeOfBirth: string
+  whatsapp: string
+  instagram: string
 }
 
 // Sample resume data
@@ -158,6 +162,10 @@ function usePreviewModel(templateIdOverride?: string, forceSample = false): Prev
       nationality: 'Ethiopian',
       gender: '',
       drivingLicence: '',
+      passportNumber: '',
+      placeOfBirth: '',
+      whatsapp: '',
+      instagram: '',
       title: profession.title,
       summary: profession.summary,
       experience: profession.experience,
@@ -202,6 +210,10 @@ function usePreviewModel(templateIdOverride?: string, forceSample = false): Prev
     nationality: info.nationality || '',
     gender: info.gender || '',
     drivingLicence: info.drivingLicence || '',
+    passportNumber: info.passportNumber || '',
+    placeOfBirth: info.placeOfBirth || '',
+    whatsapp: info.whatsapp || '',
+    instagram: info.instagram || '',
     photo: info.profilePhoto || persona.photo,
     photoWide: ownPhoto ? '' : persona.photoWide,
     photoTall: ownPhoto ? '' : persona.photoTall,
@@ -660,10 +672,14 @@ function EuropeResume({ model }: { model: PreviewModel }) {
           <EuropeFacts
             items={[
               { label: 'Date of birth', value: model.dateOfBirth },
+              { label: 'Place of birth', value: model.placeOfBirth },
               { label: 'Nationality', value: model.nationality },
               { label: 'Gender', value: model.gender },
+              { label: 'Passport', value: model.passportNumber },
               { label: 'Phone number', value: model.phone },
+              { label: 'WhatsApp', value: model.whatsapp },
               { label: 'Email address', value: model.email },
+              { label: 'Instagram', value: model.instagram },
               { label: 'Address', value: model.location },
               { label: 'Website', value: model.website },
               { label: 'LinkedIn', value: model.linkedin },

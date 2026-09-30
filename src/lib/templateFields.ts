@@ -27,6 +27,10 @@ export type ResumeFieldKey =
   | 'nationality'
   | 'gender'
   | 'drivingLicence'
+  | 'passportNumber'
+  | 'placeOfBirth'
+  | 'whatsapp'
+  | 'instagram'
   | 'eqfLevel'
   | 'cefr'
 
@@ -609,17 +613,21 @@ export const LAYOUT_FIELDS: Record<TemplateLayoutId, ResumeFieldKey[]> = {
     "experience",
     "gender",
     "hobbies",
+    "instagram",
     "languages",
     "linkedin",
     "nationality",
     "organisationalSkills",
+    "passportNumber",
     "photo",
+    "placeOfBirth",
     "projects",
     "references",
     "skills",
     "summary",
     "volunteer",
-    "website"
+    "website",
+    "whatsapp"
   ]
 }
 

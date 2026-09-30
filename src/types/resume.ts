@@ -24,6 +24,10 @@ export interface PersonalInfo {
   nationality?: string
   gender?: string
   drivingLicence?: string
+  passportNumber?: string
+  placeOfBirth?: string
+  whatsapp?: string
+  instagram?: string
 }
 
 export interface WorkExperience {

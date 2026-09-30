@@ -3,8 +3,8 @@
 import { useResumeStore } from '@/store/useResumeStore'
 import { useTemplateFields } from './useTemplateFields'
 import { Input } from '@/components/ui'
-import { User, Mail, Phone, MapPin, Link as LinkIcon, CalendarDays, Car, Flag, UserRound } from 'lucide-react'
-import { FaGithub, FaLinkedin } from 'react-icons/fa'
+import { User, Mail, Phone, MapPin, Link as LinkIcon, CalendarDays, Car, Flag, UserRound, BookUser, MapPinned, MessageCircle } from 'lucide-react'
+import { FaGithub, FaInstagram, FaLinkedin } from 'react-icons/fa'
 import { toast } from 'react-hot-toast'
 import NextImage from 'next/image'
 
@@ -328,6 +328,46 @@ export function PersonalInfoForm() {
             onChange={handleChange}
             placeholder="e.g. B"
             leftIcon={<Car size={18} />}
+          />
+        ) : null}
+        {uses('passportNumber') ? (
+          <Input
+            label="Passport number"
+            name="passportNumber"
+            value={info.passportNumber ?? ''}
+            onChange={handleChange}
+            placeholder="Optional"
+            leftIcon={<BookUser size={18} />}
+          />
+        ) : null}
+        {uses('placeOfBirth') ? (
+          <Input
+            label="Place of birth"
+            name="placeOfBirth"
+            value={info.placeOfBirth ?? ''}
+            onChange={handleChange}
+            placeholder="e.g. Robe, Ethiopia"
+            leftIcon={<MapPinned size={18} />}
+          />
+        ) : null}
+        {uses('whatsapp') ? (
+          <Input
+            label="WhatsApp"
+            name="whatsapp"
+            value={info.whatsapp ?? ''}
+            onChange={handleChange}
+            placeholder="e.g. +251 911 234 567"
+            leftIcon={<MessageCircle size={18} />}
+          />
+        ) : null}
+        {uses('instagram') ? (
+          <Input
+            label="Instagram"
+            name="instagram"
+            value={info.instagram ?? ''}
+            onChange={handleChange}
+            placeholder="instagram.com/your-name"
+            leftIcon={<FaInstagram size={18} />}
           />
         ) : null}
       </div>
