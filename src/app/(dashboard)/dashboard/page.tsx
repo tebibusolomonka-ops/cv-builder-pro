@@ -16,6 +16,8 @@ import {
   ArrowRight,
   Check,
   Search,
+  GraduationCap,
+  Globe2,
 } from "lucide-react";
 import { TEMPLATES, LAYOUT_LABELS, STARRED_RESUME_KEY } from "@/lib/constants";
 import { TemplateThumbnail } from "@/components/editor/TemplateThumbnail";
@@ -314,6 +316,33 @@ export default function WorkspacePage() {
             Browse every layout →
           </Link>
         </div>
+
+        <button
+          type="button"
+          onClick={() => handleCreate("europe-slate")}
+          className="group mt-7 flex w-full flex-col overflow-hidden rounded-2xl border border-primary-500/30 bg-gradient-to-br from-primary-500/10 via-surface-elevated to-surface-elevated text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-primary-400/60 hover:shadow-xl hover:shadow-primary-950/20 sm:flex-row"
+        >
+          <div className="relative h-44 w-full shrink-0 overflow-hidden bg-white sm:h-48 sm:w-36">
+            <TemplateThumbnail templateId="europe-slate" />
+          </div>
+          <div className="flex flex-1 items-center justify-between gap-5 p-6">
+            <div>
+              <span className="mb-3 inline-flex items-center gap-2 rounded-full bg-primary-500/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-primary-300">
+                <Globe2 size={14} aria-hidden="true" />
+                European Format
+              </span>
+              <h4 className="font-display text-xl font-bold text-white sm:text-2xl">
+                Scholarship / European CV
+              </h4>
+              <p className="mt-2 max-w-2xl text-sm leading-relaxed text-dark-300">
+                Start with the fields European applications expect: EQF education level, five-part CEFR language grading, nationality, volunteering, honours, and more.
+              </p>
+            </div>
+            <span className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary-600 text-white transition-transform duration-300 group-hover:scale-110 sm:flex">
+              <GraduationCap size={23} aria-hidden="true" />
+            </span>
+          </div>
+        </button>
 
         {/*
           grid-cols-1 is load-bearing. Without a column definition below sm the
