@@ -53,6 +53,10 @@ const DIRECT = {
   certifications: /model\.certifications/,
   projects: /model\.projects/,
   references: /model\.references/,
+  awards: /model\.awards/,
+  volunteer: /model\.volunteer/,
+  hobbies: /model\.hobbies/,
+  organisationalSkills: /model\.organisationalSkills/,
   website: /model\.website/,
   linkedin: /model\.linkedin/,
   github: /model\.github/,
@@ -165,6 +169,10 @@ export type ResumeFieldKey =
   | 'certifications'
   | 'projects'
   | 'references'
+  | 'awards'
+  | 'volunteer'
+  | 'hobbies'
+  | 'organisationalSkills'
   | 'dateOfBirth'
   | 'nationality'
   | 'gender'

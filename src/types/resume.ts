@@ -183,6 +183,9 @@ export interface ResumeData {
   languages: Language[]
   awards: Award[]
   volunteer: VolunteerExperience[]
+  /** European-format narrative sections; optional for persisted older resumes. */
+  hobbies?: string
+  organisationalSkills?: string
   references: Reference[]
   sections: ResumeSection[]
   /**
@@ -260,6 +263,8 @@ export const defaultResumeData: ResumeData = {
   languages: [],
   awards: [],
   volunteer: [],
+  hobbies: '',
+  organisationalSkills: '',
   references: [],
   sections: defaultSections,
   hiddenSections: [],

@@ -19,6 +19,10 @@ export type ResumeFieldKey =
   | 'certifications'
   | 'projects'
   | 'references'
+  | 'awards'
+  | 'volunteer'
+  | 'hobbies'
+  | 'organisationalSkills'
   | 'dateOfBirth'
   | 'nationality'
   | 'gender'
@@ -595,6 +599,7 @@ export const LAYOUT_FIELDS: Record<TemplateLayoutId, ResumeFieldKey[]> = {
     "summary"
   ],
   europe: [
+    "awards",
     "cefr",
     "certifications",
     "dateOfBirth",
@@ -603,14 +608,17 @@ export const LAYOUT_FIELDS: Record<TemplateLayoutId, ResumeFieldKey[]> = {
     "eqfLevel",
     "experience",
     "gender",
+    "hobbies",
     "languages",
     "linkedin",
     "nationality",
+    "organisationalSkills",
     "photo",
     "projects",
     "references",
     "skills",
     "summary",
+    "volunteer",
     "website"
   ]
 }

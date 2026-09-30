@@ -1,20 +1,34 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { Award, BookOpen, Globe2, Plus, RotateCcw, Trash2, UserRound } from 'lucide-react'
+import { Award, BookOpen, Globe2, HeartHandshake, Plus, RotateCcw, Sparkles, Trash2, Trophy, UserRound, Users } from 'lucide-react'
 import { Button, Input } from '@/components/ui'
 import { useResumeStore } from '@/store/useResumeStore'
 import { CefrGrid, CefrLevel, Language } from '@/types/resume'
 import { useTemplateFields } from './useTemplateFields'
 
-type Panel = 'languages' | 'certifications' | 'projects' | 'references'
+type Panel =
+  | 'languages'
+  | 'certifications'
+  | 'projects'
+  | 'references'
+  | 'awards'
+  | 'volunteer'
+  | 'hobbies'
+  | 'organisationalSkills'
 
 const panels: { id: Panel; label: string; icon: React.ReactNode }[] = [
   { id: 'languages', label: 'Languages', icon: <Globe2 size={16} /> },
   { id: 'certifications', label: 'Certifications', icon: <Award size={16} /> },
   { id: 'projects', label: 'Projects', icon: <BookOpen size={16} /> },
   { id: 'references', label: 'References', icon: <UserRound size={16} /> },
+  { id: 'awards', label: 'Honours & Awards', icon: <Trophy size={16} /> },
+  { id: 'volunteer', label: 'Volunteering', icon: <HeartHandshake size={16} /> },
+  { id: 'hobbies', label: 'Hobbies', icon: <Sparkles size={16} /> },
+  { id: 'organisationalSkills', label: 'Leadership', icon: <Users size={16} /> },
 ]
+
+const removablePanels = new Set<Panel>(['languages', 'certifications', 'projects', 'references'])
 
 export function AdditionalSectionsForm() {
   const { uses, templateName } = useTemplateFields()
@@ -23,7 +37,9 @@ export function AdditionalSectionsForm() {
   // Removing a section from the preview is meant to be undoable, so anything
   // taken off the page is listed here with a way back. Without this the X on
   // the preview would be a one-way door.
-  const removed = panels.filter((panel) => (hiddenSections ?? []).includes(panel.id))
+  const removed = panels.filter(
+    (panel) => removablePanels.has(panel.id) && (hiddenSections ?? []).includes(panel.id as 'languages' | 'certifications' | 'projects' | 'references')
+  )
   // Only 13 of 51 layouts print projects and 33 print references, so offering
   // every panel to everyone invites work that the CV then throws away.
   const available = useMemo(() => panels.filter((panel) => uses(panel.id)), [uses])
@@ -69,7 +85,7 @@ export function AdditionalSectionsForm() {
               <button
                 key={panel.id}
                 type="button"
-                onClick={() => restoreSection(panel.id)}
+                onClick={() => restoreSection(panel.id as 'languages' | 'certifications' | 'projects' | 'references')}
                 className="flex items-center gap-2 rounded-lg border border-dark-600 px-3 py-1.5 text-sm text-dark-200 transition-colors hover:border-primary-500 hover:text-white"
               >
                 <RotateCcw size={14} />
@@ -84,6 +100,10 @@ export function AdditionalSectionsForm() {
       {activePanel === 'certifications' && <CertificationsEditor />}
       {activePanel === 'projects' && <ProjectsEditor />}
       {activePanel === 'references' && <ReferencesEditor />}
+      {activePanel === 'awards' && <AwardsEditor />}
+      {activePanel === 'volunteer' && <VolunteerEditor />}
+      {activePanel === 'hobbies' && <NarrativeEditor kind="hobbies" />}
+      {activePanel === 'organisationalSkills' && <NarrativeEditor kind="organisationalSkills" />}
 
       {available.length < panels.length ? (
         <p className="text-xs text-dark-400">
@@ -296,6 +316,79 @@ function ReferencesEditor() {
         </div>
       ))}
     </SectionShell>
+  )
+}
+
+function AwardsEditor() {
+  const { data, addAward, updateAward, removeAward } = useResumeStore()
+
+  return (
+    <SectionShell
+      empty={data.awards.length === 0}
+      emptyText="No honours or awards added yet."
+      onAdd={() => addAward({ id: crypto.randomUUID(), title: '', issuer: '', date: '', description: '' })}
+    >
+      {data.awards.map((award) => (
+        <div key={award.id} className="rounded-xl border border-dark-700 bg-surface-elevated p-4">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <Input label="Award or honour" value={award.title} onChange={(event) => updateAward(award.id, { title: event.target.value })} placeholder="e.g. Department Gold Medal" />
+            <Input label="Awarded by" value={award.issuer} onChange={(event) => updateAward(award.id, { issuer: event.target.value })} placeholder="Institution or organisation" />
+            <Input label="Date" value={award.date} onChange={(event) => updateAward(award.id, { date: event.target.value })} placeholder="e.g. August 2024" />
+          </div>
+          <label className="mt-3 block text-sm font-medium text-dark-300">Description</label>
+          <textarea value={award.description} onChange={(event) => updateAward(award.id, { description: event.target.value })} placeholder="What was the honour awarded for?" className="mt-1.5 min-h-[90px] w-full rounded-xl border border-dark-600 bg-surface-elevated px-3 py-2 text-sm text-white placeholder:text-dark-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+          <div className="mt-3 flex justify-end"><RemoveButton onClick={() => removeAward(award.id)} /></div>
+        </div>
+      ))}
+    </SectionShell>
+  )
+}
+
+function VolunteerEditor() {
+  const { data, addVolunteer, updateVolunteer, removeVolunteer } = useResumeStore()
+
+  return (
+    <SectionShell
+      empty={data.volunteer.length === 0}
+      emptyText="No volunteering added yet."
+      onAdd={() => addVolunteer({ id: crypto.randomUUID(), organization: '', role: '', location: '', startDate: '', endDate: '', current: false, description: '' })}
+    >
+      {data.volunteer.map((item) => (
+        <div key={item.id} className="rounded-xl border border-dark-700 bg-surface-elevated p-4">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <Input label="Role" value={item.role} onChange={(event) => updateVolunteer(item.id, { role: event.target.value })} placeholder="e.g. Organizer" />
+            <Input label="Organisation" value={item.organization} onChange={(event) => updateVolunteer(item.id, { organization: event.target.value })} placeholder="e.g. Community volunteer team" />
+            <Input label="Location" value={item.location} onChange={(event) => updateVolunteer(item.id, { location: event.target.value })} placeholder="City, country" />
+            <Input label="Start date" value={item.startDate} onChange={(event) => updateVolunteer(item.id, { startDate: event.target.value })} placeholder="e.g. March 2021" />
+            <Input label="End date" value={item.endDate} onChange={(event) => updateVolunteer(item.id, { endDate: event.target.value })} placeholder="e.g. January 2023" />
+            <label className="flex items-center gap-2 self-end pb-2.5 text-sm text-dark-300">
+              <input type="checkbox" checked={item.current} onChange={(event) => updateVolunteer(item.id, { current: event.target.checked })} className="h-4 w-4 accent-primary-500" />
+              I currently volunteer here
+            </label>
+          </div>
+          <label className="mt-3 block text-sm font-medium text-dark-300">What you did</label>
+          <textarea value={item.description} onChange={(event) => updateVolunteer(item.id, { description: event.target.value })} placeholder="Add one achievement or responsibility per line." className="mt-1.5 min-h-[100px] w-full rounded-xl border border-dark-600 bg-surface-elevated px-3 py-2 text-sm text-white placeholder:text-dark-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20" />
+          <div className="mt-3 flex justify-end"><RemoveButton onClick={() => removeVolunteer(item.id)} /></div>
+        </div>
+      ))}
+    </SectionShell>
+  )
+}
+
+function NarrativeEditor({ kind }: { kind: 'hobbies' | 'organisationalSkills' }) {
+  const value = useResumeStore((state) => state.data[kind] ?? '')
+  const setValue = useResumeStore((state) => kind === 'hobbies' ? state.setHobbies : state.setOrganisationalSkills)
+  const hobbies = kind === 'hobbies'
+  return (
+    <div>
+      <label className="block text-sm font-medium text-dark-300">{hobbies ? 'Hobbies and interests' : 'Organisational and leadership skills'}</label>
+      <textarea
+        value={value}
+        onChange={(event) => setValue(event.target.value)}
+        placeholder={hobbies ? 'e.g. Literature, community service, reading and mentoring' : 'Describe leadership, organisation, coordination, or team-management experience.'}
+        className="mt-1.5 min-h-[130px] w-full rounded-xl border border-dark-600 bg-surface-elevated px-3 py-2 text-sm text-white placeholder:text-dark-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+      />
+    </div>
   )
 }
 

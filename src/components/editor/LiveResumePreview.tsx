@@ -7,7 +7,7 @@ import { Award, Briefcase, GraduationCap, Globe, Languages as LanguagesIcon, Mai
 import { FaGithub, FaLinkedin } from 'react-icons/fa'
 import { TemplateDefinition, TemplateLayoutId, TEMPLATES } from '@/lib/constants'
 import { useResumeStore } from '@/store/useResumeStore'
-import { CefrGrid, CefrLevel, Certification, Education, Language, Project, Reference, Skill, WorkExperience } from '@/types/resume'
+import { Award as ResumeAward, CefrGrid, CefrLevel, Certification, Education, Language, Project, Reference, Skill, VolunteerExperience, WorkExperience } from '@/types/resume'
 import { cn } from '@/utils/cn'
 
 type PreviewModel = {
@@ -31,6 +31,10 @@ type PreviewModel = {
   certifications: Certification[]
   languages: Language[]
   references: Reference[]
+  awards: ResumeAward[]
+  volunteer: VolunteerExperience[]
+  hobbies: string
+  organisationalSkills: string
   /** Printed only by the European format; blank everywhere else. */
   dateOfBirth: string
   nationality: string
@@ -163,6 +167,10 @@ function usePreviewModel(templateIdOverride?: string, forceSample = false): Prev
       certifications: profession.certifications,
       languages: sampleLanguages,
       references: profession.references,
+      awards: [],
+      volunteer: [],
+      hobbies: '',
+      organisationalSkills: '',
     }
   }
 
@@ -205,6 +213,10 @@ function usePreviewModel(templateIdOverride?: string, forceSample = false): Prev
     certifications: unlessHidden('certifications', orSample(data.certifications, profession.certifications)),
     languages: unlessHidden('languages', orSample(data.languages, sampleLanguages)),
     references: unlessHidden('references', orSample(data.references, profession.references)),
+    awards: filled(data.awards),
+    volunteer: filled(data.volunteer),
+    hobbies: data.hobbies || '',
+    organisationalSkills: data.organisationalSkills || '',
   }
 }
 
@@ -583,8 +595,48 @@ function EuropeResume({ model }: { model: PreviewModel }) {
 
   section(
     'Honours, awards and certificates',
-    model.certifications.length > 0 ? [<CertList key="c" items={model.certifications} />] : [],
+    [
+      ...model.awards.map((award) => (
+        <div key={award.id} className="pb-3">
+          <p className="text-[9px] text-gray-500">{[award.date, award.issuer].filter(Boolean).join('   ')}</p>
+          <p className="text-[11px] font-bold" style={{ color: INK }}>{award.title}</p>
+          <BulletLines text={award.description} accent={accent} />
+        </div>
+      )),
+      ...(model.certifications.length > 0 ? [<CertList key="c" items={model.certifications} />] : []),
+    ],
     'cert'
+  )
+
+  section(
+    'Hobbies and interests',
+    model.hobbies ? [<Paragraph key="hobbies">{model.hobbies}</Paragraph>] : [],
+    'hobbies'
+  )
+
+  section(
+    'Volunteering',
+    model.volunteer.map((item) => (
+      <div key={item.id} className="pb-3">
+        <p className="text-[9px] text-gray-500">
+          {[[item.startDate, item.current ? 'Current' : item.endDate].filter(Boolean).join(' - '), item.location]
+            .filter(Boolean)
+            .join('   ')}
+        </p>
+        <p className="text-[11px] font-bold" style={{ color: INK }}>
+          {item.role || 'Volunteer'}{' '}
+          <span className="font-normal text-gray-700">{item.organization}</span>
+        </p>
+        <BulletLines text={item.description} accent={accent} />
+      </div>
+    )),
+    'volunteer'
+  )
+
+  section(
+    'Organisational and leadership skills',
+    model.organisationalSkills ? [<Paragraph key="org">{model.organisationalSkills}</Paragraph>] : [],
+    'org'
   )
 
   section(

@@ -77,6 +77,10 @@ interface ResumeState {
   updateVolunteer: (id: string, vol: Partial<VolunteerExperience>) => void
   removeVolunteer: (id: string) => void
 
+  // Actions - European narrative sections
+  setHobbies: (hobbies: string) => void
+  setOrganisationalSkills: (skills: string) => void
+
   // Actions - References
   addReference: (ref: Reference) => void
   updateReference: (id: string, ref: Partial<Reference>) => void
@@ -404,6 +408,18 @@ export const useResumeStore = create<ResumeState>()(
             ...state.data,
             volunteer: state.data.volunteer.filter((v) => v.id !== id),
           },
+        })),
+
+      setHobbies: (hobbies) =>
+        set((state) => ({
+          ...pushHistory(state),
+          data: { ...state.data, hobbies },
+        })),
+
+      setOrganisationalSkills: (organisationalSkills) =>
+        set((state) => ({
+          ...pushHistory(state),
+          data: { ...state.data, organisationalSkills },
         })),
 
       // References
