@@ -1,119 +1,10 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { Award, BookOpen, Globe2, HeartHandshake, Plus, RotateCcw, Sparkles, Trash2, Trophy, UserRound, Users } from 'lucide-react'
+import { Plus, Trash2 } from 'lucide-react'
 import { Button, Input } from '@/components/ui'
 import { useResumeStore } from '@/store/useResumeStore'
 import { CefrGrid, CefrLevel, Language } from '@/types/resume'
 import { useTemplateFields } from './useTemplateFields'
-
-export type AdditionalPanel =
-  | 'languages'
-  | 'certifications'
-  | 'projects'
-  | 'references'
-  | 'awards'
-  | 'volunteer'
-  | 'hobbies'
-  | 'organisationalSkills'
-
-const panels: { id: AdditionalPanel; label: string; icon: React.ReactNode }[] = [
-  { id: 'languages', label: 'Languages', icon: <Globe2 size={16} /> },
-  { id: 'certifications', label: 'Certifications', icon: <Award size={16} /> },
-  { id: 'projects', label: 'Projects', icon: <BookOpen size={16} /> },
-  { id: 'references', label: 'References', icon: <UserRound size={16} /> },
-  { id: 'awards', label: 'Honours & Awards', icon: <Trophy size={16} /> },
-  { id: 'volunteer', label: 'Volunteering', icon: <HeartHandshake size={16} /> },
-  { id: 'hobbies', label: 'Hobbies', icon: <Sparkles size={16} /> },
-  { id: 'organisationalSkills', label: 'Leadership', icon: <Users size={16} /> },
-]
-
-const removablePanels = new Set<AdditionalPanel>(['languages', 'certifications', 'projects', 'references'])
-
-export function AdditionalSectionsForm({ requestedPanel }: { requestedPanel?: AdditionalPanel }) {
-  const { uses, templateName } = useTemplateFields()
-  const hiddenSections = useResumeStore((state) => state.data.hiddenSections)
-  const restoreSection = useResumeStore((state) => state.restoreSection)
-  // Removing a section from the preview is meant to be undoable, so anything
-  // taken off the page is listed here with a way back. Without this the X on
-  // the preview would be a one-way door.
-  const removed = panels.filter(
-    (panel) => removablePanels.has(panel.id) && (hiddenSections ?? []).includes(panel.id as 'languages' | 'certifications' | 'projects' | 'references')
-  )
-  // Only 13 of 51 layouts print projects and 33 print references, so offering
-  // every panel to everyone invites work that the CV then throws away.
-  const available = useMemo(() => panels.filter((panel) => uses(panel.id)), [uses])
-  const [requested, setRequested] = useState<AdditionalPanel | null>(requestedPanel ?? null)
-  const activePanel = available.some((panel) => panel.id === requested)
-    ? (requested as AdditionalPanel)
-    : available[0]?.id
-
-  if (available.length === 0) return null
-
-  return (
-    <div className="space-y-5">
-      <p className="text-sm text-dark-400">
-        Add optional sections when they help your CV. They appear on the A4 preview as soon as you add them.
-      </p>
-
-      <div className="grid grid-cols-2 gap-2">
-        {available.map((panel) => (
-          <button
-            key={panel.id}
-            type="button"
-            onClick={() => setRequested(panel.id)}
-            className={`flex items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
-              activePanel === panel.id
-                ? 'border-primary-500 bg-primary-500/20 text-primary-300'
-                : 'border-dark-700 bg-surface-elevated text-dark-300 hover:border-dark-600 hover:text-white'
-            }`}
-          >
-            {panel.icon}
-            {panel.label}
-          </button>
-        ))}
-      </div>
-
-      {removed.length > 0 ? (
-        <div className="rounded-xl border border-dark-700 bg-surface-elevated p-4">
-          <p className="mb-3 text-sm text-dark-300">
-            Removed from your CV. Nothing you typed was deleted &mdash; bring a section back and it
-            returns with its content.
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {removed.map((panel) => (
-              <button
-                key={panel.id}
-                type="button"
-                onClick={() => restoreSection(panel.id as 'languages' | 'certifications' | 'projects' | 'references')}
-                className="flex items-center gap-2 rounded-lg border border-dark-600 px-3 py-1.5 text-sm text-dark-200 transition-colors hover:border-primary-500 hover:text-white"
-              >
-                <RotateCcw size={14} />
-                Bring back {panel.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      ) : null}
-
-      {activePanel === 'languages' && <LanguagesEditor />}
-      {activePanel === 'certifications' && <CertificationsEditor />}
-      {activePanel === 'projects' && <ProjectsEditor />}
-      {activePanel === 'references' && <ReferencesEditor />}
-      {activePanel === 'awards' && <AwardsEditor />}
-      {activePanel === 'volunteer' && <VolunteerEditor />}
-      {activePanel === 'hobbies' && <NarrativeEditor kind="hobbies" />}
-      {activePanel === 'organisationalSkills' && <NarrativeEditor kind="organisationalSkills" />}
-
-      {available.length < panels.length ? (
-        <p className="text-xs text-dark-400">
-          {templateName} does not print the other optional sections, so they are not shown here.
-          Pick a different template to use them.
-        </p>
-      ) : null}
-    </div>
-  )
-}
 
 /** The CEFR scale, worst to best. */
 const CEFR_LEVELS: CefrLevel[] = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
@@ -174,7 +65,7 @@ function CefrEditor({
   )
 }
 
-function LanguagesEditor() {
+export function LanguagesEditor() {
   const { data, addLanguage, updateLanguage, removeLanguage } = useResumeStore()
   const { uses } = useTemplateFields()
   const graded = uses('cefr')
@@ -242,7 +133,7 @@ function LanguagesEditor() {
   )
 }
 
-function CertificationsEditor() {
+export function CertificationsEditor() {
   const { data, addCertification, updateCertification, removeCertification } = useResumeStore()
 
   return (
@@ -266,7 +157,7 @@ function CertificationsEditor() {
   )
 }
 
-function ProjectsEditor() {
+export function ProjectsEditor() {
   const { data, addProject, updateProject, removeProject } = useResumeStore()
 
   return (
@@ -295,7 +186,7 @@ function ProjectsEditor() {
   )
 }
 
-function ReferencesEditor() {
+export function ReferencesEditor() {
   const { data, addReference, updateReference, removeReference } = useResumeStore()
 
   return (
@@ -319,7 +210,7 @@ function ReferencesEditor() {
   )
 }
 
-function AwardsEditor() {
+export function AwardsEditor() {
   const { data, addAward, updateAward, removeAward } = useResumeStore()
 
   return (
@@ -344,7 +235,7 @@ function AwardsEditor() {
   )
 }
 
-function VolunteerEditor() {
+export function VolunteerEditor() {
   const { data, addVolunteer, updateVolunteer, removeVolunteer } = useResumeStore()
 
   return (
@@ -375,7 +266,7 @@ function VolunteerEditor() {
   )
 }
 
-function NarrativeEditor({ kind }: { kind: 'hobbies' | 'organisationalSkills' }) {
+export function NarrativeEditor({ kind }: { kind: 'hobbies' | 'organisationalSkills' }) {
   const value = useResumeStore((state) => state.data[kind] ?? '')
   const setValue = useResumeStore((state) => kind === 'hobbies' ? state.setHobbies : state.setOrganisationalSkills)
   const hobbies = kind === 'hobbies'

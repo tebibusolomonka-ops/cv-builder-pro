@@ -9,17 +9,32 @@ import {
   Check,
   ChevronDown,
   GraduationCap,
-  Layers,
+  Award,
+  BookOpen,
+  Globe2,
+  HeartHandshake,
   ListChecks,
   RotateCcw,
+  Sparkles,
+  Trophy,
   User,
+  UserRound,
+  Users,
 } from 'lucide-react'
 import { PersonalInfoForm } from '@/components/editor/PersonalInfoForm'
 import { SummaryForm } from '@/components/editor/SummaryForm'
 import { ExperienceForm } from '@/components/editor/ExperienceForm'
 import { EducationForm } from '@/components/editor/EducationForm'
 import { SkillsForm } from '@/components/editor/SkillsForm'
-import { AdditionalSectionsForm, type AdditionalPanel } from '@/components/editor/AdditionalSectionsForm'
+import {
+  AwardsEditor,
+  CertificationsEditor,
+  LanguagesEditor,
+  NarrativeEditor,
+  ProjectsEditor,
+  ReferencesEditor,
+  VolunteerEditor,
+} from '@/components/editor/AdditionalSectionsForm'
 import { useTemplateFields } from '@/components/editor/useTemplateFields'
 import { LiveResumePreview } from '@/components/editor/LiveResumePreview'
 import { ResumePreviewFrame } from '@/components/editor/ResumePreviewFrame'
@@ -27,12 +42,24 @@ import { TEMPLATES } from '@/lib/constants'
 import { useResumeStore } from '@/store/useResumeStore'
 import { cn } from '@/utils/cn'
 
-type SectionId = 'personal' | 'summary' | 'experience' | 'education' | 'skills' | 'extras'
+type SectionId =
+  | 'personal'
+  | 'summary'
+  | 'experience'
+  | 'education'
+  | 'skills'
+  | 'languages'
+  | 'certifications'
+  | 'projects'
+  | 'references'
+  | 'awards'
+  | 'volunteer'
+  | 'hobbies'
+  | 'organisationalSkills'
 
 export default function ResumeEditorPage() {
   const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit')
   const [openSections, setOpenSections] = useState<Set<SectionId>>(new Set(['personal']))
-  const [requestedExtra, setRequestedExtra] = useState<AdditionalPanel>()
   const searchParams = useSearchParams()
   const { data, setTemplate, restoreSection } = useResumeStore()
   const selectedTemplateId = searchParams.get('template')
@@ -103,27 +130,92 @@ export default function ResumeEditorPage() {
       content: <SkillsForm />,
     },
     {
-      id: 'extras',
-      title: 'Additional Sections',
-      hint: 'Languages, projects, certificates, references',
-      icon: Layers,
-      done: data.languages.length + data.projects.length + data.certifications.length > 0,
-      content: <AdditionalSectionsForm key={requestedExtra ?? 'default'} requestedPanel={requestedExtra} />,
+      id: 'languages',
+      title: 'Languages',
+      hint: 'Mother tongues and CEFR language levels',
+      icon: Globe2,
+      done: data.languages.length > 0,
+      content: <LanguagesEditor />,
+    },
+    {
+      id: 'certifications',
+      title: 'Certifications',
+      hint: 'Credentials, issuers, dates, and links',
+      icon: Award,
+      done: data.certifications.length > 0,
+      content: <CertificationsEditor />,
+    },
+    {
+      id: 'projects',
+      title: 'Projects',
+      hint: 'Selected work, links, and outcomes',
+      icon: BookOpen,
+      done: data.projects.length > 0,
+      content: <ProjectsEditor />,
+    },
+    {
+      id: 'references',
+      title: 'References',
+      hint: 'People who can recommend your work',
+      icon: UserRound,
+      done: data.references.length > 0,
+      content: <ReferencesEditor />,
+    },
+    {
+      id: 'awards',
+      title: 'Honours & Awards',
+      hint: 'Recognition, prizes, and academic honours',
+      icon: Trophy,
+      done: data.awards.length > 0,
+      content: <AwardsEditor />,
+    },
+    {
+      id: 'volunteer',
+      title: 'Volunteering',
+      hint: 'Community roles and social contribution',
+      icon: HeartHandshake,
+      done: data.volunteer.length > 0,
+      content: <VolunteerEditor />,
+    },
+    {
+      id: 'hobbies',
+      title: 'Hobbies & Interests',
+      hint: 'Interests that add useful context',
+      icon: Sparkles,
+      done: Boolean(data.hobbies?.trim()),
+      content: <NarrativeEditor kind="hobbies" />,
+    },
+    {
+      id: 'organisationalSkills',
+      title: 'Leadership & Organisation',
+      hint: 'Leadership, coordination, and management',
+      icon: Users,
+      done: Boolean(data.organisationalSkills?.trim()),
+      content: <NarrativeEditor kind="organisationalSkills" />,
     },
   ]
 
   // The form follows the chosen template: sections appear in the order that
   // template reads, and one that prints none of its parts is not shown at all.
   // Personal always leads -- every layout needs a name and a way to reach you.
-  const extrasUsed =
-    uses('languages') || uses('certifications') || uses('projects') || uses('references')
+  const optionalIds = [
+    'languages',
+    'certifications',
+    'projects',
+    'references',
+    'awards',
+    'volunteer',
+    'hobbies',
+    'organisationalSkills',
+  ] as const
+  const visibleOptional = optionalIds.filter((id) => uses(id))
   const byId = new Map(allSections.map((section) => [section.id, section]))
   const sections = [
     byId.get('personal')!,
     ...sectionOrder
-      .map((id) => byId.get(id))
+      .flatMap((id) => id === 'extras' ? visibleOptional.map((optionalId) => byId.get(optionalId)) : [byId.get(id)])
       .filter((section): section is (typeof allSections)[number] => Boolean(section)),
-  ].filter((section) => section.id !== 'extras' || extrasUsed)
+  ]
 
   const doneCount = sections.filter((s) => s.done).length
   const progress = Math.round((doneCount / sections.length) * 100)
@@ -150,7 +242,7 @@ export default function ResumeEditorPage() {
       education: 'education',
       skills: 'skills',
     }
-    const additional = new Set<AdditionalPanel>([
+    const additional = new Set<SectionId>([
       'languages',
       'certifications',
       'projects',
@@ -160,9 +252,8 @@ export default function ResumeEditorPage() {
       'hobbies',
       'organisationalSkills',
     ])
-    if (additional.has(kind as AdditionalPanel)) {
-      setRequestedExtra(kind as AdditionalPanel)
-      openOnly('extras')
+    if (additional.has(kind as SectionId)) {
+      openOnly(kind as SectionId)
     } else if (direct[kind]) {
       openOnly(direct[kind]!)
     }
