@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { SITE_DESCRIPTION, SITE_TITLE, pageMetadata } from '@/lib/site'
 import { homepageStructuredData, jsonLd } from '@/lib/structuredData'
 import { Hero } from '@/components/landing/Hero'
-import { TemplateSpotlight } from '@/components/landing/TemplateSpotlight'
+import { DeferredTemplateSpotlight } from '@/components/landing/DeferredTemplateSpotlight'
 import { Features } from '@/components/landing/Features'
 import { HowItWorks } from '@/components/landing/HowItWorks'
 import { CTA } from '@/components/landing/CTA'
@@ -29,7 +29,7 @@ export default async function HomePage() {
       />
 
       <Hero />
-      <TemplateSpotlight />
+      <DeferredTemplateSpotlight />
       <HowItWorks />
       <Features />
       <CTA />

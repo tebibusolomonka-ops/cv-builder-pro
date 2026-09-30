@@ -111,7 +111,10 @@ export async function POST(request: Request) {
       }, seed)
     }
 
-    await page.goto(`${origin}/resume/1/edit`, { waitUntil: 'networkidle0', timeout: 30_000 })
+    // The explicit readiness checks below are stronger than Puppeteer's generic
+    // network-idle delay. Start them as soon as the document is interactive
+    // instead of paying an extra quiet-network window on every export.
+    await page.goto(`${origin}/resume/1/edit`, { waitUntil: 'domcontentloaded', timeout: 30_000 })
     // The preview mounts client-side and fits iteratively after hydration and
     // font loading. Waiting only for the article catches its server-rendered
     // fallback zoom; wait for the visible, settled page instead.
