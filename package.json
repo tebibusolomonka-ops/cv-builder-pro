@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "launch:check": "node scripts/launch-check.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
